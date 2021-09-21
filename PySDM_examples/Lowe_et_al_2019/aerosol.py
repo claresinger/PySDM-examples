@@ -40,6 +40,7 @@ ionic_dissociation_phi = {
     'NaCl': 2
 }
 
+
 def volume_fractions(mass_fractions: dict):
     volume_fractions = {
         k: (mass_fractions[k] / densities[k]) / sum(
@@ -48,9 +49,11 @@ def volume_fractions(mass_fractions: dict):
     }
     return volume_fractions
 
+
 def f_org_volume(mass_fractions: dict):
     volfrac = volume_fractions(mass_fractions)
     return sum(is_organic[k] * volfrac[k] for k in compounds)
+
 
 def kappa(mass_fractions: dict):
     kappa = {}
@@ -72,6 +75,7 @@ def kappa(mass_fractions: dict):
         kappa[model] = ns_per_vol * const.Mv / const.rho_w
 
     return kappa
+
 
 class _Aerosol:
     pass
@@ -103,6 +107,7 @@ class AerosolMarine(_Aerosol):
         }
     )
     color = 'dodgerblue'
+
 
 @strict
 class AerosolBoreal(_Aerosol):
