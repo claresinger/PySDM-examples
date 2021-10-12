@@ -83,7 +83,7 @@ class Settings:
         assert rhod_solution.success
         self.rhod = interp1d(z_points, rhod_solution.y[0])
 
-        self.mpdata_settings = {&#39;n_iters&#39;: 3, &#39;iga&#39;: True, &#39;fct&#39;: True, &#39;tot&#39;: True}
+        self.mpdata_settings = {&#39;n_iters&#39;: 3, &#39;iga&#39;: False, &#39;fct&#39;: False, &#39;tot&#39;: False}
         self.condensation_rtol_x = condensation.default_rtol_x
         self.condensation_rtol_thd = condensation.default_rtol_thd
         self.condensation_adaptive = True
@@ -176,7 +176,7 @@ class Settings:
         assert rhod_solution.success
         self.rhod = interp1d(z_points, rhod_solution.y[0])
 
-        self.mpdata_settings = {&#39;n_iters&#39;: 3, &#39;iga&#39;: True, &#39;fct&#39;: True, &#39;tot&#39;: True}
+        self.mpdata_settings = {&#39;n_iters&#39;: 3, &#39;iga&#39;: False, &#39;fct&#39;: False, &#39;tot&#39;: False}
         self.condensation_rtol_x = condensation.default_rtol_x
         self.condensation_rtol_thd = condensation.default_rtol_thd
         self.condensation_adaptive = True

@@ -196,10 +196,6 @@ class _TemperaturePlot(_Plot):
         self.ax.grid(True)
         self.ax.plot(T_bins, self.formulae.freezing_temperature_spectrum.cdf(T_bins),
                      label=str(self.formulae.freezing_temperature_spectrum) + &#34; (sampled at t=0)&#34;)
-        P0 = .5
-        T0 = 33
-        bigg_cdf = lambda TS: np.exp(np.log(1-P0)*np.exp(T0-TS))
-        self.ax.plot(T_bins, bigg_cdf(const.T0 - T_bins), label=f&#39;Bigg 1953 for (TS_median={T0})&#39;)
         self.spec = self.ax.step(T_bins, np.full_like(T_bins, np.nan),
                                  label=&#39;binned super-particle attributes&#39;, where=&#39;mid&#39;)[0]
         self.ax.legend()

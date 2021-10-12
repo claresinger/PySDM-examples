@@ -131,7 +131,7 @@ class Simulation:
                 displacement=displacement,
                 n_iters=self.settings.mpdata_iters,
                 infinite_gauge=self.settings.mpdata_iga,
-                flux_corrected_transport=self.settings.mpdata_fct,
+                nonoscillatory=self.settings.mpdata_fct,
                 third_order_terms=self.settings.mpdata_tot
             )
             builder.add_dynamic(EulerianAdvection(solver))
@@ -315,7 +315,7 @@ class Simulation:
                 displacement=displacement,
                 n_iters=self.settings.mpdata_iters,
                 infinite_gauge=self.settings.mpdata_iga,
-                flux_corrected_transport=self.settings.mpdata_fct,
+                nonoscillatory=self.settings.mpdata_fct,
                 third_order_terms=self.settings.mpdata_tot
             )
             builder.add_dynamic(EulerianAdvection(solver))
@@ -492,7 +492,7 @@ def products(self):
             displacement=displacement,
             n_iters=self.settings.mpdata_iters,
             infinite_gauge=self.settings.mpdata_iga,
-            flux_corrected_transport=self.settings.mpdata_fct,
+            nonoscillatory=self.settings.mpdata_fct,
             third_order_terms=self.settings.mpdata_tot
         )
         builder.add_dynamic(EulerianAdvection(solver))

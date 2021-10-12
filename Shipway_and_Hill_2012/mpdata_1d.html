@@ -26,7 +26,8 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from PyMPDATA import Solver, Stepper, Options, ScalarField, VectorField, ExtrapolatedBoundaryCondition
+<pre><code class="python">from PyMPDATA import Solver, Stepper, Options, ScalarField, VectorField
+from PyMPDATA.boundary_conditions import Extrapolated
 from PySDM.state import arakawa_c
 import numpy as np
 
@@ -41,11 +42,11 @@ class MPDATA_1D:
         options = Options(
             n_iters=mpdata_settings[&#39;n_iters&#39;],
             infinite_gauge=mpdata_settings[&#39;iga&#39;],
-            flux_corrected_transport=mpdata_settings[&#39;fct&#39;],
+            nonoscillatory=mpdata_settings[&#39;fct&#39;],
             third_order_terms=mpdata_settings[&#39;tot&#39;]
         )
         stepper = Stepper(options=options, grid=grid, non_unit_g_factor=True)
-        bcs = (ExtrapolatedBoundaryCondition(),)
+        bcs = (Extrapolated(),)
         g_factor = ScalarField(
             data=g_factor_of_zZ(arakawa_c.z_scalar_coord(grid)),
             halo=options.n_halo,
@@ -99,11 +100,11 @@ class MPDATA_1D:
         options = Options(
             n_iters=mpdata_settings[&#39;n_iters&#39;],
             infinite_gauge=mpdata_settings[&#39;iga&#39;],
-            flux_corrected_transport=mpdata_settings[&#39;fct&#39;],
+            nonoscillatory=mpdata_settings[&#39;fct&#39;],
             third_order_terms=mpdata_settings[&#39;tot&#39;]
         )
         stepper = Stepper(options=options, grid=grid, non_unit_g_factor=True)
-        bcs = (ExtrapolatedBoundaryCondition(),)
+        bcs = (Extrapolated(),)
         g_factor = ScalarField(
             data=g_factor_of_zZ(arakawa_c.z_scalar_coord(grid)),
             halo=options.n_halo,
