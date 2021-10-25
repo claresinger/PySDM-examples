@@ -29,9 +29,8 @@
 <pre><code class="python">import numpy as np
 from pystrict import strict
 from PySDM.initialisation import spectral_sampling as spec_sampling
-from PySDM.physics import si, Formulae, spectra, constants as const
+from PySDM.physics import si, Formulae, constants as const
 from PySDM_examples.Lowe_et_al_2019.aerosol import _Aerosol
-from PySDM.physics.spectra import Spectrum
 
 
 @strict
@@ -44,7 +43,9 @@ class Settings:
         assert model in (&#39;bulk&#39;, &#39;film&#39;)
         self.model = model
         self.n_sd_per_mode = n_sd_per_mode
-        self.formulae = Formulae(surface_tension=&#39;CompressedFilm&#39; if model==&#39;film&#39; else &#39;Constant&#39;)
+        self.formulae = Formulae(
+            surface_tension=&#39;CompressedFilm_Ovadnevaite&#39; if model == &#39;film&#39; else &#39;Constant&#39;
+        )
         self.aerosol = aerosol
         self.spectral_sampling = spectral_sampling
         self.t_max = (400 + 196) * si.s
@@ -117,7 +118,9 @@ class Settings:
         assert model in (&#39;bulk&#39;, &#39;film&#39;)
         self.model = model
         self.n_sd_per_mode = n_sd_per_mode
-        self.formulae = Formulae(surface_tension=&#39;CompressedFilm&#39; if model==&#39;film&#39; else &#39;Constant&#39;)
+        self.formulae = Formulae(
+            surface_tension=&#39;CompressedFilm_Ovadnevaite&#39; if model == &#39;film&#39; else &#39;Constant&#39;
+        )
         self.aerosol = aerosol
         self.spectral_sampling = spectral_sampling
         self.t_max = (400 + 196) * si.s
