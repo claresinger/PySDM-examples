@@ -26,12 +26,12 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from PySDM_examples.utils.widgets import FloatProgress, Button, HBox, Checkbox
-from time import sleep
+<pre><code class="python">from time import sleep
 import shutil
 from threading import Thread
 from tempfile import TemporaryDirectory
 from PySDM.exporters import VTKExporter
+from PySDM_examples.utils.widgets import FloatProgress, Button, HBox, Checkbox
 
 
 class GUIController:
@@ -73,7 +73,13 @@ class GUIController:
         self.vtk_exporter = None
 
     def box(self):
-        netcdf_box = Checkbox(description=&#39;netCDF output&#39;, disabled=True, value=True, indent=False, layout={&#39;width&#39;: &#39;125px&#39;})
+        netcdf_box = Checkbox(
+            description=&#39;netCDF output&#39;,
+            disabled=True,
+            value=True,
+            indent=False,
+            layout={&#39;width&#39;: &#39;125px&#39;}
+        )
         return HBox([self.progress, self.button, netcdf_box, self.checkbox, self.link])
 
     def set_percent(self, value):
@@ -201,7 +207,13 @@ class GUIController:
         self.vtk_exporter = None
 
     def box(self):
-        netcdf_box = Checkbox(description=&#39;netCDF output&#39;, disabled=True, value=True, indent=False, layout={&#39;width&#39;: &#39;125px&#39;})
+        netcdf_box = Checkbox(
+            description=&#39;netCDF output&#39;,
+            disabled=True,
+            value=True,
+            indent=False,
+            layout={&#39;width&#39;: &#39;125px&#39;}
+        )
         return HBox([self.progress, self.button, netcdf_box, self.checkbox, self.link])
 
     def set_percent(self, value):
@@ -282,7 +294,13 @@ class GUIController:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def box(self):
-    netcdf_box = Checkbox(description=&#39;netCDF output&#39;, disabled=True, value=True, indent=False, layout={&#39;width&#39;: &#39;125px&#39;})
+    netcdf_box = Checkbox(
+        description=&#39;netCDF output&#39;,
+        disabled=True,
+        value=True,
+        indent=False,
+        layout={&#39;width&#39;: &#39;125px&#39;}
+    )
     return HBox([self.progress, self.button, netcdf_box, self.checkbox, self.link])</code></pre>
 </details>
 </dd>

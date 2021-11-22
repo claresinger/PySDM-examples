@@ -26,8 +26,8 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from PySDM.products.stats.timers import CPUTime, WallTime
-from contextlib import AbstractContextManager
+<pre><code class="python">from contextlib import AbstractContextManager
+from PySDM.products import CPUTime, WallTime
 
 
 class DummyController(AbstractContextManager):
@@ -44,13 +44,14 @@ class DummyController(AbstractContextManager):
         t_curr = self.__times()
         wall_time = (t_curr[0] - self.t_last[0])
         cpu_time = (t_curr[1] - self.t_last[1])
-        print(f&#34;{100 * value:.1f}% (times since last print: cpu={cpu_time:.1f}s wall={wall_time:.1f}s)&#34;)
+        print(f&#34;{100 * value:.1f}%&#34;
+              f&#34; (times since last print: cpu={cpu_time:.1f}s wall={wall_time:.1f}s)&#34;)
         self.t_last = self.__times()
 
-    def __enter__(*_):
+    def __enter__(self, *_):
         pass
 
-    def __exit__(*_):
+    def __exit__(self, *_):
         pass</code></pre>
 </details>
 </section>
@@ -86,13 +87,14 @@ class DummyController(AbstractContextManager):
         t_curr = self.__times()
         wall_time = (t_curr[0] - self.t_last[0])
         cpu_time = (t_curr[1] - self.t_last[1])
-        print(f&#34;{100 * value:.1f}% (times since last print: cpu={cpu_time:.1f}s wall={wall_time:.1f}s)&#34;)
+        print(f&#34;{100 * value:.1f}%&#34;
+              f&#34; (times since last print: cpu={cpu_time:.1f}s wall={wall_time:.1f}s)&#34;)
         self.t_last = self.__times()
 
-    def __enter__(*_):
+    def __enter__(self, *_):
         pass
 
-    def __exit__(*_):
+    def __exit__(self, *_):
         pass</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -115,7 +117,8 @@ class DummyController(AbstractContextManager):
     t_curr = self.__times()
     wall_time = (t_curr[0] - self.t_last[0])
     cpu_time = (t_curr[1] - self.t_last[1])
-    print(f&#34;{100 * value:.1f}% (times since last print: cpu={cpu_time:.1f}s wall={wall_time:.1f}s)&#34;)
+    print(f&#34;{100 * value:.1f}%&#34;
+          f&#34; (times since last print: cpu={cpu_time:.1f}s wall={wall_time:.1f}s)&#34;)
     self.t_last = self.__times()</code></pre>
 </details>
 </dd>

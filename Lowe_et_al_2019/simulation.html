@@ -26,22 +26,26 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from PySDM.environments import Parcel
+<pre><code class="python">import numpy as np
+from PySDM.environments import Parcel
 from PySDM import Builder
 from PySDM.backends import CPU
-from PySDM.physics import si
 from PySDM.dynamics import AmbientThermodynamics, Condensation
 from PySDM.initialisation.multiplicities import discretise_n
 from PySDM.initialisation.r_wet_init import r_wet_init
 from PySDM.physics.spectra import Sum
 import PySDM.products as PySDM_products
-import numpy as np
 
 
 class Simulation:
     def __init__(self, settings, products=None):
-        env = Parcel(dt=settings.dt, mass_of_dry_air=settings.mass_of_dry_air, p0=settings.p0, q0=settings.q0,
-                     T0=settings.T0, w=settings.w, g=settings.g)
+        env = Parcel(dt=settings.dt,
+                     mass_of_dry_air=settings.mass_of_dry_air,
+                     p0=settings.p0,
+                     q0=settings.q0,
+                     T0=settings.T0,
+                     w=settings.w,
+                     g=settings.g)
         n_sd = settings.n_sd_per_mode * len(settings.aerosol.aerosol_modes_per_cc)
         builder = Builder(n_sd=n_sd, backend=CPU(formulae=settings.formulae))
         builder.set_environment(env)
@@ -53,13 +57,16 @@ class Simulation:
             &#39;n&#39;: np.ndarray(0)
         }
         for mode in settings.aerosol.aerosol_modes_per_cc:
-            r_dry, n_in_dv = settings.spectral_sampling(spectrum=mode[&#39;spectrum&#39;]).sample(settings.n_sd_per_mode)
+            r_dry, n_in_dv = settings.spectral_sampling(
+                spectrum=mode[&#39;spectrum&#39;]).sample(settings.n_sd_per_mode)
             n_in_dv /= (settings.rho0 / settings.mass_of_dry_air)
             v_dry = settings.formulae.trivia.volume(radius=r_dry)
             attributes[&#39;n&#39;] = np.append(attributes[&#39;n&#39;], n_in_dv)
             attributes[&#39;dry volume&#39;] = np.append(attributes[&#39;dry volume&#39;], v_dry)
-            attributes[&#39;dry volume organic&#39;] = np.append(attributes[&#39;dry volume organic&#39;], mode[&#39;f_org&#39;] * v_dry)
-            attributes[&#39;kappa times dry volume&#39;] = np.append(attributes[&#39;kappa times dry volume&#39;], v_dry * mode[&#39;kappa&#39;][settings.model])
+            attributes[&#39;dry volume organic&#39;] = np.append(
+                attributes[&#39;dry volume organic&#39;], mode[&#39;f_org&#39;] * v_dry)
+            attributes[&#39;kappa times dry volume&#39;] = np.append(
+                attributes[&#39;kappa times dry volume&#39;], v_dry * mode[&#39;kappa&#39;][settings.model])
         for attribute in attributes.values():
             assert attribute.shape[0] == n_sd
 
@@ -68,9 +75,10 @@ class Simulation:
         dv = settings.mass_of_dry_air / settings.rho0
         np.testing.assert_approx_equal(
             np.sum(attributes[&#39;n&#39;]) / dv,
-            Sum(
-                tuple([settings.aerosol.aerosol_modes_per_cc[i][&#39;spectrum&#39;] for i in range(len(settings.aerosol.aerosol_modes_per_cc))])
-            ).norm_factor,
+            Sum(tuple(
+                settings.aerosol.aerosol_modes_per_cc[i][&#39;spectrum&#39;]
+                for i in range(len(settings.aerosol.aerosol_modes_per_cc))
+            )).norm_factor,
             significant=5
         )
         r_wet = r_wet_init(
@@ -91,8 +99,10 @@ class Simulation:
             PySDM_products.ParcelDisplacement(),
             PySDM_products.Time(),
             PySDM_products.PeakSupersaturation(),
-            PySDM_products.CloudDropletConcentration(radius_range=settings.cloud_radius_range),
-            PySDM_products.ParticlesWetSizeSpectrum(radius_bins_edges=settings.wet_radius_bins_edges),
+            PySDM_products.CloudDropletConcentration(
+                radius_range=settings.cloud_radius_range),
+            PySDM_products.ParticlesWetSizeSpectrum(
+                radius_bins_edges=settings.wet_radius_bins_edges),
         )
 
         self.particulator = builder.build(attributes=attributes, products=products)
@@ -112,7 +122,7 @@ class Simulation:
         output[&#39;spectrum&#39;] = value
 
     def run(self):
-        output = {k: [] for k in self.particulator.products.keys()}
+        output = {k: [] for k in self.particulator.products}
         for step in self.settings.output_steps:
             self.particulator.run(step - self.particulator.n_steps)
             self._save_scalars(output)
@@ -141,8 +151,13 @@ class Simulation:
 </summary>
 <pre><code class="python">class Simulation:
     def __init__(self, settings, products=None):
-        env = Parcel(dt=settings.dt, mass_of_dry_air=settings.mass_of_dry_air, p0=settings.p0, q0=settings.q0,
-                     T0=settings.T0, w=settings.w, g=settings.g)
+        env = Parcel(dt=settings.dt,
+                     mass_of_dry_air=settings.mass_of_dry_air,
+                     p0=settings.p0,
+                     q0=settings.q0,
+                     T0=settings.T0,
+                     w=settings.w,
+                     g=settings.g)
         n_sd = settings.n_sd_per_mode * len(settings.aerosol.aerosol_modes_per_cc)
         builder = Builder(n_sd=n_sd, backend=CPU(formulae=settings.formulae))
         builder.set_environment(env)
@@ -154,13 +169,16 @@ class Simulation:
             &#39;n&#39;: np.ndarray(0)
         }
         for mode in settings.aerosol.aerosol_modes_per_cc:
-            r_dry, n_in_dv = settings.spectral_sampling(spectrum=mode[&#39;spectrum&#39;]).sample(settings.n_sd_per_mode)
+            r_dry, n_in_dv = settings.spectral_sampling(
+                spectrum=mode[&#39;spectrum&#39;]).sample(settings.n_sd_per_mode)
             n_in_dv /= (settings.rho0 / settings.mass_of_dry_air)
             v_dry = settings.formulae.trivia.volume(radius=r_dry)
             attributes[&#39;n&#39;] = np.append(attributes[&#39;n&#39;], n_in_dv)
             attributes[&#39;dry volume&#39;] = np.append(attributes[&#39;dry volume&#39;], v_dry)
-            attributes[&#39;dry volume organic&#39;] = np.append(attributes[&#39;dry volume organic&#39;], mode[&#39;f_org&#39;] * v_dry)
-            attributes[&#39;kappa times dry volume&#39;] = np.append(attributes[&#39;kappa times dry volume&#39;], v_dry * mode[&#39;kappa&#39;][settings.model])
+            attributes[&#39;dry volume organic&#39;] = np.append(
+                attributes[&#39;dry volume organic&#39;], mode[&#39;f_org&#39;] * v_dry)
+            attributes[&#39;kappa times dry volume&#39;] = np.append(
+                attributes[&#39;kappa times dry volume&#39;], v_dry * mode[&#39;kappa&#39;][settings.model])
         for attribute in attributes.values():
             assert attribute.shape[0] == n_sd
 
@@ -169,9 +187,10 @@ class Simulation:
         dv = settings.mass_of_dry_air / settings.rho0
         np.testing.assert_approx_equal(
             np.sum(attributes[&#39;n&#39;]) / dv,
-            Sum(
-                tuple([settings.aerosol.aerosol_modes_per_cc[i][&#39;spectrum&#39;] for i in range(len(settings.aerosol.aerosol_modes_per_cc))])
-            ).norm_factor,
+            Sum(tuple(
+                settings.aerosol.aerosol_modes_per_cc[i][&#39;spectrum&#39;]
+                for i in range(len(settings.aerosol.aerosol_modes_per_cc))
+            )).norm_factor,
             significant=5
         )
         r_wet = r_wet_init(
@@ -192,8 +211,10 @@ class Simulation:
             PySDM_products.ParcelDisplacement(),
             PySDM_products.Time(),
             PySDM_products.PeakSupersaturation(),
-            PySDM_products.CloudDropletConcentration(radius_range=settings.cloud_radius_range),
-            PySDM_products.ParticlesWetSizeSpectrum(radius_bins_edges=settings.wet_radius_bins_edges),
+            PySDM_products.CloudDropletConcentration(
+                radius_range=settings.cloud_radius_range),
+            PySDM_products.ParticlesWetSizeSpectrum(
+                radius_bins_edges=settings.wet_radius_bins_edges),
         )
 
         self.particulator = builder.build(attributes=attributes, products=products)
@@ -213,7 +234,7 @@ class Simulation:
         output[&#39;spectrum&#39;] = value
 
     def run(self):
-        output = {k: [] for k in self.particulator.products.keys()}
+        output = {k: [] for k in self.particulator.products}
         for step in self.settings.output_steps:
             self.particulator.run(step - self.particulator.n_steps)
             self._save_scalars(output)
@@ -232,7 +253,7 @@ class Simulation:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def run(self):
-    output = {k: [] for k in self.particulator.products.keys()}
+    output = {k: [] for k in self.particulator.products}
     for step in self.settings.output_steps:
         self.particulator.run(step - self.particulator.n_steps)
         self._save_scalars(output)

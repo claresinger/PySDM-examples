@@ -80,7 +80,7 @@ class Simulation:
                 abifm.m = case[&#39;ABIFM_m&#39;]
             if &#39;cooling_rate&#39; not in case:
                 case[&#39;cooling_rate&#39;] = 0
-                constant.J_het = case[&#39;J_het&#39;]
+                constant.J_HET = case[&#39;J_het&#39;]
 
             self.output[key] = []
             for i in range(self.n_runs_per_case):
@@ -88,7 +88,7 @@ class Simulation:
                 n_sd = number_of_real_droplets / self.multiplicity
                 np.testing.assert_approx_equal(n_sd, int(n_sd))
                 n_sd = int(n_sd)
-
+                initial_temp = self.temperature_range[1] if self.temperature_range else np.nan
                 f_ufz, a_tot = simulation(
                     seed=i, n_sd=n_sd, time_step=self.time_step, volume=self.volume,
                     spectrum=case[&#39;ISA&#39;],
@@ -96,7 +96,7 @@ class Simulation:
                     total_time=total_time, number_of_real_droplets=number_of_real_droplets,
                     cooling_rate=self.cases[key][&#39;cooling_rate&#39;],
                     heterogeneous_ice_nucleation_rate=self.heterogeneous_ice_nucleation_rate,
-                    initial_temperature=self.temperature_range[1] if self.temperature_range else np.nan
+                    initial_temperature=initial_temp
                 )
                 self.output[key].append({&#39;f_ufz&#39;: f_ufz, &#39;A_tot&#39;: a_tot})
 
@@ -143,7 +143,7 @@ class Simulation:
         yunit = 1 / si.cm**2 / si.s
 
         plot_x = np.linspace(*self.temperature_range) * si.K
-        plot_y = formulae.heterogeneous_ice_nucleation_rate.J_het(
+        plot_y = formulae.heterogeneous_ice_nucleation_rate.j_het(
             formulae.saturation_vapour_pressure.a_w_ice.py_func(plot_x)
         )
         pylab.grid()
@@ -350,7 +350,7 @@ def simulation(*, seed, n_sd, time_step, volume, spectrum, droplet_volume, multi
                 abifm.m = case[&#39;ABIFM_m&#39;]
             if &#39;cooling_rate&#39; not in case:
                 case[&#39;cooling_rate&#39;] = 0
-                constant.J_het = case[&#39;J_het&#39;]
+                constant.J_HET = case[&#39;J_het&#39;]
 
             self.output[key] = []
             for i in range(self.n_runs_per_case):
@@ -358,7 +358,7 @@ def simulation(*, seed, n_sd, time_step, volume, spectrum, droplet_volume, multi
                 n_sd = number_of_real_droplets / self.multiplicity
                 np.testing.assert_approx_equal(n_sd, int(n_sd))
                 n_sd = int(n_sd)
-
+                initial_temp = self.temperature_range[1] if self.temperature_range else np.nan
                 f_ufz, a_tot = simulation(
                     seed=i, n_sd=n_sd, time_step=self.time_step, volume=self.volume,
                     spectrum=case[&#39;ISA&#39;],
@@ -366,7 +366,7 @@ def simulation(*, seed, n_sd, time_step, volume, spectrum, droplet_volume, multi
                     total_time=total_time, number_of_real_droplets=number_of_real_droplets,
                     cooling_rate=self.cases[key][&#39;cooling_rate&#39;],
                     heterogeneous_ice_nucleation_rate=self.heterogeneous_ice_nucleation_rate,
-                    initial_temperature=self.temperature_range[1] if self.temperature_range else np.nan
+                    initial_temperature=initial_temp
                 )
                 self.output[key].append({&#39;f_ufz&#39;: f_ufz, &#39;A_tot&#39;: a_tot})
 
@@ -413,7 +413,7 @@ def simulation(*, seed, n_sd, time_step, volume, spectrum, droplet_volume, multi
         yunit = 1 / si.cm**2 / si.s
 
         plot_x = np.linspace(*self.temperature_range) * si.K
-        plot_y = formulae.heterogeneous_ice_nucleation_rate.J_het(
+        plot_y = formulae.heterogeneous_ice_nucleation_rate.j_het(
             formulae.saturation_vapour_pressure.a_w_ice.py_func(plot_x)
         )
         pylab.grid()
@@ -521,7 +521,7 @@ def simulation(*, seed, n_sd, time_step, volume, spectrum, droplet_volume, multi
     yunit = 1 / si.cm**2 / si.s
 
     plot_x = np.linspace(*self.temperature_range) * si.K
-    plot_y = formulae.heterogeneous_ice_nucleation_rate.J_het(
+    plot_y = formulae.heterogeneous_ice_nucleation_rate.j_het(
         formulae.saturation_vapour_pressure.a_w_ice.py_func(plot_x)
     )
     pylab.grid()
@@ -592,7 +592,7 @@ def simulation(*, seed, n_sd, time_step, volume, spectrum, droplet_volume, multi
             abifm.m = case[&#39;ABIFM_m&#39;]
         if &#39;cooling_rate&#39; not in case:
             case[&#39;cooling_rate&#39;] = 0
-            constant.J_het = case[&#39;J_het&#39;]
+            constant.J_HET = case[&#39;J_het&#39;]
 
         self.output[key] = []
         for i in range(self.n_runs_per_case):
@@ -600,7 +600,7 @@ def simulation(*, seed, n_sd, time_step, volume, spectrum, droplet_volume, multi
             n_sd = number_of_real_droplets / self.multiplicity
             np.testing.assert_approx_equal(n_sd, int(n_sd))
             n_sd = int(n_sd)
-
+            initial_temp = self.temperature_range[1] if self.temperature_range else np.nan
             f_ufz, a_tot = simulation(
                 seed=i, n_sd=n_sd, time_step=self.time_step, volume=self.volume,
                 spectrum=case[&#39;ISA&#39;],
@@ -608,7 +608,7 @@ def simulation(*, seed, n_sd, time_step, volume, spectrum, droplet_volume, multi
                 total_time=total_time, number_of_real_droplets=number_of_real_droplets,
                 cooling_rate=self.cases[key][&#39;cooling_rate&#39;],
                 heterogeneous_ice_nucleation_rate=self.heterogeneous_ice_nucleation_rate,
-                initial_temperature=self.temperature_range[1] if self.temperature_range else np.nan
+                initial_temperature=initial_temp
             )
             self.output[key].append({&#39;f_ufz&#39;: f_ufz, &#39;A_tot&#39;: a_tot})</code></pre>
 </details>

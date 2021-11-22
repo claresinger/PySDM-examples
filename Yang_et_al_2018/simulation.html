@@ -38,11 +38,14 @@ import PySDM.products as PySDM_products
 class Simulation:
 
     def __init__(self, settings, backend=CPU):
-        dt_output = settings.total_time / settings.n_steps  # TODO #334 overwritten in jupyter example
+        dt_output = settings.total_time / settings.n_steps  # TODO #334 overwritten in notebook
         self.n_substeps = 1  # TODO #334 use condensation substeps
-        while (dt_output / self.n_substeps &gt;= settings.dt_max):
+        while dt_output / self.n_substeps &gt;= settings.dt_max:
             self.n_substeps += 1
-        self.formulae = Formulae(condensation_coordinate=settings.coord, saturation_vapour_pressure=&#39;AugustRocheMagnus&#39;)
+        self.formulae = Formulae(
+            condensation_coordinate=settings.coord,
+            saturation_vapour_pressure=&#39;AugustRocheMagnus&#39;
+        )
         self.bins_edges = self.formulae.trivia.volume(settings.r_bins_edges)
         builder = Builder(backend=backend(formulae=self.formulae), n_sd=settings.n_sd)
         builder.set_environment(Parcel(
@@ -83,25 +86,26 @@ class Simulation:
         self.n_steps = settings.n_steps
 
     def save(self, output):
+        _sp = self.particulator
         cell_id = 0
-        output[&#34;r_bins_values&#34;].append(self.particulator.products[&#34;Particles Wet Size Spectrum&#34;].get())
-        volume = self.particulator.attributes[&#39;volume&#39;].to_ndarray()
+        output[&#34;r_bins_values&#34;].append(_sp.products[&#34;Particles Wet Size Spectrum&#34;].get())
+        volume = _sp.attributes[&#39;volume&#39;].to_ndarray()
         output[&#34;r&#34;].append(self.formulae.trivia.radius(volume=volume))
-        output[&#34;S&#34;].append(self.particulator.environment[&#34;RH&#34;][cell_id] - 1)
-        output[&#34;qv&#34;].append(self.particulator.environment[&#34;qv&#34;][cell_id])
-        output[&#34;T&#34;].append(self.particulator.environment[&#34;T&#34;][cell_id])
-        output[&#34;z&#34;].append(self.particulator.environment[&#34;z&#34;][cell_id])
-        output[&#34;t&#34;].append(self.particulator.environment[&#34;t&#34;][cell_id])
-        output[&#34;dt_cond_max&#34;].append(self.particulator.products[&#34;dt_cond_max&#34;].get()[cell_id].copy())
-        output[&#34;dt_cond_min&#34;].append(self.particulator.products[&#34;dt_cond_min&#34;].get()[cell_id].copy())
-        output[&#39;ripening_rate&#39;].append(self.particulator.products[&#39;ripening_rate&#39;].get()[cell_id].copy())
+        output[&#34;S&#34;].append(_sp.environment[&#34;RH&#34;][cell_id] - 1)
+        output[&#34;qv&#34;].append(_sp.environment[&#34;qv&#34;][cell_id])
+        output[&#34;T&#34;].append(_sp.environment[&#34;T&#34;][cell_id])
+        output[&#34;z&#34;].append(_sp.environment[&#34;z&#34;][cell_id])
+        output[&#34;t&#34;].append(_sp.environment[&#34;t&#34;][cell_id])
+        output[&#34;dt_cond_max&#34;].append(_sp.products[&#34;dt_cond_max&#34;].get()[cell_id].copy())
+        output[&#34;dt_cond_min&#34;].append(_sp.products[&#34;dt_cond_min&#34;].get()[cell_id].copy())
+        output[&#39;ripening_rate&#39;].append(_sp.products[&#39;ripening_rate&#39;].get()[cell_id].copy())
 
     def run(self):
         output = {&#34;r&#34;: [], &#34;S&#34;: [], &#34;z&#34;: [], &#34;t&#34;: [], &#34;qv&#34;: [], &#34;T&#34;: [],
                   &#34;r_bins_values&#34;: [], &#34;dt_cond_max&#34;: [], &#34;dt_cond_min&#34;: [], &#34;ripening_rate&#34;: []}
 
         self.save(output)
-        for step in range(self.n_steps):
+        for _ in range(self.n_steps):
             self.particulator.run(self.n_substeps)
             self.save(output)
         return output</code></pre>
@@ -118,7 +122,7 @@ class Simulation:
 <dl>
 <dt id="PySDM_examples.Yang_et_al_2018.simulation.Simulation"><code class="flex name class">
 <span>class <span class="ident">Simulation</span></span>
-<span>(</span><span>settings, backend=PySDM.backends.numba.numba.Numba)</span>
+<span>(</span><span>settings, backend=PySDM.backends.numba.Numba)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -129,11 +133,14 @@ class Simulation:
 <pre><code class="python">class Simulation:
 
     def __init__(self, settings, backend=CPU):
-        dt_output = settings.total_time / settings.n_steps  # TODO #334 overwritten in jupyter example
+        dt_output = settings.total_time / settings.n_steps  # TODO #334 overwritten in notebook
         self.n_substeps = 1  # TODO #334 use condensation substeps
-        while (dt_output / self.n_substeps &gt;= settings.dt_max):
+        while dt_output / self.n_substeps &gt;= settings.dt_max:
             self.n_substeps += 1
-        self.formulae = Formulae(condensation_coordinate=settings.coord, saturation_vapour_pressure=&#39;AugustRocheMagnus&#39;)
+        self.formulae = Formulae(
+            condensation_coordinate=settings.coord,
+            saturation_vapour_pressure=&#39;AugustRocheMagnus&#39;
+        )
         self.bins_edges = self.formulae.trivia.volume(settings.r_bins_edges)
         builder = Builder(backend=backend(formulae=self.formulae), n_sd=settings.n_sd)
         builder.set_environment(Parcel(
@@ -174,25 +181,26 @@ class Simulation:
         self.n_steps = settings.n_steps
 
     def save(self, output):
+        _sp = self.particulator
         cell_id = 0
-        output[&#34;r_bins_values&#34;].append(self.particulator.products[&#34;Particles Wet Size Spectrum&#34;].get())
-        volume = self.particulator.attributes[&#39;volume&#39;].to_ndarray()
+        output[&#34;r_bins_values&#34;].append(_sp.products[&#34;Particles Wet Size Spectrum&#34;].get())
+        volume = _sp.attributes[&#39;volume&#39;].to_ndarray()
         output[&#34;r&#34;].append(self.formulae.trivia.radius(volume=volume))
-        output[&#34;S&#34;].append(self.particulator.environment[&#34;RH&#34;][cell_id] - 1)
-        output[&#34;qv&#34;].append(self.particulator.environment[&#34;qv&#34;][cell_id])
-        output[&#34;T&#34;].append(self.particulator.environment[&#34;T&#34;][cell_id])
-        output[&#34;z&#34;].append(self.particulator.environment[&#34;z&#34;][cell_id])
-        output[&#34;t&#34;].append(self.particulator.environment[&#34;t&#34;][cell_id])
-        output[&#34;dt_cond_max&#34;].append(self.particulator.products[&#34;dt_cond_max&#34;].get()[cell_id].copy())
-        output[&#34;dt_cond_min&#34;].append(self.particulator.products[&#34;dt_cond_min&#34;].get()[cell_id].copy())
-        output[&#39;ripening_rate&#39;].append(self.particulator.products[&#39;ripening_rate&#39;].get()[cell_id].copy())
+        output[&#34;S&#34;].append(_sp.environment[&#34;RH&#34;][cell_id] - 1)
+        output[&#34;qv&#34;].append(_sp.environment[&#34;qv&#34;][cell_id])
+        output[&#34;T&#34;].append(_sp.environment[&#34;T&#34;][cell_id])
+        output[&#34;z&#34;].append(_sp.environment[&#34;z&#34;][cell_id])
+        output[&#34;t&#34;].append(_sp.environment[&#34;t&#34;][cell_id])
+        output[&#34;dt_cond_max&#34;].append(_sp.products[&#34;dt_cond_max&#34;].get()[cell_id].copy())
+        output[&#34;dt_cond_min&#34;].append(_sp.products[&#34;dt_cond_min&#34;].get()[cell_id].copy())
+        output[&#39;ripening_rate&#39;].append(_sp.products[&#39;ripening_rate&#39;].get()[cell_id].copy())
 
     def run(self):
         output = {&#34;r&#34;: [], &#34;S&#34;: [], &#34;z&#34;: [], &#34;t&#34;: [], &#34;qv&#34;: [], &#34;T&#34;: [],
                   &#34;r_bins_values&#34;: [], &#34;dt_cond_max&#34;: [], &#34;dt_cond_min&#34;: [], &#34;ripening_rate&#34;: []}
 
         self.save(output)
-        for step in range(self.n_steps):
+        for _ in range(self.n_steps):
             self.particulator.run(self.n_substeps)
             self.save(output)
         return output</code></pre>
@@ -213,7 +221,7 @@ class Simulation:
               &#34;r_bins_values&#34;: [], &#34;dt_cond_max&#34;: [], &#34;dt_cond_min&#34;: [], &#34;ripening_rate&#34;: []}
 
     self.save(output)
-    for step in range(self.n_steps):
+    for _ in range(self.n_steps):
         self.particulator.run(self.n_substeps)
         self.save(output)
     return output</code></pre>
@@ -229,18 +237,19 @@ class Simulation:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def save(self, output):
+    _sp = self.particulator
     cell_id = 0
-    output[&#34;r_bins_values&#34;].append(self.particulator.products[&#34;Particles Wet Size Spectrum&#34;].get())
-    volume = self.particulator.attributes[&#39;volume&#39;].to_ndarray()
+    output[&#34;r_bins_values&#34;].append(_sp.products[&#34;Particles Wet Size Spectrum&#34;].get())
+    volume = _sp.attributes[&#39;volume&#39;].to_ndarray()
     output[&#34;r&#34;].append(self.formulae.trivia.radius(volume=volume))
-    output[&#34;S&#34;].append(self.particulator.environment[&#34;RH&#34;][cell_id] - 1)
-    output[&#34;qv&#34;].append(self.particulator.environment[&#34;qv&#34;][cell_id])
-    output[&#34;T&#34;].append(self.particulator.environment[&#34;T&#34;][cell_id])
-    output[&#34;z&#34;].append(self.particulator.environment[&#34;z&#34;][cell_id])
-    output[&#34;t&#34;].append(self.particulator.environment[&#34;t&#34;][cell_id])
-    output[&#34;dt_cond_max&#34;].append(self.particulator.products[&#34;dt_cond_max&#34;].get()[cell_id].copy())
-    output[&#34;dt_cond_min&#34;].append(self.particulator.products[&#34;dt_cond_min&#34;].get()[cell_id].copy())
-    output[&#39;ripening_rate&#39;].append(self.particulator.products[&#39;ripening_rate&#39;].get()[cell_id].copy())</code></pre>
+    output[&#34;S&#34;].append(_sp.environment[&#34;RH&#34;][cell_id] - 1)
+    output[&#34;qv&#34;].append(_sp.environment[&#34;qv&#34;][cell_id])
+    output[&#34;T&#34;].append(_sp.environment[&#34;T&#34;][cell_id])
+    output[&#34;z&#34;].append(_sp.environment[&#34;z&#34;][cell_id])
+    output[&#34;t&#34;].append(_sp.environment[&#34;t&#34;][cell_id])
+    output[&#34;dt_cond_max&#34;].append(_sp.products[&#34;dt_cond_max&#34;].get()[cell_id].copy())
+    output[&#34;dt_cond_min&#34;].append(_sp.products[&#34;dt_cond_min&#34;].get()[cell_id].copy())
+    output[&#39;ripening_rate&#39;].append(_sp.products[&#39;ripening_rate&#39;].get()[cell_id].copy())</code></pre>
 </details>
 </dd>
 </dl>

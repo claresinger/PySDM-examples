@@ -30,7 +30,7 @@
     def __init__(self, widgets):
         self.widgets = widgets
 
-    def observe(*args, **kwargs):
+    def observe(self, *_):
         pass
 
     @property
@@ -70,7 +70,7 @@
     def __init__(self, widgets):
         self.widgets = widgets
 
-    def observe(*args, **kwargs):
+    def observe(self, *_):
         pass
 
     @property
@@ -104,7 +104,7 @@ def value(self):
 <h3>Methods</h3>
 <dl>
 <dt id="PySDM_examples.utils.widgets.freezer.Freezer.observe"><code class="name flex">
-<span>def <span class="ident">observe</span></span>(<span>*args, **kwargs)</span>
+<span>def <span class="ident">observe</span></span>(<span>self, *_)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -112,7 +112,7 @@ def value(self):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def observe(*args, **kwargs):
+<pre><code class="python">def observe(self, *_):
     pass</code></pre>
 </details>
 </dd>

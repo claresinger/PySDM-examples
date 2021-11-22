@@ -27,15 +27,14 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">import os
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.collections import LineCollection
+from PySDM.backends.impl_numba.test_helpers import bdf
+from PySDM.backends import CPU, GPU
 from PySDM_examples.Arabas_and_Shima_2017.simulation import Simulation
 from PySDM_examples.Arabas_and_Shima_2017.settings import setups
-from PySDM.backends.numba.test_helpers import bdf
-from PySDM.backends import CPU, GPU
 
 
 def data(n_output, rtols, schemes, setups_num):
@@ -81,7 +80,7 @@ def add_color_line(fig, ax, x, y, z):
     fig.colorbar(lc, ax=ax)
 
 
-def plot(data, rtols, schemes, setups_num, show_plot, path=None):
+def plot(plot_data, rtols, schemes, setups_num, show_plot, path=None):
     _rtol = &#39;$r_{tol}$&#39;
 
     plt.ioff()
@@ -90,10 +89,10 @@ def plot(data, rtols, schemes, setups_num, show_plot, path=None):
     for settings_idx in range(setups_num):
         BDF_S = None
         PySDM_S = None
-        for rtol_idx in range(len(rtols)):
+        for rtol_idx, _ in enumerate(rtols):
             ax = axs[settings_idx, rtol_idx]
             for scheme in schemes:
-                datum = data[scheme][rtols[rtol_idx]][settings_idx]
+                datum = plot_data[scheme][rtols[rtol_idx]][settings_idx]
                 S = datum[&#39;S&#39;]
                 z = datum[&#39;z&#39;]
                 dt = datum[&#39;dt_cond_min&#39;]
@@ -222,7 +221,7 @@ if __name__ == &#39;__main__&#39;:
 </details>
 </dd>
 <dt id="PySDM_examples.Bartman_2020_MasterThesis.fig_5_BDF_VS_ADAPTIVE.plot"><code class="name flex">
-<span>def <span class="ident">plot</span></span>(<span>data, rtols, schemes, setups_num, show_plot, path=None)</span>
+<span>def <span class="ident">plot</span></span>(<span>plot_data, rtols, schemes, setups_num, show_plot, path=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -230,7 +229,7 @@ if __name__ == &#39;__main__&#39;:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot(data, rtols, schemes, setups_num, show_plot, path=None):
+<pre><code class="python">def plot(plot_data, rtols, schemes, setups_num, show_plot, path=None):
     _rtol = &#39;$r_{tol}$&#39;
 
     plt.ioff()
@@ -239,10 +238,10 @@ if __name__ == &#39;__main__&#39;:
     for settings_idx in range(setups_num):
         BDF_S = None
         PySDM_S = None
-        for rtol_idx in range(len(rtols)):
+        for rtol_idx, _ in enumerate(rtols):
             ax = axs[settings_idx, rtol_idx]
             for scheme in schemes:
-                datum = data[scheme][rtols[rtol_idx]][settings_idx]
+                datum = plot_data[scheme][rtols[rtol_idx]][settings_idx]
                 S = datum[&#39;S&#39;]
                 z = datum[&#39;z&#39;]
                 dt = datum[&#39;dt_cond_min&#39;]

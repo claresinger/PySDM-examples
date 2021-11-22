@@ -27,11 +27,11 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">import sys
+from atmos_cloud_sim_uj_utils import TemporaryFile
+from PySDM.exporters import NetCDFExporter
+from PySDM_examples.utils.widgets import display, Tab, VBox, HTML
 from PySDM_examples.Szumowski_et_al_1998.gui_controller import GUIController
 from PySDM_examples.Szumowski_et_al_1998.gui_viewer import GUIViewer
-from PySDM.exporters import NetCDFExporter
-from atmos_cloud_sim_uj_utils import TemporaryFile
-from PySDM_examples.utils.widgets import display, Tab, VBox, HTML
 
 
 def launch(settings, simulation, storage):
@@ -49,8 +49,15 @@ def launch(settings, simulation, storage):
     tabs.observe(controller.reinit, &#39;selected_index&#39;)
 
     # https://github.com/googlecolab/colabtools/issues/1302
+    hack = (
+        &#39;&lt;link&#39;
+        &#39; rel=&#34;stylesheet&#34;&#39;
+        &#39; href=&#34;https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css&#34;&#39;
+        &#39;&gt; &#39;
+    )
     if &#39;google.colab&#39; in sys.modules:
-        display(HTML(&#39;&#39;&#39;&lt;link rel=&#34;stylesheet&#34; href=&#34;https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css&#34;&gt; &#39;&#39;&#39;))
+        display(HTML(hack))
+
     display(tabs)</code></pre>
 </details>
 </section>
@@ -85,8 +92,15 @@ def launch(settings, simulation, storage):
     tabs.observe(controller.reinit, &#39;selected_index&#39;)
 
     # https://github.com/googlecolab/colabtools/issues/1302
+    hack = (
+        &#39;&lt;link&#39;
+        &#39; rel=&#34;stylesheet&#34;&#39;
+        &#39; href=&#34;https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css&#34;&#39;
+        &#39;&gt; &#39;
+    )
     if &#39;google.colab&#39; in sys.modules:
-        display(HTML(&#39;&#39;&#39;&lt;link rel=&#34;stylesheet&#34; href=&#34;https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css&#34;&gt; &#39;&#39;&#39;))
+        display(HTML(hack))
+
     display(tabs)</code></pre>
 </details>
 </dd>

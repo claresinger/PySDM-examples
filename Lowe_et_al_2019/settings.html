@@ -44,7 +44,7 @@ class Settings:
         self.model = model
         self.n_sd_per_mode = n_sd_per_mode
         self.formulae = Formulae(
-            surface_tension=&#39;CompressedFilm_Ovadnevaite&#39; if model == &#39;film&#39; else &#39;Constant&#39;
+            surface_tension=&#39;CompressedFilmOvadnevaite&#39; if model == &#39;film&#39; else &#39;Constant&#39;
         )
         self.aerosol = aerosol
         self.spectral_sampling = spectral_sampling
@@ -66,8 +66,13 @@ class Settings:
         )
 
         self.mass_of_dry_air = 44
-        
-        self.wet_radius_bins_edges = np.logspace(np.log10(4 * si.um), np.log10(12 * si.um), 128+1, endpoint=True)
+
+        self.wet_radius_bins_edges = np.logspace(
+            np.log10(4 * si.um),
+            np.log10(12 * si.um),
+            128+1,
+            endpoint=True
+        )
 
     @property
     def rho0(self):
@@ -119,7 +124,7 @@ class Settings:
         self.model = model
         self.n_sd_per_mode = n_sd_per_mode
         self.formulae = Formulae(
-            surface_tension=&#39;CompressedFilm_Ovadnevaite&#39; if model == &#39;film&#39; else &#39;Constant&#39;
+            surface_tension=&#39;CompressedFilmOvadnevaite&#39; if model == &#39;film&#39; else &#39;Constant&#39;
         )
         self.aerosol = aerosol
         self.spectral_sampling = spectral_sampling
@@ -141,8 +146,13 @@ class Settings:
         )
 
         self.mass_of_dry_air = 44
-        
-        self.wet_radius_bins_edges = np.logspace(np.log10(4 * si.um), np.log10(12 * si.um), 128+1, endpoint=True)
+
+        self.wet_radius_bins_edges = np.logspace(
+            np.log10(4 * si.um),
+            np.log10(12 * si.um),
+            128+1,
+            endpoint=True
+        )
 
     @property
     def rho0(self):

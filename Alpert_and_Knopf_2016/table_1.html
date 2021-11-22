@@ -34,63 +34,85 @@ from PySDM_examples.Alpert_and_Knopf_2016.table import Table
 class Table1(Table):
     def label(self, key):
         if isinstance(self[key][&#39;ISA&#39;], Lognormal):
-            return f&#34;σ=ln({int(self[key][&#39;ISA&#39;].s_geom)}),N={int(self[key][&#39;ISA&#39;].norm_factor * self.volume)}&#34;
+            return f&#34;σ=ln({int(self[key][&#39;ISA&#39;].s_geom)}),&#34; \
+                   f&#34;N={int(self[key][&#39;ISA&#39;].norm_factor * self.volume)}&#34;
         return key
 
     def __init__(self, *, volume=1 * si.cm ** 3):
         super().__init__(volume=volume, data={
             &#39;Iso1&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=1000 / volume, m_mode=1e-5 * si.cm ** 2, s_geom=1),
+                &#39;ISA&#39;: Lognormal(norm_factor=1000 / volume,
+                                 m_mode=1e-5 * si.cm ** 2,
+                                 s_geom=1),
                 &#39;color&#39;: &#39;#298131&#39;,
                 &#39;J_het&#39;: 1e3 / si.cm**2 / si.s,
             },
             &#39;Iso2&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=30 / volume, m_mode=1e-5 * si.cm ** 2, s_geom=1),
+                &#39;ISA&#39;: Lognormal(norm_factor=30 / volume,
+                                 m_mode=1e-5 * si.cm ** 2,
+                                 s_geom=1),
                 &#39;color&#39;: &#39;#9ACFA4&#39;,
                 &#39;J_het&#39;: 1e3 / si.cm**2 / si.s,
             },
             &#39;Iso3&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=1000 / volume, m_mode=1e-5 * si.cm ** 2, s_geom=10),
+                &#39;ISA&#39;: Lognormal(norm_factor=1000 / volume,
+                                 m_mode=1e-5 * si.cm ** 2,
+                                 s_geom=10),
                 &#39;color&#39;: &#39;#1A62B4&#39;,
                 &#39;J_het&#39;: 1e3 / si.cm**2 / si.s,
             },
             &#39;Iso4&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=30 / volume, m_mode=1e-5 * si.cm ** 2, s_geom=10),
+                &#39;ISA&#39;: Lognormal(norm_factor=30 / volume,
+                                 m_mode=1e-5 * si.cm ** 2,
+                                 s_geom=10),
                 &#39;color&#39;: &#39;#95BDE1&#39;,
                 &#39;J_het&#39;: 1e3 / si.cm**2 / si.s,
             },
             &#39;IsoWR&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=1000 / volume, m_mode=6.4e-3 * si.cm ** 2, s_geom=9.5),
+                &#39;ISA&#39;: Lognormal(norm_factor=1000 / volume,
+                                 m_mode=6.4e-3 * si.cm ** 2,
+                                 s_geom=9.5),
                 &#39;color&#39;: &#39;#FED2B0&#39;,
                 &#39;J_het&#39;: 6e-4 / si.cm**2 / si.s,
             },
             &#39;IsoBR&#39;: {
-                &#39;ISA&#39;: TopHat(norm_factor=63 / volume, endpoints=(9.4e-8 * si.cm ** 2, 7.5e-7 * si.cm ** 2)),
+                &#39;ISA&#39;: TopHat(norm_factor=63 / volume,
+                              endpoints=(9.4e-8 * si.cm ** 2, 7.5e-7 * si.cm ** 2)),
                 &#39;color&#39;: &#39;#FED2B0&#39;,
                 &#39;J_het&#39;: 2.8e3 / si.cm**2 / si.s,
             },
             &#39;IsoHE1&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=40 / volume, m_mode=1.2 * si.cm ** 2, s_geom=2.2),
+                &#39;ISA&#39;: Lognormal(norm_factor=40 / volume,
+                                 m_mode=1.2 * si.cm ** 2,
+                                 s_geom=2.2),
                 &#39;color&#39;: &#39;#FED2B0&#39;,
                 &#39;J_het&#39;: 4.1e-3 / si.cm ** 2 / si.s,
             },
             &#39;IsoHE2&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=40 / volume, m_mode=2e-2 * si.cm ** 2, s_geom=8.5),
+                &#39;ISA&#39;: Lognormal(norm_factor=40 / volume,
+                                 m_mode=2e-2 * si.cm ** 2,
+                                 s_geom=8.5),
                 &#39;color&#39;: &#39;#FED2B0&#39;,
                 &#39;J_het&#39;: 2e-2 / si.cm ** 2 / si.s,
             },
             &#39;IsoDI1&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=45 / volume, m_mode=5.1e-1 * si.cm ** 2, s_geom=3.2),
+                &#39;ISA&#39;: Lognormal(norm_factor=45 / volume,
+                                 m_mode=5.1e-1 * si.cm ** 2,
+                                 s_geom=3.2),
                 &#39;J_het&#39;: 1.8e-2 / si.cm ** 2 / si.s,
                 &#39;color&#39;: &#39;#9ACFA4&#39;
             },
             &#39;IsoDI2&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=45 / volume, m_mode=5.1e-2 * si.cm ** 2, s_geom=3.2),
+                &#39;ISA&#39;: Lognormal(norm_factor=45 / volume,
+                                 m_mode=5.1e-2 * si.cm ** 2,
+                                 s_geom=3.2),
                 &#39;J_het&#39;: 1 / si.cm ** 2 / si.s,
                 &#39;color&#39;: &#39;#FED2B0&#39;
             },
             &#39;IsoDI3&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=45 / volume, m_mode=5.1e-1 * si.cm ** 2, s_geom=3.2),
+                &#39;ISA&#39;: Lognormal(norm_factor=45 / volume,
+                                 m_mode=5.1e-1 * si.cm ** 2,
+                                 s_geom=3.2),
                 &#39;J_het&#39;: 1 / si.cm ** 2 / si.s,
                 &#39;color&#39;: &#39;#95BDE1&#39;
             }
@@ -119,63 +141,85 @@ class Table1(Table):
 <pre><code class="python">class Table1(Table):
     def label(self, key):
         if isinstance(self[key][&#39;ISA&#39;], Lognormal):
-            return f&#34;σ=ln({int(self[key][&#39;ISA&#39;].s_geom)}),N={int(self[key][&#39;ISA&#39;].norm_factor * self.volume)}&#34;
+            return f&#34;σ=ln({int(self[key][&#39;ISA&#39;].s_geom)}),&#34; \
+                   f&#34;N={int(self[key][&#39;ISA&#39;].norm_factor * self.volume)}&#34;
         return key
 
     def __init__(self, *, volume=1 * si.cm ** 3):
         super().__init__(volume=volume, data={
             &#39;Iso1&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=1000 / volume, m_mode=1e-5 * si.cm ** 2, s_geom=1),
+                &#39;ISA&#39;: Lognormal(norm_factor=1000 / volume,
+                                 m_mode=1e-5 * si.cm ** 2,
+                                 s_geom=1),
                 &#39;color&#39;: &#39;#298131&#39;,
                 &#39;J_het&#39;: 1e3 / si.cm**2 / si.s,
             },
             &#39;Iso2&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=30 / volume, m_mode=1e-5 * si.cm ** 2, s_geom=1),
+                &#39;ISA&#39;: Lognormal(norm_factor=30 / volume,
+                                 m_mode=1e-5 * si.cm ** 2,
+                                 s_geom=1),
                 &#39;color&#39;: &#39;#9ACFA4&#39;,
                 &#39;J_het&#39;: 1e3 / si.cm**2 / si.s,
             },
             &#39;Iso3&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=1000 / volume, m_mode=1e-5 * si.cm ** 2, s_geom=10),
+                &#39;ISA&#39;: Lognormal(norm_factor=1000 / volume,
+                                 m_mode=1e-5 * si.cm ** 2,
+                                 s_geom=10),
                 &#39;color&#39;: &#39;#1A62B4&#39;,
                 &#39;J_het&#39;: 1e3 / si.cm**2 / si.s,
             },
             &#39;Iso4&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=30 / volume, m_mode=1e-5 * si.cm ** 2, s_geom=10),
+                &#39;ISA&#39;: Lognormal(norm_factor=30 / volume,
+                                 m_mode=1e-5 * si.cm ** 2,
+                                 s_geom=10),
                 &#39;color&#39;: &#39;#95BDE1&#39;,
                 &#39;J_het&#39;: 1e3 / si.cm**2 / si.s,
             },
             &#39;IsoWR&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=1000 / volume, m_mode=6.4e-3 * si.cm ** 2, s_geom=9.5),
+                &#39;ISA&#39;: Lognormal(norm_factor=1000 / volume,
+                                 m_mode=6.4e-3 * si.cm ** 2,
+                                 s_geom=9.5),
                 &#39;color&#39;: &#39;#FED2B0&#39;,
                 &#39;J_het&#39;: 6e-4 / si.cm**2 / si.s,
             },
             &#39;IsoBR&#39;: {
-                &#39;ISA&#39;: TopHat(norm_factor=63 / volume, endpoints=(9.4e-8 * si.cm ** 2, 7.5e-7 * si.cm ** 2)),
+                &#39;ISA&#39;: TopHat(norm_factor=63 / volume,
+                              endpoints=(9.4e-8 * si.cm ** 2, 7.5e-7 * si.cm ** 2)),
                 &#39;color&#39;: &#39;#FED2B0&#39;,
                 &#39;J_het&#39;: 2.8e3 / si.cm**2 / si.s,
             },
             &#39;IsoHE1&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=40 / volume, m_mode=1.2 * si.cm ** 2, s_geom=2.2),
+                &#39;ISA&#39;: Lognormal(norm_factor=40 / volume,
+                                 m_mode=1.2 * si.cm ** 2,
+                                 s_geom=2.2),
                 &#39;color&#39;: &#39;#FED2B0&#39;,
                 &#39;J_het&#39;: 4.1e-3 / si.cm ** 2 / si.s,
             },
             &#39;IsoHE2&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=40 / volume, m_mode=2e-2 * si.cm ** 2, s_geom=8.5),
+                &#39;ISA&#39;: Lognormal(norm_factor=40 / volume,
+                                 m_mode=2e-2 * si.cm ** 2,
+                                 s_geom=8.5),
                 &#39;color&#39;: &#39;#FED2B0&#39;,
                 &#39;J_het&#39;: 2e-2 / si.cm ** 2 / si.s,
             },
             &#39;IsoDI1&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=45 / volume, m_mode=5.1e-1 * si.cm ** 2, s_geom=3.2),
+                &#39;ISA&#39;: Lognormal(norm_factor=45 / volume,
+                                 m_mode=5.1e-1 * si.cm ** 2,
+                                 s_geom=3.2),
                 &#39;J_het&#39;: 1.8e-2 / si.cm ** 2 / si.s,
                 &#39;color&#39;: &#39;#9ACFA4&#39;
             },
             &#39;IsoDI2&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=45 / volume, m_mode=5.1e-2 * si.cm ** 2, s_geom=3.2),
+                &#39;ISA&#39;: Lognormal(norm_factor=45 / volume,
+                                 m_mode=5.1e-2 * si.cm ** 2,
+                                 s_geom=3.2),
                 &#39;J_het&#39;: 1 / si.cm ** 2 / si.s,
                 &#39;color&#39;: &#39;#FED2B0&#39;
             },
             &#39;IsoDI3&#39;: {
-                &#39;ISA&#39;: Lognormal(norm_factor=45 / volume, m_mode=5.1e-1 * si.cm ** 2, s_geom=3.2),
+                &#39;ISA&#39;: Lognormal(norm_factor=45 / volume,
+                                 m_mode=5.1e-1 * si.cm ** 2,
+                                 s_geom=3.2),
                 &#39;J_het&#39;: 1 / si.cm ** 2 / si.s,
                 &#39;color&#39;: &#39;#95BDE1&#39;
             }
@@ -198,7 +242,8 @@ class Table1(Table):
 </summary>
 <pre><code class="python">def label(self, key):
     if isinstance(self[key][&#39;ISA&#39;], Lognormal):
-        return f&#34;σ=ln({int(self[key][&#39;ISA&#39;].s_geom)}),N={int(self[key][&#39;ISA&#39;].norm_factor * self.volume)}&#34;
+        return f&#34;σ=ln({int(self[key][&#39;ISA&#39;].s_geom)}),&#34; \
+               f&#34;N={int(self[key][&#39;ISA&#39;].norm_factor * self.volume)}&#34;
     return key</code></pre>
 </details>
 </dd>

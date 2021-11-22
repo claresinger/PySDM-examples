@@ -89,7 +89,7 @@ class Simulation:
 
     def save(self, output):
         cell_id = 0
-        output[&#34;r&#34;].append(self.particulator.products[&#39;radius_m1&#39;].get(unit=const.si.metre)[cell_id])
+        output[&#34;r&#34;].append(self.particulator.products[&#39;radius_m1&#39;].get(unit=const.si.m)[cell_id])
         output[&#34;dt_cond_min&#34;].append(self.particulator.products[&#39;dt_cond_min&#39;].get()[cell_id])
         output[&#34;z&#34;].append(self.particulator.products[&#34;z&#34;].get()[cell_id])
         output[&#34;S&#34;].append(self.particulator.products[&#34;RH_env&#34;].get()[cell_id]/100 - 1)
@@ -121,7 +121,7 @@ class Simulation:
 <dl>
 <dt id="PySDM_examples.Arabas_and_Shima_2017.simulation.Simulation"><code class="flex name class">
 <span>class <span class="ident">Simulation</span></span>
-<span>(</span><span>settings, backend=PySDM.backends.numba.numba.Numba)</span>
+<span>(</span><span>settings, backend=PySDM.backends.numba.Numba)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -181,7 +181,7 @@ class Simulation:
 
     def save(self, output):
         cell_id = 0
-        output[&#34;r&#34;].append(self.particulator.products[&#39;radius_m1&#39;].get(unit=const.si.metre)[cell_id])
+        output[&#34;r&#34;].append(self.particulator.products[&#39;radius_m1&#39;].get(unit=const.si.m)[cell_id])
         output[&#34;dt_cond_min&#34;].append(self.particulator.products[&#39;dt_cond_min&#39;].get()[cell_id])
         output[&#34;z&#34;].append(self.particulator.products[&#34;z&#34;].get()[cell_id])
         output[&#34;S&#34;].append(self.particulator.products[&#34;RH_env&#34;].get()[cell_id]/100 - 1)
@@ -235,7 +235,7 @@ class Simulation:
 </summary>
 <pre><code class="python">def save(self, output):
     cell_id = 0
-    output[&#34;r&#34;].append(self.particulator.products[&#39;radius_m1&#39;].get(unit=const.si.metre)[cell_id])
+    output[&#34;r&#34;].append(self.particulator.products[&#39;radius_m1&#39;].get(unit=const.si.m)[cell_id])
     output[&#34;dt_cond_min&#34;].append(self.particulator.products[&#39;dt_cond_min&#39;].get()[cell_id])
     output[&#34;z&#34;].append(self.particulator.products[&#34;z&#34;].get()[cell_id])
     output[&#34;S&#34;].append(self.particulator.products[&#34;RH_env&#34;].get()[cell_id]/100 - 1)

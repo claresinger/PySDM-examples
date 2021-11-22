@@ -26,14 +26,16 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import numpy as np
+<pre><code class="python">import inspect
 from threading import Thread
+import numpy as np
 from PyMPDATA import Options, Stepper, VectorField, ScalarField, Solver
 from PyMPDATA.boundary_conditions import Periodic
-from PySDM.backends.numba import conf
-from PySDM_examples.Szumowski_et_al_1998.fields import nondivergent_vector_field_2d, x_vec_coord, z_vec_coord
-from PySDM.state.arakawa_c import make_rhod
-import inspect
+from PySDM.backends.impl_numba import conf
+from PySDM.impl.arakawa_c import make_rhod
+from PySDM_examples.Szumowski_et_al_1998.fields import (
+    nondivergent_vector_field_2d, x_vec_coord, z_vec_coord
+)
 
 
 class MPDATA_2D:
@@ -63,7 +65,12 @@ class MPDATA_2D:
         if not conf.JIT_FLAGS[&#39;parallel&#39;]:
             disable_threads_if_needed[&#39;n_threads&#39;] = 1
 
-        stepper = Stepper(options=options, grid=self.grid, non_unit_g_factor=True, **disable_threads_if_needed)
+        stepper = Stepper(
+            options=options,
+            grid=self.grid,
+            non_unit_g_factor=True,
+            **disable_threads_if_needed
+        )
 
         advector_impl = VectorField(
             (
@@ -86,7 +93,9 @@ class MPDATA_2D:
         for k, v in advectees.items():
             advectee_impl = ScalarField(np.asarray(v, dtype=options.dtype), halo=options.n_halo,
                                    boundary_conditions=(Periodic(), Periodic()))
-            self.mpdatas[k] = Solver(stepper=stepper, advectee=advectee_impl, advector=advector_impl, g_factor=g_factor_impl)
+            self.mpdatas[k] = Solver(
+                stepper=stepper, advectee=advectee_impl, advector=advector_impl,
+                g_factor=g_factor_impl)
 
     def __getitem__(self, item):
         return self.mpdatas[item]
@@ -105,7 +114,8 @@ class MPDATA_2D:
 
     def refresh_advector(self):
         for mpdata in self.mpdatas.values():
-            advector = nondivergent_vector_field_2d(self.grid, self.size, self.dt, self.stream_function, t=self.t)
+            advector = nondivergent_vector_field_2d(
+                self.grid, self.size, self.dt, self.stream_function, t=self.t)
             for d in range(len(self.grid)):
                 np.testing.assert_array_less(np.abs(advector[d]), 1)
                 mpdata.advector.get_component(d)[:] = advector[d]
@@ -173,7 +183,12 @@ class MPDATA_2D:
         if not conf.JIT_FLAGS[&#39;parallel&#39;]:
             disable_threads_if_needed[&#39;n_threads&#39;] = 1
 
-        stepper = Stepper(options=options, grid=self.grid, non_unit_g_factor=True, **disable_threads_if_needed)
+        stepper = Stepper(
+            options=options,
+            grid=self.grid,
+            non_unit_g_factor=True,
+            **disable_threads_if_needed
+        )
 
         advector_impl = VectorField(
             (
@@ -196,7 +211,9 @@ class MPDATA_2D:
         for k, v in advectees.items():
             advectee_impl = ScalarField(np.asarray(v, dtype=options.dtype), halo=options.n_halo,
                                    boundary_conditions=(Periodic(), Periodic()))
-            self.mpdatas[k] = Solver(stepper=stepper, advectee=advectee_impl, advector=advector_impl, g_factor=g_factor_impl)
+            self.mpdatas[k] = Solver(
+                stepper=stepper, advectee=advectee_impl, advector=advector_impl,
+                g_factor=g_factor_impl)
 
     def __getitem__(self, item):
         return self.mpdatas[item]
@@ -215,7 +232,8 @@ class MPDATA_2D:
 
     def refresh_advector(self):
         for mpdata in self.mpdatas.values():
-            advector = nondivergent_vector_field_2d(self.grid, self.size, self.dt, self.stream_function, t=self.t)
+            advector = nondivergent_vector_field_2d(
+                self.grid, self.size, self.dt, self.stream_function, t=self.t)
             for d in range(len(self.grid)):
                 np.testing.assert_array_less(np.abs(advector[d]), 1)
                 mpdata.advector.get_component(d)[:] = advector[d]
@@ -249,7 +267,8 @@ class MPDATA_2D:
 </summary>
 <pre><code class="python">def refresh_advector(self):
     for mpdata in self.mpdatas.values():
-        advector = nondivergent_vector_field_2d(self.grid, self.size, self.dt, self.stream_function, t=self.t)
+        advector = nondivergent_vector_field_2d(
+            self.grid, self.size, self.dt, self.stream_function, t=self.t)
         for d in range(len(self.grid)):
             np.testing.assert_array_less(np.abs(advector[d]), 1)
             mpdata.advector.get_component(d)[:] = advector[d]

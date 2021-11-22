@@ -80,12 +80,12 @@ class Settings:
         ).sample(n_sd)
 
         self.ENVIRONMENT_MOLE_FRACTIONS = {
-            &#34;SO2&#34;: 0.2 * const.ppb,
-            &#34;O3&#34;: 50 * const.ppb,
-            &#34;H2O2&#34;: 0.5 * const.ppb,
-            &#34;CO2&#34;: 360 * const.ppm,
-            &#34;HNO3&#34;: 0.1 * const.ppb,
-            &#34;NH3&#34;: 0.1 * const.ppb,
+            &#34;SO2&#34;: 0.2 * const.PPB,
+            &#34;O3&#34;: 50 * const.PPB,
+            &#34;H2O2&#34;: 0.5 * const.PPB,
+            &#34;CO2&#34;: 360 * const.PPM,
+            &#34;HNO3&#34;: 0.1 * const.PPB,
+            &#34;NH3&#34;: 0.1 * const.PPB,
         }
 
         self.starting_amounts = {
@@ -93,10 +93,15 @@ class Settings:
                 self.formulae.trivia.volume(self.r_dry) * self.DRY_RHO / self.dry_molar_mass
                 if k in (&#34;N_mIII&#34;, &#34;S_VI&#34;)
                 else np.zeros(self.n_sd)
-            for k in AQUEOUS_COMPOUNDS.keys()
+            for k in AQUEOUS_COMPOUNDS
         }
-        
-        self.dry_radius_bins_edges = np.logspace(np.log10(.01 * si.um), np.log10(1 * si.um), 51, endpoint=True) / 2
+
+        self.dry_radius_bins_edges = np.logspace(
+            np.log10(.01 * si.um),
+            np.log10(1 * si.um),
+            51,
+            endpoint=True
+        ) / 2
 
     @property
     def nt(self):
@@ -174,12 +179,12 @@ class Settings:
         ).sample(n_sd)
 
         self.ENVIRONMENT_MOLE_FRACTIONS = {
-            &#34;SO2&#34;: 0.2 * const.ppb,
-            &#34;O3&#34;: 50 * const.ppb,
-            &#34;H2O2&#34;: 0.5 * const.ppb,
-            &#34;CO2&#34;: 360 * const.ppm,
-            &#34;HNO3&#34;: 0.1 * const.ppb,
-            &#34;NH3&#34;: 0.1 * const.ppb,
+            &#34;SO2&#34;: 0.2 * const.PPB,
+            &#34;O3&#34;: 50 * const.PPB,
+            &#34;H2O2&#34;: 0.5 * const.PPB,
+            &#34;CO2&#34;: 360 * const.PPM,
+            &#34;HNO3&#34;: 0.1 * const.PPB,
+            &#34;NH3&#34;: 0.1 * const.PPB,
         }
 
         self.starting_amounts = {
@@ -187,10 +192,15 @@ class Settings:
                 self.formulae.trivia.volume(self.r_dry) * self.DRY_RHO / self.dry_molar_mass
                 if k in (&#34;N_mIII&#34;, &#34;S_VI&#34;)
                 else np.zeros(self.n_sd)
-            for k in AQUEOUS_COMPOUNDS.keys()
+            for k in AQUEOUS_COMPOUNDS
         }
-        
-        self.dry_radius_bins_edges = np.logspace(np.log10(.01 * si.um), np.log10(1 * si.um), 51, endpoint=True) / 2
+
+        self.dry_radius_bins_edges = np.logspace(
+            np.log10(.01 * si.um),
+            np.log10(1 * si.um),
+            51,
+            endpoint=True
+        ) / 2
 
     @property
     def nt(self):

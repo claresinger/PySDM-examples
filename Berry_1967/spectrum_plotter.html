@@ -41,7 +41,8 @@ class SpectrumPlotter(SuperSpectrumPlotter):
         self.color = None
         self.smooth = True
 
-    def ticks(self):
+    @staticmethod
+    def ticks():
         xticks = [4, 6.25, 12.5, 25, 50, 100, 200]
         pyplot.xticks(xticks, xticks)
         pyplot.yticks([0.5 * i for i in range(5)], [0, None, 1, None, 2])
@@ -85,7 +86,8 @@ class SpectrumPlotter(SuperSpectrumPlotter):
         self.color = None
         self.smooth = True
 
-    def ticks(self):
+    @staticmethod
+    def ticks():
         xticks = [4, 6.25, 12.5, 25, 50, 100, 200]
         pyplot.xticks(xticks, xticks)
         pyplot.yticks([0.5 * i for i in range(5)], [0, None, 1, None, 2])
@@ -103,6 +105,25 @@ class SpectrumPlotter(SuperSpectrumPlotter):
 <ul class="hlist">
 <li><a title="PySDM_examples.Shima_et_al_2009.spectrum_plotter.SpectrumPlotter" href="../Shima_et_al_2009/spectrum_plotter.html#PySDM_examples.Shima_et_al_2009.spectrum_plotter.SpectrumPlotter">SpectrumPlotter</a></li>
 </ul>
+<h3>Static methods</h3>
+<dl>
+<dt id="PySDM_examples.Berry_1967.spectrum_plotter.SpectrumPlotter.ticks"><code class="name flex">
+<span>def <span class="ident">ticks</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def ticks():
+    xticks = [4, 6.25, 12.5, 25, 50, 100, 200]
+    pyplot.xticks(xticks, xticks)
+    pyplot.yticks([0.5 * i for i in range(5)], [0, None, 1, None, 2])</code></pre>
+</details>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="PySDM_examples.Berry_1967.spectrum_plotter.SpectrumPlotter.plot"><code class="name flex">
@@ -132,21 +153,6 @@ class SpectrumPlotter(SuperSpectrumPlotter):
     self.finish()
     self.ticks()
     show_plot()</code></pre>
-</details>
-</dd>
-<dt id="PySDM_examples.Berry_1967.spectrum_plotter.SpectrumPlotter.ticks"><code class="name flex">
-<span>def <span class="ident">ticks</span></span>(<span>self)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def ticks(self):
-    xticks = [4, 6.25, 12.5, 25, 50, 100, 200]
-    pyplot.xticks(xticks, xticks)
-    pyplot.yticks([0.5 * i for i in range(5)], [0, None, 1, None, 2])</code></pre>
 </details>
 </dd>
 </dl>

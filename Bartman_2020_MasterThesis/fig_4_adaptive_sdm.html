@@ -27,7 +27,6 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">import os
-
 from matplotlib import pyplot as plt
 from PySDM_examples.Shima_et_al_2009.settings import Settings
 from PySDM_examples.Shima_et_al_2009.example import run
@@ -72,9 +71,11 @@ def main(plot: bool = True, save: str = None):
             for step, vals in mean_output.items():
                 plotter.plot(vals, step * settings.dt)
 
-            plotter.ylabel = r&#39;$\bf{dt: &#39; + str(dt) + &#39;}$\ndm/dlnr [g/m^3/(unit dr/r)]&#39; if j == 0 else None
+            plotter.ylabel = r&#39;$\bf{dt: &#39; + str(dt) + &#39;}$\ndm/dlnr [g/m^3/(unit dr/r)]&#39; \
+                if j == 0 else None
             plotter.xlabel = &#39;particle radius [µm]\n&#39; \
-                             + r&#39;$\bf{n_{sd}: 2^{&#39; + str(n_sd) + &#39;}}$&#39; if i == len(dts) - 1 else None
+                             + r&#39;$\bf{n_{sd}: 2^{&#39; + str(n_sd) + &#39;}}$&#39;\
+                if i == len(dts) - 1 else None
             plotter.title = f&#39;norm. time: {norm_time:.2f}; &#39; + plotter.title
             plotter.finished = False
             plotter.finish()
@@ -145,9 +146,11 @@ if __name__ == &#39;__main__&#39;:
             for step, vals in mean_output.items():
                 plotter.plot(vals, step * settings.dt)
 
-            plotter.ylabel = r&#39;$\bf{dt: &#39; + str(dt) + &#39;}$\ndm/dlnr [g/m^3/(unit dr/r)]&#39; if j == 0 else None
+            plotter.ylabel = r&#39;$\bf{dt: &#39; + str(dt) + &#39;}$\ndm/dlnr [g/m^3/(unit dr/r)]&#39; \
+                if j == 0 else None
             plotter.xlabel = &#39;particle radius [µm]\n&#39; \
-                             + r&#39;$\bf{n_{sd}: 2^{&#39; + str(n_sd) + &#39;}}$&#39; if i == len(dts) - 1 else None
+                             + r&#39;$\bf{n_{sd}: 2^{&#39; + str(n_sd) + &#39;}}$&#39;\
+                if i == len(dts) - 1 else None
             plotter.title = f&#39;norm. time: {norm_time:.2f}; &#39; + plotter.title
             plotter.finished = False
             plotter.finish()

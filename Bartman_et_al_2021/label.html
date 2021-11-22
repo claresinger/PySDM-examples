@@ -28,9 +28,9 @@
 </summary>
 <pre><code class="python">def label(settings):
     lbl = str({k.replace(&#39;condensation_&#39;, &#39;&#39;):
-               &#34;{:.1e}&#34;.format(v) if type(v) is float else
-               str(v).zfill(2) if type(v) is int else
-               v for k,v in settings.items()})
+               f&#34;{v:.1e}&#34; if isinstance(v, float) else
+               str(v).zfill(2) if isinstance(v, int) else
+               v for k, v in settings.items()})
     return lbl\
         .replace(&#39;{&#39;, &#39;&#39;)\
         .replace(&#39;}&#39;, &#39;&#39;)\
@@ -59,9 +59,9 @@
 </summary>
 <pre><code class="python">def label(settings):
     lbl = str({k.replace(&#39;condensation_&#39;, &#39;&#39;):
-               &#34;{:.1e}&#34;.format(v) if type(v) is float else
-               str(v).zfill(2) if type(v) is int else
-               v for k,v in settings.items()})
+               f&#34;{v:.1e}&#34; if isinstance(v, float) else
+               str(v).zfill(2) if isinstance(v, int) else
+               v for k, v in settings.items()})
     return lbl\
         .replace(&#39;{&#39;, &#39;&#39;)\
         .replace(&#39;}&#39;, &#39;&#39;)\

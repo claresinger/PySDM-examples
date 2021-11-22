@@ -27,32 +27,29 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">import os
-
 import numpy as np
-
 from PySDM.backends import CPU
 from PySDM.builder import Builder
 from PySDM.environments import Box
 from PySDM.dynamics import Coalescence
 from PySDM.initialisation.spectral_sampling import ConstantMultiplicity
-
+from PySDM.products import ParticlesVolumeSpectrum, WallTime
 from PySDM_examples.Shima_et_al_2009.settings import Settings
 from PySDM_examples.Shima_et_al_2009.spectrum_plotter import SpectrumPlotter
-from PySDM.products.state import ParticlesVolumeSpectrum
-from PySDM.products.stats.timers import WallTime
 
 
 def run(settings, backend=CPU, observers=()):
     builder = Builder(n_sd=settings.n_sd, backend=backend(formulae=settings.formulae))
     builder.set_environment(Box(dv=settings.dv, dt=settings.dt))
     attributes = {}
-    attributes[&#39;volume&#39;], attributes[&#39;n&#39;] = ConstantMultiplicity(settings.spectrum).sample(settings.n_sd)
+    sampling = ConstantMultiplicity(settings.spectrum)
+    attributes[&#39;volume&#39;], attributes[&#39;n&#39;] = sampling.sample(settings.n_sd)
     coalescence = Coalescence(settings.kernel, adaptive=settings.adaptive)
     builder.add_dynamic(coalescence)
     products = [ParticlesVolumeSpectrum(settings.radius_bins_edges), WallTime()]
     particulator = builder.build(attributes, products)
-    if hasattr(settings, &#39;u_term&#39;) and &#39;terminal velocity&#39; in particulator.particles.attributes:
-        particulator.particles.attributes[&#39;terminal velocity&#39;].approximation = settings.u_term(particulator)
+    if hasattr(settings, &#39;u_term&#39;) and &#39;terminal velocity&#39; in particulator.attributes:
+        particulator.attributes[&#39;terminal velocity&#39;].approximation = settings.u_term(particulator)
 
     for observer in observers:
         particulator.observers.append(observer)
@@ -80,8 +77,8 @@ def main(plot: bool, save: str):
         plotter = SpectrumPlotter(settings)
         plotter.smooth = True
         for step, vals in states.items():
-            error = plotter.plot(vals, step * settings.dt)
-            #assert error &lt; 200  # TODO #327
+            _ = plotter.plot(vals, step * settings.dt)
+            #assert _ &lt; 200  # TODO #327
         if save is not None:
             n_sd = settings.n_sd
             plotter.save(save + &#34;/&#34; +
@@ -123,8 +120,8 @@ if __name__ == &#39;__main__&#39;:
         plotter = SpectrumPlotter(settings)
         plotter.smooth = True
         for step, vals in states.items():
-            error = plotter.plot(vals, step * settings.dt)
-            #assert error &lt; 200  # TODO #327
+            _ = plotter.plot(vals, step * settings.dt)
+            #assert _ &lt; 200  # TODO #327
         if save is not None:
             n_sd = settings.n_sd
             plotter.save(save + &#34;/&#34; +
@@ -135,7 +132,7 @@ if __name__ == &#39;__main__&#39;:
 </details>
 </dd>
 <dt id="PySDM_examples.Shima_et_al_2009.example.run"><code class="name flex">
-<span>def <span class="ident">run</span></span>(<span>settings, backend=PySDM.backends.numba.numba.Numba, observers=())</span>
+<span>def <span class="ident">run</span></span>(<span>settings, backend=PySDM.backends.numba.Numba, observers=())</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -147,13 +144,14 @@ if __name__ == &#39;__main__&#39;:
     builder = Builder(n_sd=settings.n_sd, backend=backend(formulae=settings.formulae))
     builder.set_environment(Box(dv=settings.dv, dt=settings.dt))
     attributes = {}
-    attributes[&#39;volume&#39;], attributes[&#39;n&#39;] = ConstantMultiplicity(settings.spectrum).sample(settings.n_sd)
+    sampling = ConstantMultiplicity(settings.spectrum)
+    attributes[&#39;volume&#39;], attributes[&#39;n&#39;] = sampling.sample(settings.n_sd)
     coalescence = Coalescence(settings.kernel, adaptive=settings.adaptive)
     builder.add_dynamic(coalescence)
     products = [ParticlesVolumeSpectrum(settings.radius_bins_edges), WallTime()]
     particulator = builder.build(attributes, products)
-    if hasattr(settings, &#39;u_term&#39;) and &#39;terminal velocity&#39; in particulator.particles.attributes:
-        particulator.particles.attributes[&#39;terminal velocity&#39;].approximation = settings.u_term(particulator)
+    if hasattr(settings, &#39;u_term&#39;) and &#39;terminal velocity&#39; in particulator.attributes:
+        particulator.attributes[&#39;terminal velocity&#39;].approximation = settings.u_term(particulator)
 
     for observer in observers:
         particulator.observers.append(observer)
