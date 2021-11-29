@@ -81,7 +81,7 @@ def main():
             simulation = Simulation(settings, storage, None, backend)
             simulation.reinit(products=[WallTime()])
             simulation.run()
-            times[key].append(storage.load(&#39;wall_time&#39;)[-1])
+            times[key].append(storage.load(&#39;wall time&#39;)[-1])
 
     for parallelization, t in times.items():
         plt.plot(n_sd, t, label=parallelization)
@@ -143,7 +143,7 @@ if __name__ == &#39;__main__&#39;:
             simulation = Simulation(settings, storage, None, backend)
             simulation.reinit(products=[WallTime()])
             simulation.run()
-            times[key].append(storage.load(&#39;wall_time&#39;)[-1])
+            times[key].append(storage.load(&#39;wall time&#39;)[-1])
 
     for parallelization, t in times.items():
         plt.plot(n_sd, t, label=parallelization)

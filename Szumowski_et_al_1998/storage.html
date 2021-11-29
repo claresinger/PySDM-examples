@@ -45,6 +45,7 @@ class Storage:
             self.dir_path = Path(path).absolute()
         self.dtype = dtype
         self.grid = None
+        self._data_range = None
 
     def __del__(self):
         if hasattr(self, &#39;temp_dir&#39;):
@@ -52,6 +53,7 @@ class Storage:
 
     def init(self, settings):
         self.grid = settings.grid
+        self._data_range = {}
 
     def _filepath(self, name: str, step: int = None):
         if step is None:
@@ -69,6 +71,16 @@ class Storage:
             np.save(self._filepath(name, step), data.astype(self.dtype))
         else:
             raise NotImplementedError()
+
+        if name not in self._data_range:
+            self._data_range[name] = (np.inf, -np.inf)
+        self._data_range[name] = (
+            min(np.amin(data), self._data_range[name][0]),
+            max(np.amax(data), self._data_range[name][1])
+        )
+
+    def data_range(self, name):
+        return self._data_range[name]
 
     def load(self, name: str, step: int = None) -&gt; np.ndarray:
         try:
@@ -110,6 +122,7 @@ class Storage:
             self.dir_path = Path(path).absolute()
         self.dtype = dtype
         self.grid = None
+        self._data_range = None
 
     def __del__(self):
         if hasattr(self, &#39;temp_dir&#39;):
@@ -117,6 +130,7 @@ class Storage:
 
     def init(self, settings):
         self.grid = settings.grid
+        self._data_range = {}
 
     def _filepath(self, name: str, step: int = None):
         if step is None:
@@ -135,6 +149,16 @@ class Storage:
         else:
             raise NotImplementedError()
 
+        if name not in self._data_range:
+            self._data_range[name] = (np.inf, -np.inf)
+        self._data_range[name] = (
+            min(np.amin(data), self._data_range[name][0]),
+            max(np.amax(data), self._data_range[name][1])
+        )
+
+    def data_range(self, name):
+        return self._data_range[name]
+
     def load(self, name: str, step: int = None) -&gt; np.ndarray:
         try:
             data = np.load(self._filepath(name, step))
@@ -151,6 +175,19 @@ class Storage:
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="PySDM_examples.Szumowski_et_al_1998.storage.Storage.data_range"><code class="name flex">
+<span>def <span class="ident">data_range</span></span>(<span>self, name)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def data_range(self, name):
+    return self._data_range[name]</code></pre>
+</details>
+</dd>
 <dt id="PySDM_examples.Szumowski_et_al_1998.storage.Storage.init"><code class="name flex">
 <span>def <span class="ident">init</span></span>(<span>self, settings)</span>
 </code></dt>
@@ -161,7 +198,8 @@ class Storage:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def init(self, settings):
-    self.grid = settings.grid</code></pre>
+    self.grid = settings.grid
+    self._data_range = {}</code></pre>
 </details>
 </dd>
 <dt id="PySDM_examples.Szumowski_et_al_1998.storage.Storage.load"><code class="name flex">
@@ -197,7 +235,14 @@ class Storage:
     elif data.shape[0:2] == self.grid:
         np.save(self._filepath(name, step), data.astype(self.dtype))
     else:
-        raise NotImplementedError()</code></pre>
+        raise NotImplementedError()
+
+    if name not in self._data_range:
+        self._data_range[name] = (np.inf, -np.inf)
+    self._data_range[name] = (
+        min(np.amin(data), self._data_range[name][0]),
+        max(np.amax(data), self._data_range[name][1])
+    )</code></pre>
 </details>
 </dd>
 </dl>
@@ -222,6 +267,7 @@ class Storage:
 <h4><code><a title="PySDM_examples.Szumowski_et_al_1998.storage.Storage" href="#PySDM_examples.Szumowski_et_al_1998.storage.Storage">Storage</a></code></h4>
 <ul class="">
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.storage.Storage.Exception" href="#PySDM_examples.Szumowski_et_al_1998.storage.Storage.Exception">Exception</a></code></li>
+<li><code><a title="PySDM_examples.Szumowski_et_al_1998.storage.Storage.data_range" href="#PySDM_examples.Szumowski_et_al_1998.storage.Storage.data_range">data_range</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.storage.Storage.init" href="#PySDM_examples.Szumowski_et_al_1998.storage.Storage.init">init</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.storage.Storage.load" href="#PySDM_examples.Szumowski_et_al_1998.storage.Storage.load">load</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.storage.Storage.save" href="#PySDM_examples.Szumowski_et_al_1998.storage.Storage.save">save</a></code></li>

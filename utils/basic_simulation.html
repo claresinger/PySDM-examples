@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>PySDM_examples.Yang_et_al_2018.settings API documentation</title>
+<title>PySDM_examples.utils.basic_simulation API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,68 +19,34 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>PySDM_examples.Yang_et_al_2018.settings</code></h1>
+<h1 class="title">Module <code>PySDM_examples.utils.basic_simulation</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from PySDM.backends import CPU
-from PySDM.physics import si
-from PySDM.initialisation.sampling import spectral_sampling
-from PySDM.initialisation import spectra
-from PySDM.dynamics import condensation
-import numpy as np
-from pystrict import strict
+<pre><code class="python">import numpy as np
 
 
-@strict
-class Settings:
+class BasicSimulation:
+    def __init__(self, particulator):
+        self.particulator = particulator
 
-    def __init__(self,
-                 n_sd: int = 100,
-                 dt_output: float = 1 * si.second,
-                 dt_max: float = 1 * si.second
-     ):
-        self.total_time = 3 * si.hours
-        self.mass_of_dry_air = 1000 * si.kilogram  # TODO #335 doubled with jupyter si unit
+    def _save(self, output):
+        for k, v in self.particulator.products.items():
+            value = v.get()
+            if isinstance(value, np.ndarray) and value.shape[0] == 1:
+                value = value[0]
+            output[k].append(value)
 
-        self.n_steps = int(self.total_time / (5 * si.second))  # TODO #334 rename to n_output
-        self.n_sd = n_sd
-        self.r_dry, self.n = spectral_sampling.Logarithmic(
-            spectrum=spectra.Lognormal(
-                norm_factor=1000 / si.milligram * self.mass_of_dry_air,
-                m_mode=50 * si.nanometre,
-                s_geom=1.4
-            ),
-            size_range=(10.633 * si.nanometre, 513.06 * si.nanometre)
-        ).sample(n_sd)
-        self.dt_max = dt_max
-
-        self.dt_output = dt_output
-        self.r_bins_edges = np.linspace(0 * si.micrometre, 20 * si.micrometre, 101, endpoint=True)
-
-        self.backend = CPU
-        self.coord = &#39;VolumeLogarithm&#39;
-        self.adaptive = True
-        self.rtol_x = condensation.DEFAULTS.rtol_x
-        self.rtol_thd = condensation.DEFAULTS.rtol_thd
-        self.dt_cond_range = condensation.DEFAULTS.cond_range
-
-        self.T0 = 284.3 * si.kelvin
-        self.q0 = 7.6 * si.grams / si.kilogram
-        self.p0 = 938.5 * si.hectopascals
-        self.z0 = 600 * si.metres
-        self.kappa = 0.53  # Petters and S. M. Kreidenweis mean growth-factor derived
-
-        self.t0 = 1200 * si.second
-        self.f0 = 1 / 1000 * si.hertz
-
-    def w(self, t):
-        return .5 * (
-            np.where(t &lt; self.t0, 1, np.sign(-np.sin(2 * np.pi * self.f0 * (t - self.t0))))
-        ) * si.metre / si.second</code></pre>
+    def _run(self, nt, steps_per_output_interval):
+        output = {k: [] for k in self.particulator.products}
+        self._save(output)
+        for _ in range(0, nt+1, steps_per_output_interval):
+            self.particulator.run(steps=steps_per_output_interval)
+            self._save(output)
+        return output</code></pre>
 </details>
 </section>
 <section>
@@ -92,9 +58,9 @@ class Settings:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="PySDM_examples.Yang_et_al_2018.settings.Settings"><code class="flex name class">
-<span>class <span class="ident">Settings</span></span>
-<span>(</span><span>n_sd: int = 100, dt_output: float = 1.0, dt_max: float = 1.0)</span>
+<dt id="PySDM_examples.utils.basic_simulation.BasicSimulation"><code class="flex name class">
+<span>class <span class="ident">BasicSimulation</span></span>
+<span>(</span><span>particulator)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -102,71 +68,29 @@ class Settings:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@strict
-class Settings:
+<pre><code class="python">class BasicSimulation:
+    def __init__(self, particulator):
+        self.particulator = particulator
 
-    def __init__(self,
-                 n_sd: int = 100,
-                 dt_output: float = 1 * si.second,
-                 dt_max: float = 1 * si.second
-     ):
-        self.total_time = 3 * si.hours
-        self.mass_of_dry_air = 1000 * si.kilogram  # TODO #335 doubled with jupyter si unit
+    def _save(self, output):
+        for k, v in self.particulator.products.items():
+            value = v.get()
+            if isinstance(value, np.ndarray) and value.shape[0] == 1:
+                value = value[0]
+            output[k].append(value)
 
-        self.n_steps = int(self.total_time / (5 * si.second))  # TODO #334 rename to n_output
-        self.n_sd = n_sd
-        self.r_dry, self.n = spectral_sampling.Logarithmic(
-            spectrum=spectra.Lognormal(
-                norm_factor=1000 / si.milligram * self.mass_of_dry_air,
-                m_mode=50 * si.nanometre,
-                s_geom=1.4
-            ),
-            size_range=(10.633 * si.nanometre, 513.06 * si.nanometre)
-        ).sample(n_sd)
-        self.dt_max = dt_max
-
-        self.dt_output = dt_output
-        self.r_bins_edges = np.linspace(0 * si.micrometre, 20 * si.micrometre, 101, endpoint=True)
-
-        self.backend = CPU
-        self.coord = &#39;VolumeLogarithm&#39;
-        self.adaptive = True
-        self.rtol_x = condensation.DEFAULTS.rtol_x
-        self.rtol_thd = condensation.DEFAULTS.rtol_thd
-        self.dt_cond_range = condensation.DEFAULTS.cond_range
-
-        self.T0 = 284.3 * si.kelvin
-        self.q0 = 7.6 * si.grams / si.kilogram
-        self.p0 = 938.5 * si.hectopascals
-        self.z0 = 600 * si.metres
-        self.kappa = 0.53  # Petters and S. M. Kreidenweis mean growth-factor derived
-
-        self.t0 = 1200 * si.second
-        self.f0 = 1 / 1000 * si.hertz
-
-    def w(self, t):
-        return .5 * (
-            np.where(t &lt; self.t0, 1, np.sign(-np.sin(2 * np.pi * self.f0 * (t - self.t0))))
-        ) * si.metre / si.second</code></pre>
+    def _run(self, nt, steps_per_output_interval):
+        output = {k: [] for k in self.particulator.products}
+        self._save(output)
+        for _ in range(0, nt+1, steps_per_output_interval):
+            self.particulator.run(steps=steps_per_output_interval)
+            self._save(output)
+        return output</code></pre>
 </details>
-<h3>Methods</h3>
-<dl>
-<dt id="PySDM_examples.Yang_et_al_2018.settings.Settings.w"><code class="name flex">
-<span>def <span class="ident">w</span></span>(<span>self, t)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def w(self, t):
-    return .5 * (
-        np.where(t &lt; self.t0, 1, np.sign(-np.sin(2 * np.pi * self.f0 * (t - self.t0))))
-    ) * si.metre / si.second</code></pre>
-</details>
-</dd>
-</dl>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="PySDM_examples.Kreidenweis_et_al_2003.simulation.Simulation" href="../Kreidenweis_et_al_2003/simulation.html#PySDM_examples.Kreidenweis_et_al_2003.simulation.Simulation">Simulation</a></li>
+</ul>
 </dd>
 </dl>
 </section>
@@ -179,16 +103,13 @@ class Settings:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="PySDM_examples.Yang_et_al_2018" href="index.html">PySDM_examples.Yang_et_al_2018</a></code></li>
+<li><code><a title="PySDM_examples.utils" href="index.html">PySDM_examples.utils</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="PySDM_examples.Yang_et_al_2018.settings.Settings" href="#PySDM_examples.Yang_et_al_2018.settings.Settings">Settings</a></code></h4>
-<ul class="">
-<li><code><a title="PySDM_examples.Yang_et_al_2018.settings.Settings.w" href="#PySDM_examples.Yang_et_al_2018.settings.Settings.w">w</a></code></li>
-</ul>
+<h4><code><a title="PySDM_examples.utils.basic_simulation.BasicSimulation" href="#PySDM_examples.utils.basic_simulation.BasicSimulation">BasicSimulation</a></code></h4>
 </li>
 </ul>
 </li>

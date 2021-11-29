@@ -28,7 +28,8 @@
 </summary>
 <pre><code class="python">import inspect
 import numpy as np
-from PySDM import physics
+from PySDM import Formulae, physics
+from PySDM import formulae
 from PySDM_examples.utils.widgets import IntSlider, FloatSlider, VBox, Checkbox, Accordion, Dropdown
 
 
@@ -87,15 +88,15 @@ class GUISettings:
         self.ui_formulae_options = [
             Dropdown(
                 description=k,
-                options=physics.formulae._choices(getattr(physics, k)).keys(),
+                options=formulae._choices(getattr(physics, k)).keys(),
                 value=v.default
             )
-            for k, v in inspect.signature(physics.Formulae.__init__).parameters.items()
+            for k, v in inspect.signature(Formulae.__init__).parameters.items()
             if k not in (&#39;self&#39;, &#39;fastmath&#39;, &#39;seed&#39;)
         ]
         self.ui_formulae_options.append(
             Checkbox(
-                value=inspect.signature(physics.Formulae.__init__).parameters[&#39;fastmath&#39;].default,
+                value=inspect.signature(Formulae.__init__).parameters[&#39;fastmath&#39;].default,
                 description=&#39;fastmath&#39;
             )
         )
@@ -155,8 +156,8 @@ class GUISettings:
         return self.ui_output_options[&#39;interval&#39;].value
 
     @property
-    def formulae(self) -&gt; physics.Formulae:
-        return physics.Formulae(
+    def formulae(self) -&gt; Formulae:
+        return Formulae(
             **{widget.description: widget.value for widget in self.ui_formulae_options}
         )
 
@@ -332,15 +333,15 @@ class GUISettings:
         self.ui_formulae_options = [
             Dropdown(
                 description=k,
-                options=physics.formulae._choices(getattr(physics, k)).keys(),
+                options=formulae._choices(getattr(physics, k)).keys(),
                 value=v.default
             )
-            for k, v in inspect.signature(physics.Formulae.__init__).parameters.items()
+            for k, v in inspect.signature(Formulae.__init__).parameters.items()
             if k not in (&#39;self&#39;, &#39;fastmath&#39;, &#39;seed&#39;)
         ]
         self.ui_formulae_options.append(
             Checkbox(
-                value=inspect.signature(physics.Formulae.__init__).parameters[&#39;fastmath&#39;].default,
+                value=inspect.signature(Formulae.__init__).parameters[&#39;fastmath&#39;].default,
                 description=&#39;fastmath&#39;
             )
         )
@@ -400,8 +401,8 @@ class GUISettings:
         return self.ui_output_options[&#39;interval&#39;].value
 
     @property
-    def formulae(self) -&gt; physics.Formulae:
-        return physics.Formulae(
+    def formulae(self) -&gt; Formulae:
+        return Formulae(
             **{widget.description: widget.value for widget in self.ui_formulae_options}
         )
 
@@ -588,7 +589,7 @@ def dt(self):
     return self.ui_dt.value</code></pre>
 </details>
 </dd>
-<dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.formulae"><code class="name">var <span class="ident">formulae</span> : PySDM.physics.formulae.Formulae</code></dt>
+<dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.formulae"><code class="name">var <span class="ident">formulae</span> : PySDM.formulae.Formulae</code></dt>
 <dd>
 <div class="desc"></div>
 <details class="source">
@@ -596,8 +597,8 @@ def dt(self):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def formulae(self) -&gt; physics.Formulae:
-    return physics.Formulae(
+def formulae(self) -&gt; Formulae:
+    return Formulae(
         **{widget.description: widget.value for widget in self.ui_formulae_options}
     )</code></pre>
 </details>

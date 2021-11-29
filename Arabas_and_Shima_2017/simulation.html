@@ -32,7 +32,7 @@ from PySDM.builder import Builder
 from PySDM.dynamics import AmbientThermodynamics
 from PySDM.dynamics import Condensation
 from PySDM.environments import Parcel
-from PySDM.initialisation.r_wet_init import r_wet_init
+from PySDM.initialisation import equilibrate_wet_radii
 from PySDM.physics import constants as const
 import PySDM.products as PySDM_products
 
@@ -68,19 +68,20 @@ class Simulation:
         attributes[&#39;kappa times dry volume&#39;] = attributes[&#39;dry volume&#39;] * settings.kappa
         attributes[&#39;n&#39;] = np.array([settings.n_in_dv], dtype=np.int64)
         environment = builder.particulator.environment
-        r_wet = r_wet_init(r_dry, environment,
-                           kappa_times_dry_volume=attributes[&#39;kappa times dry volume&#39;])
+        r_wet = equilibrate_wet_radii(
+            r_dry, environment,
+            kappa_times_dry_volume=attributes[&#39;kappa times dry volume&#39;])
         attributes[&#39;volume&#39;] = settings.formulae.trivia.volume(radius=r_wet)
         products = [
-            PySDM_products.ParticleMeanRadius(),
-            PySDM_products.CondensationTimestepMin(),
-            PySDM_products.ParcelDisplacement(),
-            PySDM_products.RelativeHumidity(),
-            PySDM_products.Time(),
-            PySDM_products.ActivatingRate(),
-            PySDM_products.DeactivatingRate(),
-            PySDM_products.RipeningRate(),
-            PySDM_products.PeakSupersaturation()
+            PySDM_products.MeanRadius(name=&#39;radius_m1&#39;, unit=&#39;um&#39;),
+            PySDM_products.CondensationTimestepMin(name=&#39;dt_cond_min&#39;),
+            PySDM_products.ParcelDisplacement(name=&#39;z&#39;),
+            PySDM_products.AmbientRelativeHumidity(name=&#34;RH&#34;, unit=&#34;%&#34;),
+            PySDM_products.Time(name=&#39;t&#39;),
+            PySDM_products.ActivatingRate(unit=&#39;s^-1 mg^-1&#39;, name=&#39;activating_rate&#39;),
+            PySDM_products.DeactivatingRate(unit=&#39;s^-1 mg^-1&#39;, name=&#39;deactivating_rate&#39;),
+            PySDM_products.RipeningRate(unit=&#39;s^-1 mg^-1&#39;, name=&#39;ripening_rate&#39;),
+            PySDM_products.PeakSupersaturation(unit=&#39;%&#39;, name=&#39;S_max&#39;)
         ]
 
         self.particulator = builder.build(attributes, products)
@@ -92,7 +93,7 @@ class Simulation:
         output[&#34;r&#34;].append(self.particulator.products[&#39;radius_m1&#39;].get(unit=const.si.m)[cell_id])
         output[&#34;dt_cond_min&#34;].append(self.particulator.products[&#39;dt_cond_min&#39;].get()[cell_id])
         output[&#34;z&#34;].append(self.particulator.products[&#34;z&#34;].get()[cell_id])
-        output[&#34;S&#34;].append(self.particulator.products[&#34;RH_env&#34;].get()[cell_id]/100 - 1)
+        output[&#34;S&#34;].append(self.particulator.products[&#34;RH&#34;].get()[cell_id]/100 - 1)
         output[&#34;t&#34;].append(self.particulator.products[&#34;t&#34;].get())
 
         for event in (&#39;activating&#39;, &#39;deactivating&#39;, &#39;ripening&#39;):
@@ -160,19 +161,20 @@ class Simulation:
         attributes[&#39;kappa times dry volume&#39;] = attributes[&#39;dry volume&#39;] * settings.kappa
         attributes[&#39;n&#39;] = np.array([settings.n_in_dv], dtype=np.int64)
         environment = builder.particulator.environment
-        r_wet = r_wet_init(r_dry, environment,
-                           kappa_times_dry_volume=attributes[&#39;kappa times dry volume&#39;])
+        r_wet = equilibrate_wet_radii(
+            r_dry, environment,
+            kappa_times_dry_volume=attributes[&#39;kappa times dry volume&#39;])
         attributes[&#39;volume&#39;] = settings.formulae.trivia.volume(radius=r_wet)
         products = [
-            PySDM_products.ParticleMeanRadius(),
-            PySDM_products.CondensationTimestepMin(),
-            PySDM_products.ParcelDisplacement(),
-            PySDM_products.RelativeHumidity(),
-            PySDM_products.Time(),
-            PySDM_products.ActivatingRate(),
-            PySDM_products.DeactivatingRate(),
-            PySDM_products.RipeningRate(),
-            PySDM_products.PeakSupersaturation()
+            PySDM_products.MeanRadius(name=&#39;radius_m1&#39;, unit=&#39;um&#39;),
+            PySDM_products.CondensationTimestepMin(name=&#39;dt_cond_min&#39;),
+            PySDM_products.ParcelDisplacement(name=&#39;z&#39;),
+            PySDM_products.AmbientRelativeHumidity(name=&#34;RH&#34;, unit=&#34;%&#34;),
+            PySDM_products.Time(name=&#39;t&#39;),
+            PySDM_products.ActivatingRate(unit=&#39;s^-1 mg^-1&#39;, name=&#39;activating_rate&#39;),
+            PySDM_products.DeactivatingRate(unit=&#39;s^-1 mg^-1&#39;, name=&#39;deactivating_rate&#39;),
+            PySDM_products.RipeningRate(unit=&#39;s^-1 mg^-1&#39;, name=&#39;ripening_rate&#39;),
+            PySDM_products.PeakSupersaturation(unit=&#39;%&#39;, name=&#39;S_max&#39;)
         ]
 
         self.particulator = builder.build(attributes, products)
@@ -184,7 +186,7 @@ class Simulation:
         output[&#34;r&#34;].append(self.particulator.products[&#39;radius_m1&#39;].get(unit=const.si.m)[cell_id])
         output[&#34;dt_cond_min&#34;].append(self.particulator.products[&#39;dt_cond_min&#39;].get()[cell_id])
         output[&#34;z&#34;].append(self.particulator.products[&#34;z&#34;].get()[cell_id])
-        output[&#34;S&#34;].append(self.particulator.products[&#34;RH_env&#34;].get()[cell_id]/100 - 1)
+        output[&#34;S&#34;].append(self.particulator.products[&#34;RH&#34;].get()[cell_id]/100 - 1)
         output[&#34;t&#34;].append(self.particulator.products[&#34;t&#34;].get())
 
         for event in (&#39;activating&#39;, &#39;deactivating&#39;, &#39;ripening&#39;):
@@ -238,7 +240,7 @@ class Simulation:
     output[&#34;r&#34;].append(self.particulator.products[&#39;radius_m1&#39;].get(unit=const.si.m)[cell_id])
     output[&#34;dt_cond_min&#34;].append(self.particulator.products[&#39;dt_cond_min&#39;].get()[cell_id])
     output[&#34;z&#34;].append(self.particulator.products[&#34;z&#34;].get()[cell_id])
-    output[&#34;S&#34;].append(self.particulator.products[&#34;RH_env&#34;].get()[cell_id]/100 - 1)
+    output[&#34;S&#34;].append(self.particulator.products[&#34;RH&#34;].get()[cell_id]/100 - 1)
     output[&#34;t&#34;].append(self.particulator.products[&#34;t&#34;].get())
 
     for event in (&#39;activating&#39;, &#39;deactivating&#39;, &#39;ripening&#39;):

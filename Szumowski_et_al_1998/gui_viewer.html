@@ -73,8 +73,8 @@ class GUIViewer:
     def reinit(self, products):
         self.products = products
         self.product_select.options = tuple(
-            (f&#34;{val.description} [{val.unit}]&#34;, key)
-            for key, val in sorted(self.products.items(), key=lambda item: item[1].description)
+            (f&#34;{val.name} [{val.unit}]&#34;, key)
+            for key, val in sorted(self.products.items(), key=lambda item: item[1].name)
             if len(val.shape) == 2
         )
         opts = [(&#34;dry/wet particle size spectra&#34;, &#39;size&#39;)]
@@ -269,7 +269,10 @@ class GUIViewer:
         except self.storage.Exception:
             data = None
 
-        self.plots[selected].update(data, step)
+        self.plots[selected].update(
+            data, step,
+            self.storage.data_range(selected) if data is not None else None
+        )
 
     def replot_image(self, *_):
         selected = self.product_select.value
@@ -363,8 +366,8 @@ class GUIViewer:
     def reinit(self, products):
         self.products = products
         self.product_select.options = tuple(
-            (f&#34;{val.description} [{val.unit}]&#34;, key)
-            for key, val in sorted(self.products.items(), key=lambda item: item[1].description)
+            (f&#34;{val.name} [{val.unit}]&#34;, key)
+            for key, val in sorted(self.products.items(), key=lambda item: item[1].name)
             if len(val.shape) == 2
         )
         opts = [(&#34;dry/wet particle size spectra&#34;, &#39;size&#39;)]
@@ -559,7 +562,10 @@ class GUIViewer:
         except self.storage.Exception:
             data = None
 
-        self.plots[selected].update(data, step)
+        self.plots[selected].update(
+            data, step,
+            self.storage.data_range(selected) if data is not None else None
+        )
 
     def replot_image(self, *_):
         selected = self.product_select.value
@@ -671,8 +677,8 @@ class GUIViewer:
 <pre><code class="python">def reinit(self, products):
     self.products = products
     self.product_select.options = tuple(
-        (f&#34;{val.description} [{val.unit}]&#34;, key)
-        for key, val in sorted(self.products.items(), key=lambda item: item[1].description)
+        (f&#34;{val.name} [{val.unit}]&#34;, key)
+        for key, val in sorted(self.products.items(), key=lambda item: item[1].name)
         if len(val.shape) == 2
     )
     opts = [(&#34;dry/wet particle size spectra&#34;, &#39;size&#39;)]
@@ -881,7 +887,10 @@ class GUIViewer:
     except self.storage.Exception:
         data = None
 
-    self.plots[selected].update(data, step)</code></pre>
+    self.plots[selected].update(
+        data, step,
+        self.storage.data_range(selected) if data is not None else None
+    )</code></pre>
 </details>
 </dd>
 <dt id="PySDM_examples.Szumowski_et_al_1998.gui_viewer.GUIViewer.update_spectra"><code class="name flex">

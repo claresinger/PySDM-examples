@@ -29,9 +29,11 @@
 <pre><code class="python">from chempy import Substance
 import numpy as np
 from pystrict import strict
+from PySDM import Formulae
 from PySDM.physics.aqueous_chemistry.support import AQUEOUS_COMPOUNDS
-from PySDM.initialisation import spectral_sampling as spec_sampling
-from PySDM.physics import si, Formulae, spectra, constants as const
+from PySDM.initialisation.sampling import spectral_sampling as spec_sampling
+from PySDM.initialisation import spectra
+from PySDM.physics import si, constants as const
 
 
 @strict
@@ -125,7 +127,7 @@ class Settings:
 <dl>
 <dt id="PySDM_examples.Kreidenweis_et_al_2003.settings.Settings"><code class="flex name class">
 <span>class <span class="ident">Settings</span></span>
-<span>(</span><span>dt: float, n_sd: int, n_substep: int, spectral_sampling: PySDM.initialisation.spectral_sampling.SpectralSampling = PySDM.initialisation.spectral_sampling.Logarithmic)</span>
+<span>(</span><span>dt: float, n_sd: int, n_substep: int, spectral_sampling: PySDM.initialisation.sampling.spectral_sampling.SpectralSampling = PySDM.initialisation.sampling.spectral_sampling.Logarithmic)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>

@@ -26,12 +26,11 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from PySDM.backends import CPU
-from PySDM.builder import Builder
+<pre><code class="python">from PySDM import Builder, Formulae
+from PySDM.backends import CPU
 from PySDM.dynamics import AmbientThermodynamics
 from PySDM.dynamics import Condensation
 from PySDM.environments import Parcel
-from PySDM.physics.formulae import Formulae
 import PySDM.products as PySDM_products
 
 
@@ -69,9 +68,12 @@ class Simulation:
         builder.add_dynamic(condensation)
 
         products = [
-            PySDM_products.ParticlesWetSizeSpectrum(radius_bins_edges=settings.r_bins_edges),
-            PySDM_products.CondensationTimestepMin(),
-            PySDM_products.CondensationTimestepMax(),
+            PySDM_products.ParticleSizeSpectrumPerVolume(
+                name=&#39;Particles Wet Size Spectrum&#39;,
+                radius_bins_edges=settings.r_bins_edges
+            ),
+            PySDM_products.CondensationTimestepMin(name=&#39;dt_cond_min&#39;),
+            PySDM_products.CondensationTimestepMax(name=&#39;dt_cond_max&#39;),
             PySDM_products.RipeningRate()
         ]
 
@@ -98,11 +100,11 @@ class Simulation:
         output[&#34;t&#34;].append(_sp.environment[&#34;t&#34;][cell_id])
         output[&#34;dt_cond_max&#34;].append(_sp.products[&#34;dt_cond_max&#34;].get()[cell_id].copy())
         output[&#34;dt_cond_min&#34;].append(_sp.products[&#34;dt_cond_min&#34;].get()[cell_id].copy())
-        output[&#39;ripening_rate&#39;].append(_sp.products[&#39;ripening_rate&#39;].get()[cell_id].copy())
+        output[&#39;ripening rate&#39;].append(_sp.products[&#39;ripening rate&#39;].get()[cell_id].copy())
 
     def run(self):
         output = {&#34;r&#34;: [], &#34;S&#34;: [], &#34;z&#34;: [], &#34;t&#34;: [], &#34;qv&#34;: [], &#34;T&#34;: [],
-                  &#34;r_bins_values&#34;: [], &#34;dt_cond_max&#34;: [], &#34;dt_cond_min&#34;: [], &#34;ripening_rate&#34;: []}
+                  &#34;r_bins_values&#34;: [], &#34;dt_cond_max&#34;: [], &#34;dt_cond_min&#34;: [], &#34;ripening rate&#34;: []}
 
         self.save(output)
         for _ in range(self.n_steps):
@@ -164,9 +166,12 @@ class Simulation:
         builder.add_dynamic(condensation)
 
         products = [
-            PySDM_products.ParticlesWetSizeSpectrum(radius_bins_edges=settings.r_bins_edges),
-            PySDM_products.CondensationTimestepMin(),
-            PySDM_products.CondensationTimestepMax(),
+            PySDM_products.ParticleSizeSpectrumPerVolume(
+                name=&#39;Particles Wet Size Spectrum&#39;,
+                radius_bins_edges=settings.r_bins_edges
+            ),
+            PySDM_products.CondensationTimestepMin(name=&#39;dt_cond_min&#39;),
+            PySDM_products.CondensationTimestepMax(name=&#39;dt_cond_max&#39;),
             PySDM_products.RipeningRate()
         ]
 
@@ -193,11 +198,11 @@ class Simulation:
         output[&#34;t&#34;].append(_sp.environment[&#34;t&#34;][cell_id])
         output[&#34;dt_cond_max&#34;].append(_sp.products[&#34;dt_cond_max&#34;].get()[cell_id].copy())
         output[&#34;dt_cond_min&#34;].append(_sp.products[&#34;dt_cond_min&#34;].get()[cell_id].copy())
-        output[&#39;ripening_rate&#39;].append(_sp.products[&#39;ripening_rate&#39;].get()[cell_id].copy())
+        output[&#39;ripening rate&#39;].append(_sp.products[&#39;ripening rate&#39;].get()[cell_id].copy())
 
     def run(self):
         output = {&#34;r&#34;: [], &#34;S&#34;: [], &#34;z&#34;: [], &#34;t&#34;: [], &#34;qv&#34;: [], &#34;T&#34;: [],
-                  &#34;r_bins_values&#34;: [], &#34;dt_cond_max&#34;: [], &#34;dt_cond_min&#34;: [], &#34;ripening_rate&#34;: []}
+                  &#34;r_bins_values&#34;: [], &#34;dt_cond_max&#34;: [], &#34;dt_cond_min&#34;: [], &#34;ripening rate&#34;: []}
 
         self.save(output)
         for _ in range(self.n_steps):
@@ -218,7 +223,7 @@ class Simulation:
 </summary>
 <pre><code class="python">def run(self):
     output = {&#34;r&#34;: [], &#34;S&#34;: [], &#34;z&#34;: [], &#34;t&#34;: [], &#34;qv&#34;: [], &#34;T&#34;: [],
-              &#34;r_bins_values&#34;: [], &#34;dt_cond_max&#34;: [], &#34;dt_cond_min&#34;: [], &#34;ripening_rate&#34;: []}
+              &#34;r_bins_values&#34;: [], &#34;dt_cond_max&#34;: [], &#34;dt_cond_min&#34;: [], &#34;ripening rate&#34;: []}
 
     self.save(output)
     for _ in range(self.n_steps):
@@ -249,7 +254,7 @@ class Simulation:
     output[&#34;t&#34;].append(_sp.environment[&#34;t&#34;][cell_id])
     output[&#34;dt_cond_max&#34;].append(_sp.products[&#34;dt_cond_max&#34;].get()[cell_id].copy())
     output[&#34;dt_cond_min&#34;].append(_sp.products[&#34;dt_cond_min&#34;].get()[cell_id].copy())
-    output[&#39;ripening_rate&#39;].append(_sp.products[&#39;ripening_rate&#39;].get()[cell_id].copy())</code></pre>
+    output[&#39;ripening rate&#39;].append(_sp.products[&#39;ripening rate&#39;].get()[cell_id].copy())</code></pre>
 </details>
 </dd>
 </dl>

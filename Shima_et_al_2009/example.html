@@ -32,7 +32,7 @@ from PySDM.backends import CPU
 from PySDM.builder import Builder
 from PySDM.environments import Box
 from PySDM.dynamics import Coalescence
-from PySDM.initialisation.spectral_sampling import ConstantMultiplicity
+from PySDM.initialisation.sampling.spectral_sampling import ConstantMultiplicity
 from PySDM.products import ParticlesVolumeSpectrum, WallTime
 from PySDM_examples.Shima_et_al_2009.settings import Settings
 from PySDM_examples.Shima_et_al_2009.spectrum_plotter import SpectrumPlotter
@@ -46,7 +46,7 @@ def run(settings, backend=CPU, observers=()):
     attributes[&#39;volume&#39;], attributes[&#39;n&#39;] = sampling.sample(settings.n_sd)
     coalescence = Coalescence(settings.kernel, adaptive=settings.adaptive)
     builder.add_dynamic(coalescence)
-    products = [ParticlesVolumeSpectrum(settings.radius_bins_edges), WallTime()]
+    products = (ParticlesVolumeSpectrum(settings.radius_bins_edges, name=&#39;dv/dlnr&#39;), WallTime())
     particulator = builder.build(attributes, products)
     if hasattr(settings, &#39;u_term&#39;) and &#39;terminal velocity&#39; in particulator.attributes:
         particulator.attributes[&#39;terminal velocity&#39;].approximation = settings.u_term(particulator)
@@ -55,13 +55,13 @@ def run(settings, backend=CPU, observers=()):
         particulator.observers.append(observer)
 
     vals = {}
-    particulator.products[&#39;wall_time&#39;].reset()
+    particulator.products[&#39;wall time&#39;].reset()
     for step in settings.output_steps:
         particulator.run(step - particulator.n_steps)
         vals[step] = particulator.products[&#39;dv/dlnr&#39;].get()[0]
         vals[step][:] *= settings.rho
 
-    exec_time = particulator.products[&#39;wall_time&#39;].get()
+    exec_time = particulator.products[&#39;wall time&#39;].get()
     return vals, exec_time
 
 
@@ -148,7 +148,7 @@ if __name__ == &#39;__main__&#39;:
     attributes[&#39;volume&#39;], attributes[&#39;n&#39;] = sampling.sample(settings.n_sd)
     coalescence = Coalescence(settings.kernel, adaptive=settings.adaptive)
     builder.add_dynamic(coalescence)
-    products = [ParticlesVolumeSpectrum(settings.radius_bins_edges), WallTime()]
+    products = (ParticlesVolumeSpectrum(settings.radius_bins_edges, name=&#39;dv/dlnr&#39;), WallTime())
     particulator = builder.build(attributes, products)
     if hasattr(settings, &#39;u_term&#39;) and &#39;terminal velocity&#39; in particulator.attributes:
         particulator.attributes[&#39;terminal velocity&#39;].approximation = settings.u_term(particulator)
@@ -157,13 +157,13 @@ if __name__ == &#39;__main__&#39;:
         particulator.observers.append(observer)
 
     vals = {}
-    particulator.products[&#39;wall_time&#39;].reset()
+    particulator.products[&#39;wall time&#39;].reset()
     for step in settings.output_steps:
         particulator.run(step - particulator.n_steps)
         vals[step] = particulator.products[&#39;dv/dlnr&#39;].get()[0]
         vals[step][:] *= settings.rho
 
-    exec_time = particulator.products[&#39;wall_time&#39;].get()
+    exec_time = particulator.products[&#39;wall time&#39;].get()
     return vals, exec_time</code></pre>
 </details>
 </dd>

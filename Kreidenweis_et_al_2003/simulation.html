@@ -34,9 +34,10 @@ from PySDM.physics import si
 from PySDM.dynamics import AmbientThermodynamics, Condensation, AqueousChemistry
 from PySDM.physics.aqueous_chemistry.support import AQUEOUS_COMPOUNDS, GASEOUS_COMPOUNDS
 import PySDM.products as PySDM_products
+from PySDM_examples.utils import BasicSimulation
 
 
-class Simulation:
+class Simulation(BasicSimulation):
     def __init__(self, settings, products=None):
         env = Parcel(dt=settings.dt, mass_of_dry_air=settings.mass_of_dry_air, p0=settings.p0,
                      q0=settings.q0, T0=settings.T0, w=settings.w, g=settings.g)
@@ -62,51 +63,58 @@ class Simulation:
         ))
 
         products = products or (
-            PySDM_products.RelativeHumidity(),
+            PySDM_products.AmbientRelativeHumidity(name=&#39;RH&#39;, unit=&#39;%&#39;),
             PySDM_products.WaterMixingRatio(
                 name=&#39;ql&#39;,
-                description_prefix=&#39;liquid&#39;,
-                radius_range=[1*si.um, np.inf]
+                radius_range=[1*si.um, np.inf],
+                unit=&#39;g/kg&#39;
             ),
-            PySDM_products.ParcelDisplacement(),
-            PySDM_products.Pressure(),
-            PySDM_products.Temperature(),
-            PySDM_products.DryAirDensity(),
-            PySDM_products.WaterVapourMixingRatio(),
-            PySDM_products.Time(),
-            *[PySDM_products.AqueousMoleFraction(compound) for compound in AQUEOUS_COMPOUNDS],
-            *[PySDM_products.GaseousMoleFraction(compound) for compound in GASEOUS_COMPOUNDS],
-            PySDM_products.pH(
+            PySDM_products.ParcelDisplacement(name=&#39;z&#39;),
+            PySDM_products.AmbientPressure(name=&#39;p&#39;),
+            PySDM_products.AmbientTemperature(name=&#39;T&#39;),
+            PySDM_products.AmbientDryAirDensity(name=&#39;rhod&#39;),
+            PySDM_products.AmbientWaterVapourMixingRatio(name=&#39;qv&#39;, unit=&#39;g/kg&#39;),
+            PySDM_products.Time(name=&#39;t&#39;),
+            *(
+                PySDM_products.AqueousMoleFraction(comp, unit=&#39;ppb&#39;, name=f&#34;aq_{comp}_ppb&#34;)
+                for comp in AQUEOUS_COMPOUNDS
+            ),
+            *(
+                PySDM_products.GaseousMoleFraction(comp, unit=&#39;ppb&#39;, name=f&#34;gas_{comp}_ppb&#34;)
+                for comp in GASEOUS_COMPOUNDS
+            ),
+            PySDM_products.Acidity(
+                name=&#39;pH_pH_number_weighted&#39;,
                 radius_range=settings.cloud_radius_range, weighting=&#39;number&#39;, attr=&#39;pH&#39;),
-            PySDM_products.pH(
+            PySDM_products.Acidity(
+                name=&#39;pH_pH_volume_weighted&#39;,
                 radius_range=settings.cloud_radius_range, weighting=&#39;volume&#39;, attr=&#39;pH&#39;),
-            PySDM_products.pH(
+            PySDM_products.Acidity(
+                name=&#39;pH_conc_H_number_weighted&#39;,
                 radius_range=settings.cloud_radius_range, weighting=&#39;number&#39;, attr=&#39;conc_H&#39;),
-            PySDM_products.pH(
+            PySDM_products.Acidity(
+                name=&#39;pH_conc_H_volume_weighted&#39;,
                 radius_range=settings.cloud_radius_range, weighting=&#39;volume&#39;, attr=&#39;conc_H&#39;),
-            PySDM_products.TotalDryMassMixingRatio(settings.DRY_RHO),
-            PySDM_products.PeakSupersaturation(),
-            PySDM_products.CloudDropletConcentration(radius_range=settings.cloud_radius_range),
-            PySDM_products.AqueousMassSpectrum(&#34;S_VI&#34;, settings.dry_radius_bins_edges)
+            PySDM_products.TotalDryMassMixingRatio(settings.DRY_RHO, name=&#39;q_dry&#39;, unit=&#39;ug/kg&#39;),
+            PySDM_products.PeakSupersaturation(unit=&#39;%&#39;, name=&#39;S_max&#39;),
+            PySDM_products.ParticleSpecificConcentration(
+                radius_range=settings.cloud_radius_range,
+                name=&#39;n_c_mg&#39;,
+                unit=&#39;mg^-1&#39;
+            ),
+            PySDM_products.AqueousMassSpectrum(&#34;S_VI&#34;,
+                                               settings.dry_radius_bins_edges,
+                                               name=&#39;dm_S_VI/dlog_10(dry diameter)&#39;,
+                                               unit=&#39;ug / m^3&#34;&#39;,
+                                               )
         )
 
-        self.particulator = builder.build(attributes=attributes, products=products)
+        particulator = builder.build(attributes=attributes, products=products)
         self.settings = settings
-
-    def _save(self, output):
-        for k, v in self.particulator.products.items():
-            value = v.get()
-            if isinstance(value, np.ndarray) and value.shape[0] == 1:
-                value = value[0]
-            output[k].append(value)
+        super().__init__(particulator=particulator)
 
     def run(self):
-        output = {k: [] for k in self.particulator.products}
-        self._save(output)
-        for _ in range(0, self.settings.nt+1, self.settings.steps_per_output_interval):
-            self.particulator.run(steps=self.settings.steps_per_output_interval)
-            self._save(output)
-        return output</code></pre>
+        return super()._run(self.settings.nt, self.settings.steps_per_output_interval)</code></pre>
 </details>
 </section>
 <section>
@@ -128,7 +136,7 @@ class Simulation:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Simulation:
+<pre><code class="python">class Simulation(BasicSimulation):
     def __init__(self, settings, products=None):
         env = Parcel(dt=settings.dt, mass_of_dry_air=settings.mass_of_dry_air, p0=settings.p0,
                      q0=settings.q0, T0=settings.T0, w=settings.w, g=settings.g)
@@ -154,52 +162,63 @@ class Simulation:
         ))
 
         products = products or (
-            PySDM_products.RelativeHumidity(),
+            PySDM_products.AmbientRelativeHumidity(name=&#39;RH&#39;, unit=&#39;%&#39;),
             PySDM_products.WaterMixingRatio(
                 name=&#39;ql&#39;,
-                description_prefix=&#39;liquid&#39;,
-                radius_range=[1*si.um, np.inf]
+                radius_range=[1*si.um, np.inf],
+                unit=&#39;g/kg&#39;
             ),
-            PySDM_products.ParcelDisplacement(),
-            PySDM_products.Pressure(),
-            PySDM_products.Temperature(),
-            PySDM_products.DryAirDensity(),
-            PySDM_products.WaterVapourMixingRatio(),
-            PySDM_products.Time(),
-            *[PySDM_products.AqueousMoleFraction(compound) for compound in AQUEOUS_COMPOUNDS],
-            *[PySDM_products.GaseousMoleFraction(compound) for compound in GASEOUS_COMPOUNDS],
-            PySDM_products.pH(
+            PySDM_products.ParcelDisplacement(name=&#39;z&#39;),
+            PySDM_products.AmbientPressure(name=&#39;p&#39;),
+            PySDM_products.AmbientTemperature(name=&#39;T&#39;),
+            PySDM_products.AmbientDryAirDensity(name=&#39;rhod&#39;),
+            PySDM_products.AmbientWaterVapourMixingRatio(name=&#39;qv&#39;, unit=&#39;g/kg&#39;),
+            PySDM_products.Time(name=&#39;t&#39;),
+            *(
+                PySDM_products.AqueousMoleFraction(comp, unit=&#39;ppb&#39;, name=f&#34;aq_{comp}_ppb&#34;)
+                for comp in AQUEOUS_COMPOUNDS
+            ),
+            *(
+                PySDM_products.GaseousMoleFraction(comp, unit=&#39;ppb&#39;, name=f&#34;gas_{comp}_ppb&#34;)
+                for comp in GASEOUS_COMPOUNDS
+            ),
+            PySDM_products.Acidity(
+                name=&#39;pH_pH_number_weighted&#39;,
                 radius_range=settings.cloud_radius_range, weighting=&#39;number&#39;, attr=&#39;pH&#39;),
-            PySDM_products.pH(
+            PySDM_products.Acidity(
+                name=&#39;pH_pH_volume_weighted&#39;,
                 radius_range=settings.cloud_radius_range, weighting=&#39;volume&#39;, attr=&#39;pH&#39;),
-            PySDM_products.pH(
+            PySDM_products.Acidity(
+                name=&#39;pH_conc_H_number_weighted&#39;,
                 radius_range=settings.cloud_radius_range, weighting=&#39;number&#39;, attr=&#39;conc_H&#39;),
-            PySDM_products.pH(
+            PySDM_products.Acidity(
+                name=&#39;pH_conc_H_volume_weighted&#39;,
                 radius_range=settings.cloud_radius_range, weighting=&#39;volume&#39;, attr=&#39;conc_H&#39;),
-            PySDM_products.TotalDryMassMixingRatio(settings.DRY_RHO),
-            PySDM_products.PeakSupersaturation(),
-            PySDM_products.CloudDropletConcentration(radius_range=settings.cloud_radius_range),
-            PySDM_products.AqueousMassSpectrum(&#34;S_VI&#34;, settings.dry_radius_bins_edges)
+            PySDM_products.TotalDryMassMixingRatio(settings.DRY_RHO, name=&#39;q_dry&#39;, unit=&#39;ug/kg&#39;),
+            PySDM_products.PeakSupersaturation(unit=&#39;%&#39;, name=&#39;S_max&#39;),
+            PySDM_products.ParticleSpecificConcentration(
+                radius_range=settings.cloud_radius_range,
+                name=&#39;n_c_mg&#39;,
+                unit=&#39;mg^-1&#39;
+            ),
+            PySDM_products.AqueousMassSpectrum(&#34;S_VI&#34;,
+                                               settings.dry_radius_bins_edges,
+                                               name=&#39;dm_S_VI/dlog_10(dry diameter)&#39;,
+                                               unit=&#39;ug / m^3&#34;&#39;,
+                                               )
         )
 
-        self.particulator = builder.build(attributes=attributes, products=products)
+        particulator = builder.build(attributes=attributes, products=products)
         self.settings = settings
-
-    def _save(self, output):
-        for k, v in self.particulator.products.items():
-            value = v.get()
-            if isinstance(value, np.ndarray) and value.shape[0] == 1:
-                value = value[0]
-            output[k].append(value)
+        super().__init__(particulator=particulator)
 
     def run(self):
-        output = {k: [] for k in self.particulator.products}
-        self._save(output)
-        for _ in range(0, self.settings.nt+1, self.settings.steps_per_output_interval):
-            self.particulator.run(steps=self.settings.steps_per_output_interval)
-            self._save(output)
-        return output</code></pre>
+        return super()._run(self.settings.nt, self.settings.steps_per_output_interval)</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="PySDM_examples.utils.basic_simulation.BasicSimulation" href="../utils/basic_simulation.html#PySDM_examples.utils.basic_simulation.BasicSimulation">BasicSimulation</a></li>
+</ul>
 <h3>Methods</h3>
 <dl>
 <dt id="PySDM_examples.Kreidenweis_et_al_2003.simulation.Simulation.run"><code class="name flex">
@@ -212,12 +231,7 @@ class Simulation:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def run(self):
-    output = {k: [] for k in self.particulator.products}
-    self._save(output)
-    for _ in range(0, self.settings.nt+1, self.settings.steps_per_output_interval):
-        self.particulator.run(steps=self.settings.steps_per_output_interval)
-        self._save(output)
-    return output</code></pre>
+    return super()._run(self.settings.nt, self.settings.steps_per_output_interval)</code></pre>
 </details>
 </dd>
 </dl>

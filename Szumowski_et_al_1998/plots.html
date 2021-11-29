@@ -26,10 +26,8 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import matplotlib
-import matplotlib.pyplot as plt
+<pre><code class="python">import matplotlib.pyplot as plt
 import numpy as np
-from PySDM import products
 from PySDM.physics import constants as const
 
 
@@ -62,38 +60,8 @@ class _ImagePlot(_Plot):
             self.lines[&#39;X&#39;][1] = plt.plot([-1] * 2, zlim, **self.line_args)[0]
             self.lines[&#39;Z&#39;][1] = plt.plot(xlim, [-1] * 2, **self.line_args)[0]
 
-        product_range, product_scale = {
-            products.WaterMixingRatio: ((0, 1), &#39;linear&#39;),
-            products.TotalParticleSpecificConcentration: ((20, 50), &#39;linear&#39;),
-            products.TotalParticleConcentration: ((20, 50), &#39;linear&#39;),
-            products.SuperDropletCount: ((0, 10), &#39;linear&#39;),
-            products.ParticlesVolumeSpectrum: ((20, 50), &#39;linear&#39;),
-            products.AerosolConcentration: ((1e0, 1e2), &#39;linear&#39;),
-            products.CloudDropletConcentration: ((1e0, 1e2), &#39;linear&#39;),
-            products.DrizzleConcentration: ((1e-3, 1e1), &#39;log&#39;),
-            products.ParticleMeanRadius: ((1, 25), &#39;linear&#39;),
-            products.CloudDropletEffectiveRadius: ((0, 25), &#39;linear&#39;),
-            products.AerosolSpecificConcentration: ((0, 3e2), &#39;linear&#39;),
-            products.WaterVapourMixingRatio: ((5, 7.5), &#39;linear&#39;),
-            products.Temperature: ((275, 305), &#39;linear&#39;),
-            products.RelativeHumidity: ((75, 105), &#39;linear&#39;),
-            products.Pressure: ((90000, 100000), &#39;linear&#39;),
-            products.DryAirPotentialTemperature: ((275, 300), &#39;linear&#39;),
-            products.DryAirDensity: ((0.95, 1.3), &#39;linear&#39;),
-            products.PeakSupersaturation: ((-1, 1), &#39;linear&#39;),
-            products.RipeningRate: ((1e-1, 1e1), &#39;log&#39;),
-            products.ActivatingRate: ((1e-1, 1e1), &#39;log&#39;),
-            products.DeactivatingRate: ((1e-1, 1e1), &#39;log&#39;),
-            products.CollisionRateDeficit: ((0, 1e10), &#39;linear&#39;),
-            products.CollisionRate: ((0, 1e10), &#39;linear&#39;),
-            products.CondensationTimestepMin: ((.01, 10), &#39;log&#39;),
-            products.CondensationTimestepMax: ((.01, 10), &#39;log&#39;),
-            products.CoalescenceTimestepMin: ((.01, 10), &#39;log&#39;),
-            products.IceWaterContent: ((.0001, .001), &#39;linear&#39;),
-            products.ParticlesConcentration: ((0, 1e4), &#39;linear&#39;)
-        }[product.__class__]
-        data = np.full_like(self.nans, product_range[0])
-        label = f&#34;{product.description} [{product.unit}]&#34;
+        data = np.full_like(self.nans, np.nan)
+        label = f&#34;{product.name} [{product.unit}]&#34;
 
         self.ax.set_xlabel(&#39;X [m]&#39;)
         self.ax.set_ylabel(&#39;Z [m]&#39;)
@@ -102,14 +70,9 @@ class _ImagePlot(_Plot):
             self._transpose(data),
             origin=&#39;lower&#39;,
             extent=(*xlim, *zlim),
-            cmap=cmap,
-            norm=(
-                matplotlib.colors.LogNorm() if product_scale == &#39;log&#39; and np.isfinite(data).all()
-                else None
-            )
+            cmap=cmap
         )
         plt.colorbar(self.im, ax=self.ax).set_label(label)
-        self.im.set_clim(vmin=product_range[0], vmax=product_range[1])
         if show:
             plt.show()
 
@@ -119,10 +82,12 @@ class _ImagePlot(_Plot):
             return data.T
         return None
 
-    def update(self, data,  step):
+    def update(self, data, step, data_range):
         data = self._transpose(data)
         if data is not None:
             self.im.set_data(data)
+            if data_range is not None:
+                self.im.set_clim(vmin=data_range[0], vmax=data_range[1])
             self.ax.set_title(
                 f&#34;min:{np.nanmin(data): .3g}    max:{np.nanmax(data): .3g}    t/dt_out:{step: &gt;6}&#34;
             )
