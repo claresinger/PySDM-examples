@@ -27,23 +27,25 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from typing import Iterable
-from pystrict import strict
 from PySDM.physics import si
-from PySDM.backends.impl_numba.conf import JIT_FLAGS
+from PySDM import Formulae
 from PySDM_examples.Morrison_and_Grabowski_2007.strato_cumulus import StratoCumulus
 
 
-@strict
 class Settings(StratoCumulus):
     def __dir__(self) -&gt; Iterable[str]:
         return &#39;dt&#39;, &#39;grid&#39;, &#39;size&#39;, &#39;n_spin_up&#39;, &#39;versions&#39;, &#39;steps_per_output_interval&#39;,\
                &#39;formulae&#39;, &#39;initial_dry_potential_temperature_profile&#39;,\
-               &#39;initial_vapour_mixing_ratio_profile&#39;
+               &#39;initial_vapour_mixing_ratio_profile&#39;, &#39;rhod_w_max&#39;
 
-    def __init__(self, fastmath: bool = JIT_FLAGS[&#39;fastmath&#39;]):
+    def __init__(
+        self,
+        formulae=None,
+        rhod_w_max: float = .6 * si.metres / si.seconds * (si.kilogram / si.metre ** 3)
+    ):
         super().__init__(
-            fastmath,
-            rho_w_max=.6 * si.metres / si.seconds * (si.kilogram / si.metre ** 3)
+            formulae or Formulae(),
+            rhod_w_max=rhod_w_max
         )
 
         self.grid = (25, 25)
@@ -66,7 +68,7 @@ class Settings(StratoCumulus):
 <dl>
 <dt id="PySDM_examples.Arabas_et_al_2015.settings.Settings"><code class="flex name class">
 <span>class <span class="ident">Settings</span></span>
-<span>(</span><span>fastmath: bool = True)</span>
+<span>(</span><span>formulae=None, rhod_w_max: float = 0.6)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -74,17 +76,20 @@ class Settings(StratoCumulus):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@strict
-class Settings(StratoCumulus):
+<pre><code class="python">class Settings(StratoCumulus):
     def __dir__(self) -&gt; Iterable[str]:
         return &#39;dt&#39;, &#39;grid&#39;, &#39;size&#39;, &#39;n_spin_up&#39;, &#39;versions&#39;, &#39;steps_per_output_interval&#39;,\
                &#39;formulae&#39;, &#39;initial_dry_potential_temperature_profile&#39;,\
-               &#39;initial_vapour_mixing_ratio_profile&#39;
+               &#39;initial_vapour_mixing_ratio_profile&#39;, &#39;rhod_w_max&#39;
 
-    def __init__(self, fastmath: bool = JIT_FLAGS[&#39;fastmath&#39;]):
+    def __init__(
+        self,
+        formulae=None,
+        rhod_w_max: float = .6 * si.metres / si.seconds * (si.kilogram / si.metre ** 3)
+    ):
         super().__init__(
-            fastmath,
-            rho_w_max=.6 * si.metres / si.seconds * (si.kilogram / si.metre ** 3)
+            formulae or Formulae(),
+            rhod_w_max=rhod_w_max
         )
 
         self.grid = (25, 25)

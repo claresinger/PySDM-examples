@@ -37,9 +37,9 @@ class Storage:
         pass
 
     def __init__(self, dtype=np.float32, path=None):
+        self.temp_dir = None
         if path is None:
-            self.temp_dir = tempfile.TemporaryDirectory()
-            self.dir_path = self.temp_dir.name
+            self.setup_temporary_directory()
         else:
             Path(path).mkdir(parents=True, exist_ok=True)
             self.dir_path = Path(path).absolute()
@@ -48,12 +48,22 @@ class Storage:
         self._data_range = None
 
     def __del__(self):
-        if hasattr(self, &#39;temp_dir&#39;):
+        self.cleanup()
+
+    def cleanup(self):
+        if self.temp_dir is not None:
             self.temp_dir.cleanup()
+
+    def setup_temporary_directory(self):
+        self.cleanup()
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.dir_path = self.temp_dir.name
 
     def init(self, settings):
         self.grid = settings.grid
         self._data_range = {}
+        if self.temp_dir is not None and any(os.scandir(self.temp_dir.name)):
+            self.setup_temporary_directory()
 
     def _filepath(self, name: str, step: int = None):
         if step is None:
@@ -74,9 +84,16 @@ class Storage:
 
         if name not in self._data_range:
             self._data_range[name] = (np.inf, -np.inf)
+        just_nans = np.isnan(data).all()
         self._data_range[name] = (
-            min(np.amin(data), self._data_range[name][0]),
-            max(np.amax(data), self._data_range[name][1])
+            min(
+                self._data_range[name][0] if just_nans else np.nanmin(data),
+                self._data_range[name][0]
+            ),
+            max(
+                self._data_range[name][1] if just_nans else np.nanmax(data),
+                self._data_range[name][1]
+            )
         )
 
     def data_range(self, name):
@@ -114,9 +131,9 @@ class Storage:
         pass
 
     def __init__(self, dtype=np.float32, path=None):
+        self.temp_dir = None
         if path is None:
-            self.temp_dir = tempfile.TemporaryDirectory()
-            self.dir_path = self.temp_dir.name
+            self.setup_temporary_directory()
         else:
             Path(path).mkdir(parents=True, exist_ok=True)
             self.dir_path = Path(path).absolute()
@@ -125,12 +142,22 @@ class Storage:
         self._data_range = None
 
     def __del__(self):
-        if hasattr(self, &#39;temp_dir&#39;):
+        self.cleanup()
+
+    def cleanup(self):
+        if self.temp_dir is not None:
             self.temp_dir.cleanup()
+
+    def setup_temporary_directory(self):
+        self.cleanup()
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.dir_path = self.temp_dir.name
 
     def init(self, settings):
         self.grid = settings.grid
         self._data_range = {}
+        if self.temp_dir is not None and any(os.scandir(self.temp_dir.name)):
+            self.setup_temporary_directory()
 
     def _filepath(self, name: str, step: int = None):
         if step is None:
@@ -151,9 +178,16 @@ class Storage:
 
         if name not in self._data_range:
             self._data_range[name] = (np.inf, -np.inf)
+        just_nans = np.isnan(data).all()
         self._data_range[name] = (
-            min(np.amin(data), self._data_range[name][0]),
-            max(np.amax(data), self._data_range[name][1])
+            min(
+                self._data_range[name][0] if just_nans else np.nanmin(data),
+                self._data_range[name][0]
+            ),
+            max(
+                self._data_range[name][1] if just_nans else np.nanmax(data),
+                self._data_range[name][1]
+            )
         )
 
     def data_range(self, name):
@@ -175,6 +209,20 @@ class Storage:
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="PySDM_examples.Szumowski_et_al_1998.storage.Storage.cleanup"><code class="name flex">
+<span>def <span class="ident">cleanup</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cleanup(self):
+    if self.temp_dir is not None:
+        self.temp_dir.cleanup()</code></pre>
+</details>
+</dd>
 <dt id="PySDM_examples.Szumowski_et_al_1998.storage.Storage.data_range"><code class="name flex">
 <span>def <span class="ident">data_range</span></span>(<span>self, name)</span>
 </code></dt>
@@ -199,7 +247,9 @@ class Storage:
 </summary>
 <pre><code class="python">def init(self, settings):
     self.grid = settings.grid
-    self._data_range = {}</code></pre>
+    self._data_range = {}
+    if self.temp_dir is not None and any(os.scandir(self.temp_dir.name)):
+        self.setup_temporary_directory()</code></pre>
 </details>
 </dd>
 <dt id="PySDM_examples.Szumowski_et_al_1998.storage.Storage.load"><code class="name flex">
@@ -239,10 +289,32 @@ class Storage:
 
     if name not in self._data_range:
         self._data_range[name] = (np.inf, -np.inf)
+    just_nans = np.isnan(data).all()
     self._data_range[name] = (
-        min(np.amin(data), self._data_range[name][0]),
-        max(np.amax(data), self._data_range[name][1])
+        min(
+            self._data_range[name][0] if just_nans else np.nanmin(data),
+            self._data_range[name][0]
+        ),
+        max(
+            self._data_range[name][1] if just_nans else np.nanmax(data),
+            self._data_range[name][1]
+        )
     )</code></pre>
+</details>
+</dd>
+<dt id="PySDM_examples.Szumowski_et_al_1998.storage.Storage.setup_temporary_directory"><code class="name flex">
+<span>def <span class="ident">setup_temporary_directory</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def setup_temporary_directory(self):
+    self.cleanup()
+    self.temp_dir = tempfile.TemporaryDirectory()
+    self.dir_path = self.temp_dir.name</code></pre>
 </details>
 </dd>
 </dl>
@@ -267,10 +339,12 @@ class Storage:
 <h4><code><a title="PySDM_examples.Szumowski_et_al_1998.storage.Storage" href="#PySDM_examples.Szumowski_et_al_1998.storage.Storage">Storage</a></code></h4>
 <ul class="">
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.storage.Storage.Exception" href="#PySDM_examples.Szumowski_et_al_1998.storage.Storage.Exception">Exception</a></code></li>
+<li><code><a title="PySDM_examples.Szumowski_et_al_1998.storage.Storage.cleanup" href="#PySDM_examples.Szumowski_et_al_1998.storage.Storage.cleanup">cleanup</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.storage.Storage.data_range" href="#PySDM_examples.Szumowski_et_al_1998.storage.Storage.data_range">data_range</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.storage.Storage.init" href="#PySDM_examples.Szumowski_et_al_1998.storage.Storage.init">init</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.storage.Storage.load" href="#PySDM_examples.Szumowski_et_al_1998.storage.Storage.load">load</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.storage.Storage.save" href="#PySDM_examples.Szumowski_et_al_1998.storage.Storage.save">save</a></code></li>
+<li><code><a title="PySDM_examples.Szumowski_et_al_1998.storage.Storage.setup_temporary_directory" href="#PySDM_examples.Szumowski_et_al_1998.storage.Storage.setup_temporary_directory">setup_temporary_directory</a></code></li>
 </ul>
 </li>
 </ul>

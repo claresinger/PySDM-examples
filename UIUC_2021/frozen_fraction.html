@@ -26,24 +26,22 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from PySDM.physics import constants as const
-
-
-class FrozenFraction:
-    def __init__(self, *, volume, droplet_volume, total_particle_number):
+<pre><code class="python">class FrozenFraction:
+    def __init__(self, *, volume, droplet_volume, total_particle_number, rho_w):
         self.volume = volume
+        self.rho_w = rho_w
         self.droplet_volume = droplet_volume
         self.total_particle_number = total_particle_number
 
     def qi2ff(self, ice_mass_per_volume):
         ice_mass = ice_mass_per_volume * self.volume
-        ice_number = ice_mass / (const.rho_w * self.droplet_volume)
+        ice_number = ice_mass / (self.rho_w * self.droplet_volume)
         frozen_fraction = ice_number / self.total_particle_number
         return frozen_fraction
 
     def ff2qi(self, frozen_fraction):
         ice_number = frozen_fraction * self.total_particle_number
-        ice_mass = ice_number * (const.rho_w * self.droplet_volume)
+        ice_mass = ice_number * (self.rho_w * self.droplet_volume)
         ice_mass_per_volume = ice_mass / self.volume
         return ice_mass_per_volume</code></pre>
 </details>
@@ -59,7 +57,7 @@ class FrozenFraction:
 <dl>
 <dt id="PySDM_examples.UIUC_2021.frozen_fraction.FrozenFraction"><code class="flex name class">
 <span>class <span class="ident">FrozenFraction</span></span>
-<span>(</span><span>*, volume, droplet_volume, total_particle_number)</span>
+<span>(</span><span>*, volume, droplet_volume, total_particle_number, rho_w)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -68,20 +66,21 @@ class FrozenFraction:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class FrozenFraction:
-    def __init__(self, *, volume, droplet_volume, total_particle_number):
+    def __init__(self, *, volume, droplet_volume, total_particle_number, rho_w):
         self.volume = volume
+        self.rho_w = rho_w
         self.droplet_volume = droplet_volume
         self.total_particle_number = total_particle_number
 
     def qi2ff(self, ice_mass_per_volume):
         ice_mass = ice_mass_per_volume * self.volume
-        ice_number = ice_mass / (const.rho_w * self.droplet_volume)
+        ice_number = ice_mass / (self.rho_w * self.droplet_volume)
         frozen_fraction = ice_number / self.total_particle_number
         return frozen_fraction
 
     def ff2qi(self, frozen_fraction):
         ice_number = frozen_fraction * self.total_particle_number
-        ice_mass = ice_number * (const.rho_w * self.droplet_volume)
+        ice_mass = ice_number * (self.rho_w * self.droplet_volume)
         ice_mass_per_volume = ice_mass / self.volume
         return ice_mass_per_volume</code></pre>
 </details>
@@ -98,7 +97,7 @@ class FrozenFraction:
 </summary>
 <pre><code class="python">def ff2qi(self, frozen_fraction):
     ice_number = frozen_fraction * self.total_particle_number
-    ice_mass = ice_number * (const.rho_w * self.droplet_volume)
+    ice_mass = ice_number * (self.rho_w * self.droplet_volume)
     ice_mass_per_volume = ice_mass / self.volume
     return ice_mass_per_volume</code></pre>
 </details>
@@ -114,7 +113,7 @@ class FrozenFraction:
 </summary>
 <pre><code class="python">def qi2ff(self, ice_mass_per_volume):
     ice_mass = ice_mass_per_volume * self.volume
-    ice_number = ice_mass / (const.rho_w * self.droplet_volume)
+    ice_number = ice_mass / (self.rho_w * self.droplet_volume)
     frozen_fraction = ice_number / self.total_particle_number
     return frozen_fraction</code></pre>
 </details>

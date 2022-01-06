@@ -30,14 +30,14 @@
 from pystrict import strict
 from PySDM import Formulae
 from PySDM.initialisation.sampling import spectral_sampling as spec_sampling
-from PySDM.physics import si, constants as const
-from PySDM_examples.Lowe_et_al_2019.aerosol import _Aerosol
+from PySDM.physics import si
+from PySDM_examples.Lowe_et_al_2019.aerosol import Aerosol
 
 
 @strict
 class Settings:
     def __init__(self, dt: float, n_sd_per_mode: int,
-                 aerosol: _Aerosol,
+                 aerosol: Aerosol,
                  model: str,
                  spectral_sampling: type(spec_sampling.SpectralSampling),
                  ):
@@ -45,8 +45,13 @@ class Settings:
         self.model = model
         self.n_sd_per_mode = n_sd_per_mode
         self.formulae = Formulae(
-            surface_tension=&#39;CompressedFilmOvadnevaite&#39; if model == &#39;film&#39; else &#39;Constant&#39;
+            surface_tension=&#39;CompressedFilmOvadnevaite&#39; if model == &#39;film&#39; else &#39;Constant&#39;,
+            constants={
+                &#39;sgm_org&#39;: 40 * si.mN / si.m,
+                &#39;delta_min&#39;: 0.1 * si.nm
+            }
         )
+        const = self.formulae.constants
         self.aerosol = aerosol
         self.spectral_sampling = spectral_sampling
         self.t_max = (400 + 196) * si.s
@@ -77,6 +82,7 @@ class Settings:
 
     @property
     def rho0(self):
+        const = self.formulae.constants
         rhod0 = self.formulae.trivia.p_d(self.p0, self.q0) / self.T0 / const.Rd
         return rhod0 * (1 + self.q0)
 
@@ -106,7 +112,7 @@ class Settings:
 <dl>
 <dt id="PySDM_examples.Lowe_et_al_2019.settings.Settings"><code class="flex name class">
 <span>class <span class="ident">Settings</span></span>
-<span>(</span><span>dt: float, n_sd_per_mode: int, aerosol: PySDM_examples.Lowe_et_al_2019.aerosol._Aerosol, model: str, spectral_sampling: type)</span>
+<span>(</span><span>dt: float, n_sd_per_mode: int, aerosol: <a title="PySDM_examples.Lowe_et_al_2019.aerosol.Aerosol" href="aerosol.html#PySDM_examples.Lowe_et_al_2019.aerosol.Aerosol">Aerosol</a>, model: str, spectral_sampling: type)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -117,7 +123,7 @@ class Settings:
 <pre><code class="python">@strict
 class Settings:
     def __init__(self, dt: float, n_sd_per_mode: int,
-                 aerosol: _Aerosol,
+                 aerosol: Aerosol,
                  model: str,
                  spectral_sampling: type(spec_sampling.SpectralSampling),
                  ):
@@ -125,8 +131,13 @@ class Settings:
         self.model = model
         self.n_sd_per_mode = n_sd_per_mode
         self.formulae = Formulae(
-            surface_tension=&#39;CompressedFilmOvadnevaite&#39; if model == &#39;film&#39; else &#39;Constant&#39;
+            surface_tension=&#39;CompressedFilmOvadnevaite&#39; if model == &#39;film&#39; else &#39;Constant&#39;,
+            constants={
+                &#39;sgm_org&#39;: 40 * si.mN / si.m,
+                &#39;delta_min&#39;: 0.1 * si.nm
+            }
         )
+        const = self.formulae.constants
         self.aerosol = aerosol
         self.spectral_sampling = spectral_sampling
         self.t_max = (400 + 196) * si.s
@@ -157,6 +168,7 @@ class Settings:
 
     @property
     def rho0(self):
+        const = self.formulae.constants
         rhod0 = self.formulae.trivia.p_d(self.p0, self.q0) / self.T0 / const.Rd
         return rhod0 * (1 + self.q0)
 
@@ -211,6 +223,7 @@ def output_steps(self) -&gt; np.ndarray:
 </summary>
 <pre><code class="python">@property
 def rho0(self):
+    const = self.formulae.constants
     rhod0 = self.formulae.trivia.p_d(self.p0, self.q0) / self.T0 / const.Rd
     return rhod0 * (1 + self.q0)</code></pre>
 </details>

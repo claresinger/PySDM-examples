@@ -34,7 +34,7 @@ from PySDM.dynamics import (
     AmbientThermodynamics, Freezing
 )
 from PySDM.environments import Kinematic2D
-from PySDM.initialisation.sampling import spectral_sampling, spatial_sampling
+from PySDM.initialisation.sampling import spatial_sampling
 from PySDM import products as PySDM_products
 from PySDM_examples.Szumowski_et_al_1998.mpdata_2d import MPDATA_2D
 from PySDM_examples.utils import DummyController
@@ -53,12 +53,14 @@ class Simulation:
         return self.particulator.products
 
     def reinit(self, products=None):
-        backend = self.backend_class(formulae=self.settings.formulae)
+        formulae = self.settings.formulae
+        backend = self.backend_class(formulae=formulae)
         builder = Builder(n_sd=self.settings.n_sd, backend=backend)
         environment = Kinematic2D(dt=self.settings.dt,
                                   grid=self.settings.grid,
                                   size=self.settings.size,
-                                  rhod_of=self.settings.rhod_of_zZ)
+                                  rhod_of=self.settings.rhod_of_zZ,
+                                  mixed_phase=self.settings.processes[&#39;freezing&#39;])
         builder.set_environment(environment)
 
         cloud_range = (
@@ -113,11 +115,15 @@ class Simulation:
             PySDM_products.AmbientDryAirPotentialTemperature(name=&#39;thd_env&#39;, var=&#39;thd&#39;),
             PySDM_products.CPUTime(),
             PySDM_products.WallTime(),
-            PySDM_products.EffectiveRadius(unit=&#39;um&#39;, radius_range=cloud_range)
+            PySDM_products.EffectiveRadius(unit=&#39;um&#39;, radius_range=cloud_range),
+            PySDM_products.RadiusBinnedNumberAveragedTerminalVelocity(
+                radius_bin_edges=self.settings.terminal_velocity_radius_bin_edges
+            )
         ]
 
         if self.settings.processes[&#39;fluid advection&#39;]:
             builder.add_dynamic(AmbientThermodynamics())
+            products.append(PySDM_products.MaxCourantNumber())
         if self.settings.processes[&#34;condensation&#34;]:
             condensation = Condensation(
                 rtol_x=self.settings.condensation_rtol_x,
@@ -181,34 +187,42 @@ class Simulation:
             products.append(PySDM_products.CollisionRatePerGridbox())
             products.append(PySDM_products.CollisionRateDeficitPerGridbox())
         if self.settings.processes[&#34;freezing&#34;]:
-            builder.add_dynamic(Freezing())
+            builder.add_dynamic(Freezing(singular=self.settings.freezing_singular))
             products.append(PySDM_products.IceWaterContent())
-            products.append(PySDM_products.FreezableSpecificConcentration(
-                self.settings.T_bins_edges))
-            products.append(PySDM_products.ParticleSpecificConcentration())
-
-        kw = {}
-        if self.settings.processes[&#34;freezing&#34;]:
-            raise NotImplementedError()
-            # kw[&#39;spectro_glacial_discretisation&#39;] = spectro_glacial.Independent(
-            #     size_spectrum=self.settings.spectrum_per_mass_of_dry_air,
-            #     freezing_temperature_spectrum=self.settings.formulae.freezing_temperature_spectrum
-            # )
-        # else:
-        kw[&#39;spectral_discretisation&#39;] = spectral_sampling.UniformRandom(
-            spectrum=self.settings.spectrum_per_mass_of_dry_air
-        )
+            if self.settings.freezing_singular:
+                products.append(PySDM_products.FreezableSpecificConcentration(
+                    self.settings.T_bins_edges))
+            else:
+                products.append(PySDM_products.TotalUnfrozenImmersedSurfaceArea())
+                # TODO #599 immersed surf spec
+            products.append(PySDM_products.ParticleSpecificConcentration(unit=&#39;mg^-1&#39;))
 
         attributes = environment.init_attributes(
             spatial_discretisation=spatial_sampling.Pseudorandom(),
-            **kw,
+            dry_radius_spectrum=self.settings.spectrum_per_mass_of_dry_air,
             kappa=self.settings.kappa
         )
 
         if self.settings.processes[&#34;freezing&#34;]:
-            attributes[&#39;spheroid mass&#39;] = np.zeros(self.settings.n_sd)
+            if self.settings.freezing_inp_spec is None:
+                immersed_surface_area = formulae.trivia.sphere_surface(
+                    diameter=2 * formulae.trivia.radius(volume=attributes[&#39;dry volume&#39;])
+                )
+            else:
+                immersed_surface_area = self.settings.freezing_inp_spec.percentiles(
+                    np.random.random(self.settings.n_sd),  # TODO #599: seed
+                )
 
-        self.particulator = builder.build(attributes, products)
+            if self.settings.freezing_singular:
+                attributes[&#39;freezing temperature&#39;] = formulae.freezing_temperature_spectrum.invcdf(
+                    np.random.random(self.settings.n_sd),  # TODO #599: seed
+                    immersed_surface_area
+                )
+            else:
+                attributes[&#39;immersed surface area&#39;] = immersed_surface_area
+
+        self.particulator = builder.build(attributes, tuple(products))
+
         if self.SpinUp is not None:
             self.SpinUp(self.particulator, self.settings.n_spin_up)
         if self.storage is not None:
@@ -267,12 +281,14 @@ class Simulation:
         return self.particulator.products
 
     def reinit(self, products=None):
-        backend = self.backend_class(formulae=self.settings.formulae)
+        formulae = self.settings.formulae
+        backend = self.backend_class(formulae=formulae)
         builder = Builder(n_sd=self.settings.n_sd, backend=backend)
         environment = Kinematic2D(dt=self.settings.dt,
                                   grid=self.settings.grid,
                                   size=self.settings.size,
-                                  rhod_of=self.settings.rhod_of_zZ)
+                                  rhod_of=self.settings.rhod_of_zZ,
+                                  mixed_phase=self.settings.processes[&#39;freezing&#39;])
         builder.set_environment(environment)
 
         cloud_range = (
@@ -327,11 +343,15 @@ class Simulation:
             PySDM_products.AmbientDryAirPotentialTemperature(name=&#39;thd_env&#39;, var=&#39;thd&#39;),
             PySDM_products.CPUTime(),
             PySDM_products.WallTime(),
-            PySDM_products.EffectiveRadius(unit=&#39;um&#39;, radius_range=cloud_range)
+            PySDM_products.EffectiveRadius(unit=&#39;um&#39;, radius_range=cloud_range),
+            PySDM_products.RadiusBinnedNumberAveragedTerminalVelocity(
+                radius_bin_edges=self.settings.terminal_velocity_radius_bin_edges
+            )
         ]
 
         if self.settings.processes[&#39;fluid advection&#39;]:
             builder.add_dynamic(AmbientThermodynamics())
+            products.append(PySDM_products.MaxCourantNumber())
         if self.settings.processes[&#34;condensation&#34;]:
             condensation = Condensation(
                 rtol_x=self.settings.condensation_rtol_x,
@@ -395,34 +415,42 @@ class Simulation:
             products.append(PySDM_products.CollisionRatePerGridbox())
             products.append(PySDM_products.CollisionRateDeficitPerGridbox())
         if self.settings.processes[&#34;freezing&#34;]:
-            builder.add_dynamic(Freezing())
+            builder.add_dynamic(Freezing(singular=self.settings.freezing_singular))
             products.append(PySDM_products.IceWaterContent())
-            products.append(PySDM_products.FreezableSpecificConcentration(
-                self.settings.T_bins_edges))
-            products.append(PySDM_products.ParticleSpecificConcentration())
-
-        kw = {}
-        if self.settings.processes[&#34;freezing&#34;]:
-            raise NotImplementedError()
-            # kw[&#39;spectro_glacial_discretisation&#39;] = spectro_glacial.Independent(
-            #     size_spectrum=self.settings.spectrum_per_mass_of_dry_air,
-            #     freezing_temperature_spectrum=self.settings.formulae.freezing_temperature_spectrum
-            # )
-        # else:
-        kw[&#39;spectral_discretisation&#39;] = spectral_sampling.UniformRandom(
-            spectrum=self.settings.spectrum_per_mass_of_dry_air
-        )
+            if self.settings.freezing_singular:
+                products.append(PySDM_products.FreezableSpecificConcentration(
+                    self.settings.T_bins_edges))
+            else:
+                products.append(PySDM_products.TotalUnfrozenImmersedSurfaceArea())
+                # TODO #599 immersed surf spec
+            products.append(PySDM_products.ParticleSpecificConcentration(unit=&#39;mg^-1&#39;))
 
         attributes = environment.init_attributes(
             spatial_discretisation=spatial_sampling.Pseudorandom(),
-            **kw,
+            dry_radius_spectrum=self.settings.spectrum_per_mass_of_dry_air,
             kappa=self.settings.kappa
         )
 
         if self.settings.processes[&#34;freezing&#34;]:
-            attributes[&#39;spheroid mass&#39;] = np.zeros(self.settings.n_sd)
+            if self.settings.freezing_inp_spec is None:
+                immersed_surface_area = formulae.trivia.sphere_surface(
+                    diameter=2 * formulae.trivia.radius(volume=attributes[&#39;dry volume&#39;])
+                )
+            else:
+                immersed_surface_area = self.settings.freezing_inp_spec.percentiles(
+                    np.random.random(self.settings.n_sd),  # TODO #599: seed
+                )
 
-        self.particulator = builder.build(attributes, products)
+            if self.settings.freezing_singular:
+                attributes[&#39;freezing temperature&#39;] = formulae.freezing_temperature_spectrum.invcdf(
+                    np.random.random(self.settings.n_sd),  # TODO #599: seed
+                    immersed_surface_area
+                )
+            else:
+                attributes[&#39;immersed surface area&#39;] = immersed_surface_area
+
+        self.particulator = builder.build(attributes, tuple(products))
+
         if self.SpinUp is not None:
             self.SpinUp(self.particulator, self.settings.n_spin_up)
         if self.storage is not None:
@@ -475,12 +503,14 @@ def products(self):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def reinit(self, products=None):
-    backend = self.backend_class(formulae=self.settings.formulae)
+    formulae = self.settings.formulae
+    backend = self.backend_class(formulae=formulae)
     builder = Builder(n_sd=self.settings.n_sd, backend=backend)
     environment = Kinematic2D(dt=self.settings.dt,
                               grid=self.settings.grid,
                               size=self.settings.size,
-                              rhod_of=self.settings.rhod_of_zZ)
+                              rhod_of=self.settings.rhod_of_zZ,
+                              mixed_phase=self.settings.processes[&#39;freezing&#39;])
     builder.set_environment(environment)
 
     cloud_range = (
@@ -535,11 +565,15 @@ def products(self):
         PySDM_products.AmbientDryAirPotentialTemperature(name=&#39;thd_env&#39;, var=&#39;thd&#39;),
         PySDM_products.CPUTime(),
         PySDM_products.WallTime(),
-        PySDM_products.EffectiveRadius(unit=&#39;um&#39;, radius_range=cloud_range)
+        PySDM_products.EffectiveRadius(unit=&#39;um&#39;, radius_range=cloud_range),
+        PySDM_products.RadiusBinnedNumberAveragedTerminalVelocity(
+            radius_bin_edges=self.settings.terminal_velocity_radius_bin_edges
+        )
     ]
 
     if self.settings.processes[&#39;fluid advection&#39;]:
         builder.add_dynamic(AmbientThermodynamics())
+        products.append(PySDM_products.MaxCourantNumber())
     if self.settings.processes[&#34;condensation&#34;]:
         condensation = Condensation(
             rtol_x=self.settings.condensation_rtol_x,
@@ -603,34 +637,42 @@ def products(self):
         products.append(PySDM_products.CollisionRatePerGridbox())
         products.append(PySDM_products.CollisionRateDeficitPerGridbox())
     if self.settings.processes[&#34;freezing&#34;]:
-        builder.add_dynamic(Freezing())
+        builder.add_dynamic(Freezing(singular=self.settings.freezing_singular))
         products.append(PySDM_products.IceWaterContent())
-        products.append(PySDM_products.FreezableSpecificConcentration(
-            self.settings.T_bins_edges))
-        products.append(PySDM_products.ParticleSpecificConcentration())
-
-    kw = {}
-    if self.settings.processes[&#34;freezing&#34;]:
-        raise NotImplementedError()
-        # kw[&#39;spectro_glacial_discretisation&#39;] = spectro_glacial.Independent(
-        #     size_spectrum=self.settings.spectrum_per_mass_of_dry_air,
-        #     freezing_temperature_spectrum=self.settings.formulae.freezing_temperature_spectrum
-        # )
-    # else:
-    kw[&#39;spectral_discretisation&#39;] = spectral_sampling.UniformRandom(
-        spectrum=self.settings.spectrum_per_mass_of_dry_air
-    )
+        if self.settings.freezing_singular:
+            products.append(PySDM_products.FreezableSpecificConcentration(
+                self.settings.T_bins_edges))
+        else:
+            products.append(PySDM_products.TotalUnfrozenImmersedSurfaceArea())
+            # TODO #599 immersed surf spec
+        products.append(PySDM_products.ParticleSpecificConcentration(unit=&#39;mg^-1&#39;))
 
     attributes = environment.init_attributes(
         spatial_discretisation=spatial_sampling.Pseudorandom(),
-        **kw,
+        dry_radius_spectrum=self.settings.spectrum_per_mass_of_dry_air,
         kappa=self.settings.kappa
     )
 
     if self.settings.processes[&#34;freezing&#34;]:
-        attributes[&#39;spheroid mass&#39;] = np.zeros(self.settings.n_sd)
+        if self.settings.freezing_inp_spec is None:
+            immersed_surface_area = formulae.trivia.sphere_surface(
+                diameter=2 * formulae.trivia.radius(volume=attributes[&#39;dry volume&#39;])
+            )
+        else:
+            immersed_surface_area = self.settings.freezing_inp_spec.percentiles(
+                np.random.random(self.settings.n_sd),  # TODO #599: seed
+            )
 
-    self.particulator = builder.build(attributes, products)
+        if self.settings.freezing_singular:
+            attributes[&#39;freezing temperature&#39;] = formulae.freezing_temperature_spectrum.invcdf(
+                np.random.random(self.settings.n_sd),  # TODO #599: seed
+                immersed_surface_area
+            )
+        else:
+            attributes[&#39;immersed surface area&#39;] = immersed_surface_area
+
+    self.particulator = builder.build(attributes, tuple(products))
+
     if self.SpinUp is not None:
         self.SpinUp(self.particulator, self.settings.n_spin_up)
     if self.storage is not None:

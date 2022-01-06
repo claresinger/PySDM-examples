@@ -30,7 +30,10 @@
 import numpy as np
 from PySDM import Formulae, physics
 from PySDM import formulae
-from PySDM_examples.utils.widgets import IntSlider, FloatSlider, VBox, Checkbox, Accordion, Dropdown
+from PySDM.physics import si
+from PySDM.initialisation.spectra import Lognormal
+from PySDM_examples.utils.widgets import IntSlider, FloatSlider, VBox, Checkbox, Accordion,\
+    Dropdown, RadioButtons, Layout
 
 
 class GUISettings:
@@ -39,12 +42,42 @@ class GUISettings:
 
     def __init__(self, settings):
         self.__settings = settings
+
         self.ui_dth0 = FloatSlider(
             description=&#34;$\\Delta\\theta_0$ [K]&#34;, value=0, min=-15, max=15)
         self.ui_dqv0 = FloatSlider(
             description=&#34;$\\Delta q_{v0}$ [g/kg]&#34;, value=0, min=-6, max=6)
+        self.ui_rhod_w_max = FloatSlider(
+            description=&#34;$\\rho_d w_{max}$&#34;, value=settings.rhod_w_max, min=.1, max=2, step=.1
+        )
         self.ui_kappa = FloatSlider(
             description=&#34;$\\kappa$ [1]&#34;, value=settings.kappa, min=0, max=1.5)
+
+        self.ui_freezing = {
+            &#39;model&#39;: RadioButtons(
+                options=(&#39;singular&#39;, &#39;time-dependent&#39;),
+                description=&#39;immersion frz&#39;,
+                layout={&#39;width&#39;: &#39;max-content&#39;}
+            ),
+            &#39;INP surface&#39;: RadioButtons(
+                options=(&#39;as dry surface&#39;, &#39;lognormal(A, sgm_g)&#39;),
+                description=&#39;INP surface&#39;
+            ),
+            &#39;lognormal_log10_A_um2&#39;: FloatSlider(
+                description=&#39;log10(A/$μm^2$)&#39;, min=-3, max=1, step=.5
+            ),
+            &#39;lognormal_ln_sgm_g&#39;: FloatSlider(
+                description=&#39;ln(sgm_g)&#39;, min=.5, max=3, step=.5
+            ),
+            &#39;ABIFM fit&#39;: Dropdown(
+                description=&#39;ABIFM fit&#39;, options=(&#39;Nonadecanol&#39;,)
+            ),
+            &#39;INAS fit&#39;: Dropdown(
+                description=&#39;INAS fit&#39;, options=(&#39;Niemand et al. 2012&#39;,)
+            )
+        }
+        # TODO #599 cool rate product + sing/tdep diff prod
+
         self.ui_nx = IntSlider(value=settings.grid[0], min=10, max=100, description=&#34;nx&#34;)
         self.ui_nz = IntSlider(value=settings.grid[1], min=10, max=100, description=&#34;nz&#34;)
         self.ui_dt = FloatSlider(value=settings.dt, min=.5, max=60, description=&#34;dt (Eulerian)&#34;)
@@ -92,7 +125,7 @@ class GUISettings:
                 value=v.default
             )
             for k, v in inspect.signature(Formulae.__init__).parameters.items()
-            if k not in (&#39;self&#39;, &#39;fastmath&#39;, &#39;seed&#39;)
+            if k not in (&#39;self&#39;, &#39;fastmath&#39;, &#39;seed&#39;, &#39;constants&#39;)
         ]
         self.ui_formulae_options.append(
             Checkbox(
@@ -115,6 +148,8 @@ class GUISettings:
 
         self.r_bins_edges = settings.r_bins_edges
         self.T_bins_edges = settings.T_bins_edges
+        self.terminal_velocity_radius_bin_edges = settings.terminal_velocity_radius_bin_edges
+
         self.size = settings.size
         self.condensation_substeps = settings.condensation_substeps
         self.condensation_dt_cond_range = settings.condensation_dt_cond_range
@@ -125,7 +160,7 @@ class GUISettings:
         self.coalescence_optimized_random = settings.coalescence_optimized_random
         self.coalescence_substeps = settings.coalescence_substeps
 
-        for attr in (&#39;rhod_of_zZ&#39;, &#39;versions&#39;, &#39;n_spin_up&#39;, &#39;stream_function&#39;):
+        for attr in (&#39;rhod_of_zZ&#39;, &#39;versions&#39;, &#39;n_spin_up&#39;):
             setattr(self, attr, getattr(settings, attr))
 
     @property
@@ -170,8 +205,16 @@ class GUISettings:
         return np.arange(0, self.n_steps + 1, self.steps_per_output_interval)
 
     @property
+    def rhod_w_max(self):
+        return self.ui_rhod_w_max.value
+
+    @property
     def kappa(self):
         return self.ui_kappa.value
+
+    @property
+    def freezing_singular(self):
+        return self.ui_freezing[&#39;model&#39;].value == &#39;singular&#39;
 
     @property
     def grid(self):
@@ -240,9 +283,32 @@ class GUISettings:
                 return widget.value
         raise Exception()
 
+    def stream_function(self, xX, zZ, _):
+        assert hasattr(self.__settings, &#39;rhod_w_max&#39;)
+        self.__settings.rhod_w_max = self.ui_rhod_w_max.value
+        return self.__settings.stream_function(xX, zZ, _)
+
+    @property
+    def freezing_inp_spec(self):
+        if self.ui_freezing[&#39;INP surface&#39;].value == &#39;as dry surface&#39;:
+            return None
+        if self.ui_freezing[&#39;INP surface&#39;].value == &#39;lognormal(A, sgm_g)&#39;:
+            return Lognormal(
+                norm_factor=1,
+                m_mode=10**(self.ui_freezing[&#39;lognormal_log10_A_um2&#39;].value * si.um**2),
+                s_geom=np.exp(self.ui_freezing[&#39;lognormal_ln_sgm_g&#39;].value)
+            )
+        raise NotImplementedError()
+
     def box(self):
         layout = Accordion(children=[
-            VBox([self.ui_dth0, self.ui_dqv0, self.ui_kappa]),
+            VBox([
+                self.ui_dth0,
+                self.ui_dqv0,
+                self.ui_kappa,
+                self.ui_rhod_w_max,
+                *self.ui_freezing.values()
+            ]),
             VBox([*self.ui_processes]),
             VBox([self.ui_nx, self.ui_nz, self.ui_sdpg, self.ui_dt, self.ui_simulation_time,
                   self.ui_condensation_rtol_x, self.ui_condensation_rtol_thd,
@@ -251,12 +317,28 @@ class GUISettings:
             VBox([*self.ui_formulae_options]),
             VBox([*self.ui_output_options.values()])
         ])
-        layout.set_title(0, &#39;environment&#39;)
+        layout.set_title(0, &#39;parameters&#39;)
         layout.set_title(1, &#39;processes&#39;)
         layout.set_title(2, &#39;discretisation&#39;)
-        layout.set_title(3, &#39;physics&#39;)
+        layout.set_title(3, &#39;formulae&#39;)
         layout.set_title(4, &#39;output&#39;)
-        return layout</code></pre>
+
+        layout.observe(self.hide_and_show, names=&#34;selected_index&#34;)
+        self.hide_and_show()
+
+        return layout
+
+    def hide_and_show(self, _=None):
+        freezing_enabled = self.processes[&#39;freezing&#39;]
+        for widget in self.ui_freezing.values():
+            set_visibility(widget, freezing_enabled)
+
+
+def set_visibility(widget, visible):
+    if visible:
+        widget.layout = Layout()
+    else:
+        widget.layout = Layout(visibility=&#39;hidden&#39;)</code></pre>
 </details>
 </section>
 <section>
@@ -264,6 +346,25 @@ class GUISettings:
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.set_visibility"><code class="name flex">
+<span>def <span class="ident">set_visibility</span></span>(<span>widget, visible)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_visibility(widget, visible):
+    if visible:
+        widget.layout = Layout()
+    else:
+        widget.layout = Layout(visibility=&#39;hidden&#39;)</code></pre>
+</details>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -284,12 +385,42 @@ class GUISettings:
 
     def __init__(self, settings):
         self.__settings = settings
+
         self.ui_dth0 = FloatSlider(
             description=&#34;$\\Delta\\theta_0$ [K]&#34;, value=0, min=-15, max=15)
         self.ui_dqv0 = FloatSlider(
             description=&#34;$\\Delta q_{v0}$ [g/kg]&#34;, value=0, min=-6, max=6)
+        self.ui_rhod_w_max = FloatSlider(
+            description=&#34;$\\rho_d w_{max}$&#34;, value=settings.rhod_w_max, min=.1, max=2, step=.1
+        )
         self.ui_kappa = FloatSlider(
             description=&#34;$\\kappa$ [1]&#34;, value=settings.kappa, min=0, max=1.5)
+
+        self.ui_freezing = {
+            &#39;model&#39;: RadioButtons(
+                options=(&#39;singular&#39;, &#39;time-dependent&#39;),
+                description=&#39;immersion frz&#39;,
+                layout={&#39;width&#39;: &#39;max-content&#39;}
+            ),
+            &#39;INP surface&#39;: RadioButtons(
+                options=(&#39;as dry surface&#39;, &#39;lognormal(A, sgm_g)&#39;),
+                description=&#39;INP surface&#39;
+            ),
+            &#39;lognormal_log10_A_um2&#39;: FloatSlider(
+                description=&#39;log10(A/$μm^2$)&#39;, min=-3, max=1, step=.5
+            ),
+            &#39;lognormal_ln_sgm_g&#39;: FloatSlider(
+                description=&#39;ln(sgm_g)&#39;, min=.5, max=3, step=.5
+            ),
+            &#39;ABIFM fit&#39;: Dropdown(
+                description=&#39;ABIFM fit&#39;, options=(&#39;Nonadecanol&#39;,)
+            ),
+            &#39;INAS fit&#39;: Dropdown(
+                description=&#39;INAS fit&#39;, options=(&#39;Niemand et al. 2012&#39;,)
+            )
+        }
+        # TODO #599 cool rate product + sing/tdep diff prod
+
         self.ui_nx = IntSlider(value=settings.grid[0], min=10, max=100, description=&#34;nx&#34;)
         self.ui_nz = IntSlider(value=settings.grid[1], min=10, max=100, description=&#34;nz&#34;)
         self.ui_dt = FloatSlider(value=settings.dt, min=.5, max=60, description=&#34;dt (Eulerian)&#34;)
@@ -337,7 +468,7 @@ class GUISettings:
                 value=v.default
             )
             for k, v in inspect.signature(Formulae.__init__).parameters.items()
-            if k not in (&#39;self&#39;, &#39;fastmath&#39;, &#39;seed&#39;)
+            if k not in (&#39;self&#39;, &#39;fastmath&#39;, &#39;seed&#39;, &#39;constants&#39;)
         ]
         self.ui_formulae_options.append(
             Checkbox(
@@ -360,6 +491,8 @@ class GUISettings:
 
         self.r_bins_edges = settings.r_bins_edges
         self.T_bins_edges = settings.T_bins_edges
+        self.terminal_velocity_radius_bin_edges = settings.terminal_velocity_radius_bin_edges
+
         self.size = settings.size
         self.condensation_substeps = settings.condensation_substeps
         self.condensation_dt_cond_range = settings.condensation_dt_cond_range
@@ -370,7 +503,7 @@ class GUISettings:
         self.coalescence_optimized_random = settings.coalescence_optimized_random
         self.coalescence_substeps = settings.coalescence_substeps
 
-        for attr in (&#39;rhod_of_zZ&#39;, &#39;versions&#39;, &#39;n_spin_up&#39;, &#39;stream_function&#39;):
+        for attr in (&#39;rhod_of_zZ&#39;, &#39;versions&#39;, &#39;n_spin_up&#39;):
             setattr(self, attr, getattr(settings, attr))
 
     @property
@@ -415,8 +548,16 @@ class GUISettings:
         return np.arange(0, self.n_steps + 1, self.steps_per_output_interval)
 
     @property
+    def rhod_w_max(self):
+        return self.ui_rhod_w_max.value
+
+    @property
     def kappa(self):
         return self.ui_kappa.value
+
+    @property
+    def freezing_singular(self):
+        return self.ui_freezing[&#39;model&#39;].value == &#39;singular&#39;
 
     @property
     def grid(self):
@@ -485,9 +626,32 @@ class GUISettings:
                 return widget.value
         raise Exception()
 
+    def stream_function(self, xX, zZ, _):
+        assert hasattr(self.__settings, &#39;rhod_w_max&#39;)
+        self.__settings.rhod_w_max = self.ui_rhod_w_max.value
+        return self.__settings.stream_function(xX, zZ, _)
+
+    @property
+    def freezing_inp_spec(self):
+        if self.ui_freezing[&#39;INP surface&#39;].value == &#39;as dry surface&#39;:
+            return None
+        if self.ui_freezing[&#39;INP surface&#39;].value == &#39;lognormal(A, sgm_g)&#39;:
+            return Lognormal(
+                norm_factor=1,
+                m_mode=10**(self.ui_freezing[&#39;lognormal_log10_A_um2&#39;].value * si.um**2),
+                s_geom=np.exp(self.ui_freezing[&#39;lognormal_ln_sgm_g&#39;].value)
+            )
+        raise NotImplementedError()
+
     def box(self):
         layout = Accordion(children=[
-            VBox([self.ui_dth0, self.ui_dqv0, self.ui_kappa]),
+            VBox([
+                self.ui_dth0,
+                self.ui_dqv0,
+                self.ui_kappa,
+                self.ui_rhod_w_max,
+                *self.ui_freezing.values()
+            ]),
             VBox([*self.ui_processes]),
             VBox([self.ui_nx, self.ui_nz, self.ui_sdpg, self.ui_dt, self.ui_simulation_time,
                   self.ui_condensation_rtol_x, self.ui_condensation_rtol_thd,
@@ -496,12 +660,21 @@ class GUISettings:
             VBox([*self.ui_formulae_options]),
             VBox([*self.ui_output_options.values()])
         ])
-        layout.set_title(0, &#39;environment&#39;)
+        layout.set_title(0, &#39;parameters&#39;)
         layout.set_title(1, &#39;processes&#39;)
         layout.set_title(2, &#39;discretisation&#39;)
-        layout.set_title(3, &#39;physics&#39;)
+        layout.set_title(3, &#39;formulae&#39;)
         layout.set_title(4, &#39;output&#39;)
-        return layout</code></pre>
+
+        layout.observe(self.hide_and_show, names=&#34;selected_index&#34;)
+        self.hide_and_show()
+
+        return layout
+
+    def hide_and_show(self, _=None):
+        freezing_enabled = self.processes[&#39;freezing&#39;]
+        for widget in self.ui_freezing.values():
+            set_visibility(widget, freezing_enabled)</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
@@ -601,6 +774,38 @@ def formulae(self) -&gt; Formulae:
     return Formulae(
         **{widget.description: widget.value for widget in self.ui_formulae_options}
     )</code></pre>
+</details>
+</dd>
+<dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.freezing_inp_spec"><code class="name">var <span class="ident">freezing_inp_spec</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def freezing_inp_spec(self):
+    if self.ui_freezing[&#39;INP surface&#39;].value == &#39;as dry surface&#39;:
+        return None
+    if self.ui_freezing[&#39;INP surface&#39;].value == &#39;lognormal(A, sgm_g)&#39;:
+        return Lognormal(
+            norm_factor=1,
+            m_mode=10**(self.ui_freezing[&#39;lognormal_log10_A_um2&#39;].value * si.um**2),
+            s_geom=np.exp(self.ui_freezing[&#39;lognormal_ln_sgm_g&#39;].value)
+        )
+    raise NotImplementedError()</code></pre>
+</details>
+</dd>
+<dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.freezing_singular"><code class="name">var <span class="ident">freezing_singular</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def freezing_singular(self):
+    return self.ui_freezing[&#39;model&#39;].value == &#39;singular&#39;</code></pre>
 </details>
 </dd>
 <dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.grid"><code class="name">var <span class="ident">grid</span></code></dt>
@@ -789,6 +994,18 @@ def processes(self):
     return result</code></pre>
 </details>
 </dd>
+<dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.rhod_w_max"><code class="name">var <span class="ident">rhod_w_max</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def rhod_w_max(self):
+    return self.ui_rhod_w_max.value</code></pre>
+</details>
+</dd>
 <dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.steps_per_output_interval"><code class="name">var <span class="ident">steps_per_output_interval</span> : int</code></dt>
 <dd>
 <div class="desc"></div>
@@ -815,7 +1032,13 @@ def steps_per_output_interval(self) -&gt; int:
 </summary>
 <pre><code class="python">def box(self):
     layout = Accordion(children=[
-        VBox([self.ui_dth0, self.ui_dqv0, self.ui_kappa]),
+        VBox([
+            self.ui_dth0,
+            self.ui_dqv0,
+            self.ui_kappa,
+            self.ui_rhod_w_max,
+            *self.ui_freezing.values()
+        ]),
         VBox([*self.ui_processes]),
         VBox([self.ui_nx, self.ui_nz, self.ui_sdpg, self.ui_dt, self.ui_simulation_time,
               self.ui_condensation_rtol_x, self.ui_condensation_rtol_thd,
@@ -824,12 +1047,46 @@ def steps_per_output_interval(self) -&gt; int:
         VBox([*self.ui_formulae_options]),
         VBox([*self.ui_output_options.values()])
     ])
-    layout.set_title(0, &#39;environment&#39;)
+    layout.set_title(0, &#39;parameters&#39;)
     layout.set_title(1, &#39;processes&#39;)
     layout.set_title(2, &#39;discretisation&#39;)
-    layout.set_title(3, &#39;physics&#39;)
+    layout.set_title(3, &#39;formulae&#39;)
     layout.set_title(4, &#39;output&#39;)
+
+    layout.observe(self.hide_and_show, names=&#34;selected_index&#34;)
+    self.hide_and_show()
+
     return layout</code></pre>
+</details>
+</dd>
+<dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.hide_and_show"><code class="name flex">
+<span>def <span class="ident">hide_and_show</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def hide_and_show(self, _=None):
+    freezing_enabled = self.processes[&#39;freezing&#39;]
+    for widget in self.ui_freezing.values():
+        set_visibility(widget, freezing_enabled)</code></pre>
+</details>
+</dd>
+<dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.stream_function"><code class="name flex">
+<span>def <span class="ident">stream_function</span></span>(<span>self, xX, zZ, _)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def stream_function(self, xX, zZ, _):
+    assert hasattr(self.__settings, &#39;rhod_w_max&#39;)
+    self.__settings.rhod_w_max = self.ui_rhod_w_max.value
+    return self.__settings.stream_function(xX, zZ, _)</code></pre>
 </details>
 </dd>
 </dl>
@@ -848,6 +1105,11 @@ def steps_per_output_interval(self) -&gt; int:
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998" href="index.html">PySDM_examples.Szumowski_et_al_1998</a></code></li>
 </ul>
 </li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.set_visibility" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.set_visibility">set_visibility</a></code></li>
+</ul>
+</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
@@ -862,7 +1124,10 @@ def steps_per_output_interval(self) -&gt; int:
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.drizzle_radius_threshold" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.drizzle_radius_threshold">drizzle_radius_threshold</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.dt" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.dt">dt</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.formulae" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.formulae">formulae</a></code></li>
+<li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.freezing_inp_spec" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.freezing_inp_spec">freezing_inp_spec</a></code></li>
+<li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.freezing_singular" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.freezing_singular">freezing_singular</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.grid" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.grid">grid</a></code></li>
+<li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.hide_and_show" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.hide_and_show">hide_and_show</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.initial_dry_potential_temperature_profile" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.initial_dry_potential_temperature_profile">initial_dry_potential_temperature_profile</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.initial_vapour_mixing_ratio_profile" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.initial_vapour_mixing_ratio_profile">initial_vapour_mixing_ratio_profile</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.kappa" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.kappa">kappa</a></code></li>
@@ -876,7 +1141,9 @@ def steps_per_output_interval(self) -&gt; int:
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.output_interval" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.output_interval">output_interval</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.output_steps" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.output_steps">output_steps</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.processes" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.processes">processes</a></code></li>
+<li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.rhod_w_max" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.rhod_w_max">rhod_w_max</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.steps_per_output_interval" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.steps_per_output_interval">steps_per_output_interval</a></code></li>
+<li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.stream_function" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.stream_function">stream_function</a></code></li>
 </ul>
 </li>
 </ul>

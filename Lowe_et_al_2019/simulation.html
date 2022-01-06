@@ -43,8 +43,7 @@ class Simulation:
                      p0=settings.p0,
                      q0=settings.q0,
                      T0=settings.T0,
-                     w=settings.w,
-                     g=settings.g)
+                     w=settings.w)
         n_sd = settings.n_sd_per_mode * len(settings.aerosol.aerosol_modes_per_cc)
         builder = Builder(n_sd=n_sd, backend=CPU(formulae=settings.formulae))
         builder.set_environment(env)
@@ -155,8 +154,7 @@ class Simulation:
                      p0=settings.p0,
                      q0=settings.q0,
                      T0=settings.T0,
-                     w=settings.w,
-                     g=settings.g)
+                     w=settings.w)
         n_sd = settings.n_sd_per_mode * len(settings.aerosol.aerosol_modes_per_cc)
         builder = Builder(n_sd=n_sd, backend=CPU(formulae=settings.formulae))
         builder.set_environment(env)

@@ -27,9 +27,12 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def update_thermo(particulator, T):
-    env = particulator.env
+    env = particulator.environment
+    svp = particulator.formulae.saturation_vapour_pressure
+    const = particulator.formulae.constants
+
     env[&#39;T&#39;] = T
-    env[&#39;a_w_ice&#39;] = particulator.formulae.saturation_vapour_pressure.a_w_ice.py_func(T)
+    env[&#39;a_w_ice&#39;] = svp.ice_Celsius(T - const.T0) / svp.pvs_Celsius(T - const.T0)
 
 
 def run_simulation(particulator, temperature_profile, n_steps):
@@ -92,9 +95,12 @@ def run_simulation(particulator, temperature_profile, n_steps):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def update_thermo(particulator, T):
-    env = particulator.env
+    env = particulator.environment
+    svp = particulator.formulae.saturation_vapour_pressure
+    const = particulator.formulae.constants
+
     env[&#39;T&#39;] = T
-    env[&#39;a_w_ice&#39;] = particulator.formulae.saturation_vapour_pressure.a_w_ice.py_func(T)</code></pre>
+    env[&#39;a_w_ice&#39;] = svp.ice_Celsius(T - const.T0) / svp.pvs_Celsius(T - const.T0)</code></pre>
 </details>
 </dd>
 </dl>

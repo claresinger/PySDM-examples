@@ -33,16 +33,16 @@ import numpy as np  # pylint: disable=reimported
 import PyMPDATA
 import PySDM
 from PySDM import Formulae
-from PySDM.physics import si, constants as const
+from PySDM.physics import si
 from PySDM.dynamics import condensation, coalescence
 from PySDM.physics.coalescence_kernels import Geometric
 from PySDM.initialisation import spectra
 
 
 class Common:
-    def __init__(self, fastmath):
-        self.formulae = Formulae(condensation_coordinate=&#39;VolumeLogarithm&#39;, fastmath=fastmath)
-        self.g = const.g_std
+    def __init__(self, formulae: Formulae):
+        self.formulae = formulae
+        const = formulae.constants
 
         self.condensation_rtol_x = condensation.DEFAULTS.rtol_x
         self.condensation_rtol_thd = condensation.DEFAULTS.rtol_thd
@@ -57,13 +57,28 @@ class Common:
         self.coalescence_substeps = 1
         self.kernel = Geometric(collection_efficiency=1)
 
+        self.freezing_singular = True
+        self.freezing_inp_spec = None
+
         self.n_sd_per_gridbox = 20
+
         self.aerosol_radius_threshold = .5 * si.micrometre
         self.drizzle_radius_threshold = 25 * si.micrometre
+
         self.r_bins_edges = np.logspace(np.log10(0.001 * si.micrometre),
                                         np.log10(100 * si.micrometre),
                                         64, endpoint=True)
         self.T_bins_edges = np.linspace(const.T0-40, const.T0-20, 64, endpoint=True)
+
+        # TODO #599
+        n_bins_per_phase = 25
+        solid_phase_radii = np.linspace(-n_bins_per_phase, -1, n_bins_per_phase+1) * si.um
+        liquid_phase_radii = np.linspace(0, n_bins_per_phase, n_bins_per_phase+1) * si.um
+        self.terminal_velocity_radius_bin_edges = np.concatenate([
+            solid_phase_radii,
+            liquid_phase_radii
+        ])
+
         self.output_interval = 1 * si.minute
         self.spin_up_time = 0
 
@@ -86,8 +101,7 @@ class Common:
             &#34;coalescence&#34;: True,
             &#34;condensation&#34;: True,
             &#34;sedimentation&#34;: True,
-            &#34;freezing&#34;: False,
-            &#34;PartMC piggy-backer&#34;: False
+            &#34;freezing&#34;: False
         }
 
         self.mpdata_iters = 2
@@ -160,7 +174,7 @@ class Common:
 <dl>
 <dt id="PySDM_examples.Morrison_and_Grabowski_2007.common.Common"><code class="flex name class">
 <span>class <span class="ident">Common</span></span>
-<span>(</span><span>fastmath)</span>
+<span>(</span><span>formulae: PySDM.formulae.Formulae)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -169,9 +183,9 @@ class Common:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Common:
-    def __init__(self, fastmath):
-        self.formulae = Formulae(condensation_coordinate=&#39;VolumeLogarithm&#39;, fastmath=fastmath)
-        self.g = const.g_std
+    def __init__(self, formulae: Formulae):
+        self.formulae = formulae
+        const = formulae.constants
 
         self.condensation_rtol_x = condensation.DEFAULTS.rtol_x
         self.condensation_rtol_thd = condensation.DEFAULTS.rtol_thd
@@ -186,13 +200,28 @@ class Common:
         self.coalescence_substeps = 1
         self.kernel = Geometric(collection_efficiency=1)
 
+        self.freezing_singular = True
+        self.freezing_inp_spec = None
+
         self.n_sd_per_gridbox = 20
+
         self.aerosol_radius_threshold = .5 * si.micrometre
         self.drizzle_radius_threshold = 25 * si.micrometre
+
         self.r_bins_edges = np.logspace(np.log10(0.001 * si.micrometre),
                                         np.log10(100 * si.micrometre),
                                         64, endpoint=True)
         self.T_bins_edges = np.linspace(const.T0-40, const.T0-20, 64, endpoint=True)
+
+        # TODO #599
+        n_bins_per_phase = 25
+        solid_phase_radii = np.linspace(-n_bins_per_phase, -1, n_bins_per_phase+1) * si.um
+        liquid_phase_radii = np.linspace(0, n_bins_per_phase, n_bins_per_phase+1) * si.um
+        self.terminal_velocity_radius_bin_edges = np.concatenate([
+            solid_phase_radii,
+            liquid_phase_radii
+        ])
+
         self.output_interval = 1 * si.minute
         self.spin_up_time = 0
 
@@ -215,8 +244,7 @@ class Common:
             &#34;coalescence&#34;: True,
             &#34;condensation&#34;: True,
             &#34;sedimentation&#34;: True,
-            &#34;freezing&#34;: False,
-            &#34;PartMC piggy-backer&#34;: False
+            &#34;freezing&#34;: False
         }
 
         self.mpdata_iters = 2

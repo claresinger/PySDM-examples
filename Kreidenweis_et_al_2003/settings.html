@@ -33,15 +33,19 @@ from PySDM import Formulae
 from PySDM.physics.aqueous_chemistry.support import AQUEOUS_COMPOUNDS
 from PySDM.initialisation.sampling import spectral_sampling as spec_sampling
 from PySDM.initialisation import spectra
-from PySDM.physics import si, constants as const
+from PySDM.physics import si
+from PySDM.physics.constants import T0, PPB, PPM
 
 
 @strict
 class Settings:
     def __init__(self, dt: float, n_sd: int, n_substep: int,
                  spectral_sampling: spec_sampling.SpectralSampling = spec_sampling.Logarithmic):
-        self.formulae = Formulae(saturation_vapour_pressure=&#39;AugustRocheMagnus&#39;)
-
+        self.formulae = Formulae(
+            saturation_vapour_pressure=&#39;AugustRocheMagnus&#39;,
+            constants={&#39;g_std&#39;: 10 * si.m / si.s**2}
+        )
+        const = self.formulae.constants
         self.DRY_RHO = 1800 * si.kg / (si.m ** 3)
         self.dry_molar_mass = Substance.from_formula(&#34;NH4HSO4&#34;).mass * si.gram / si.mole
 
@@ -52,14 +56,13 @@ class Settings:
         self.dt = dt
 
         self.w = .5 * si.m / si.s
-        self.g = 10 * si.m / si.s**2
 
         self.n_sd = n_sd
         self.n_substep = n_substep
 
         self.p0 = 950 * si.mbar
         self.T0 = 285.2 * si.K
-        pv0 = .95 * self.formulae.saturation_vapour_pressure.pvs_Celsius(self.T0 - const.T0)
+        pv0 = .95 * self.formulae.saturation_vapour_pressure.pvs_Celsius(self.T0 - T0)
         self.q0 = const.eps * pv0 / (self.p0 - pv0)
         self.kappa = .61
 
@@ -82,12 +85,12 @@ class Settings:
         ).sample(n_sd)
 
         self.ENVIRONMENT_MOLE_FRACTIONS = {
-            &#34;SO2&#34;: 0.2 * const.PPB,
-            &#34;O3&#34;: 50 * const.PPB,
-            &#34;H2O2&#34;: 0.5 * const.PPB,
-            &#34;CO2&#34;: 360 * const.PPM,
-            &#34;HNO3&#34;: 0.1 * const.PPB,
-            &#34;NH3&#34;: 0.1 * const.PPB,
+            &#34;SO2&#34;: 0.2 * PPB,
+            &#34;O3&#34;: 50 * PPB,
+            &#34;H2O2&#34;: 0.5 * PPB,
+            &#34;CO2&#34;: 360 * PPM,
+            &#34;HNO3&#34;: 0.1 * PPB,
+            &#34;NH3&#34;: 0.1 * PPB,
         }
 
         self.starting_amounts = {
@@ -139,8 +142,11 @@ class Settings:
 class Settings:
     def __init__(self, dt: float, n_sd: int, n_substep: int,
                  spectral_sampling: spec_sampling.SpectralSampling = spec_sampling.Logarithmic):
-        self.formulae = Formulae(saturation_vapour_pressure=&#39;AugustRocheMagnus&#39;)
-
+        self.formulae = Formulae(
+            saturation_vapour_pressure=&#39;AugustRocheMagnus&#39;,
+            constants={&#39;g_std&#39;: 10 * si.m / si.s**2}
+        )
+        const = self.formulae.constants
         self.DRY_RHO = 1800 * si.kg / (si.m ** 3)
         self.dry_molar_mass = Substance.from_formula(&#34;NH4HSO4&#34;).mass * si.gram / si.mole
 
@@ -151,14 +157,13 @@ class Settings:
         self.dt = dt
 
         self.w = .5 * si.m / si.s
-        self.g = 10 * si.m / si.s**2
 
         self.n_sd = n_sd
         self.n_substep = n_substep
 
         self.p0 = 950 * si.mbar
         self.T0 = 285.2 * si.K
-        pv0 = .95 * self.formulae.saturation_vapour_pressure.pvs_Celsius(self.T0 - const.T0)
+        pv0 = .95 * self.formulae.saturation_vapour_pressure.pvs_Celsius(self.T0 - T0)
         self.q0 = const.eps * pv0 / (self.p0 - pv0)
         self.kappa = .61
 
@@ -181,12 +186,12 @@ class Settings:
         ).sample(n_sd)
 
         self.ENVIRONMENT_MOLE_FRACTIONS = {
-            &#34;SO2&#34;: 0.2 * const.PPB,
-            &#34;O3&#34;: 50 * const.PPB,
-            &#34;H2O2&#34;: 0.5 * const.PPB,
-            &#34;CO2&#34;: 360 * const.PPM,
-            &#34;HNO3&#34;: 0.1 * const.PPB,
-            &#34;NH3&#34;: 0.1 * const.PPB,
+            &#34;SO2&#34;: 0.2 * PPB,
+            &#34;O3&#34;: 50 * PPB,
+            &#34;H2O2&#34;: 0.5 * PPB,
+            &#34;CO2&#34;: 360 * PPM,
+            &#34;HNO3&#34;: 0.1 * PPB,
+            &#34;NH3&#34;: 0.1 * PPB,
         }
 
         self.starting_amounts = {

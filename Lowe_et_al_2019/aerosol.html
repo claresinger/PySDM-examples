@@ -29,7 +29,8 @@
 <pre><code class="python">from pystrict import strict
 from chempy import Substance
 from PySDM.initialisation import spectra
-from PySDM.physics import si, constants as const
+from PySDM.physics import si
+from PySDM.physics.constants_defaults import rho_w, Mv
 
 compounds = (&#39;palmitic&#39;, &#39;SOA1&#39;, &#39;SOA2&#39;, &#39;(NH4)2SO4&#39;, &#39;NH4NO3&#39;, &#39;NaCl&#39;)
 
@@ -104,17 +105,17 @@ def kappa(mass_fractions: dict):
                              for i in compounds)
         else:
             raise AssertionError()
-        result[model] = ns_per_vol * const.Mv / const.rho_w
+        result[model] = ns_per_vol * Mv / rho_w
 
     return result
 
 
-class _Aerosol:
+class Aerosol:
     pass
 
 
 @strict
-class AerosolMarine(_Aerosol):
+class AerosolMarine(Aerosol):
     Aitken = {&#39;palmitic&#39;: .2, &#39;SOA1&#39;: 0, &#39;SOA2&#39;: 0, &#39;(NH4)2SO4&#39;: .8, &#39;NH4NO3&#39;: 0, &#39;NaCl&#39;: 0}
     Accumulation = {&#39;palmitic&#39;: .2, &#39;SOA1&#39;: 0, &#39;SOA2&#39;: 0, &#39;(NH4)2SO4&#39;: 0, &#39;NH4NO3&#39;: .8, &#39;NaCl&#39;: 0}
 
@@ -143,7 +144,7 @@ class AerosolMarine(_Aerosol):
 
 
 @strict
-class AerosolBoreal(_Aerosol):
+class AerosolBoreal(Aerosol):
     # note: SOA1 or SOA2 unclear from the paper
     Aitken = {
         &#39;palmitic&#39;: 0,
@@ -187,7 +188,7 @@ class AerosolBoreal(_Aerosol):
 
 
 @strict
-class AerosolNascent(_Aerosol):
+class AerosolNascent(Aerosol):
     Ultrafine = {&#39;palmitic&#39;: 0, &#39;SOA1&#39;: .52, &#39;SOA2&#39;: 0, &#39;(NH4)2SO4&#39;: .48, &#39;NH4NO3&#39;: 0, &#39;NaCl&#39;: 0}
     Accumulation = {&#39;palmitic&#39;: 0, &#39;SOA1&#39;: 0, &#39;SOA2&#39;: .3, &#39;(NH4)2SO4&#39;: .7, &#39;NH4NO3&#39;: 0, &#39;NaCl&#39;: 0}
 
@@ -266,7 +267,7 @@ class AerosolNascent(_Aerosol):
                              for i in compounds)
         else:
             raise AssertionError()
-        result[model] = ns_per_vol * const.Mv / const.rho_w
+        result[model] = ns_per_vol * Mv / rho_w
 
     return result</code></pre>
 </details>
@@ -293,6 +294,25 @@ class AerosolNascent(_Aerosol):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="PySDM_examples.Lowe_et_al_2019.aerosol.Aerosol"><code class="flex name class">
+<span>class <span class="ident">Aerosol</span></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Aerosol:
+    pass</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="PySDM_examples.Lowe_et_al_2019.aerosol.AerosolBoreal" href="#PySDM_examples.Lowe_et_al_2019.aerosol.AerosolBoreal">AerosolBoreal</a></li>
+<li><a title="PySDM_examples.Lowe_et_al_2019.aerosol.AerosolMarine" href="#PySDM_examples.Lowe_et_al_2019.aerosol.AerosolMarine">AerosolMarine</a></li>
+<li><a title="PySDM_examples.Lowe_et_al_2019.aerosol.AerosolNascent" href="#PySDM_examples.Lowe_et_al_2019.aerosol.AerosolNascent">AerosolNascent</a></li>
+</ul>
+</dd>
 <dt id="PySDM_examples.Lowe_et_al_2019.aerosol.AerosolBoreal"><code class="flex name class">
 <span>class <span class="ident">AerosolBoreal</span></span>
 </code></dt>
@@ -303,7 +323,7 @@ class AerosolNascent(_Aerosol):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@strict
-class AerosolBoreal(_Aerosol):
+class AerosolBoreal(Aerosol):
     # note: SOA1 or SOA2 unclear from the paper
     Aitken = {
         &#39;palmitic&#39;: 0,
@@ -347,7 +367,7 @@ class AerosolBoreal(_Aerosol):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>PySDM_examples.Lowe_et_al_2019.aerosol._Aerosol</li>
+<li><a title="PySDM_examples.Lowe_et_al_2019.aerosol.Aerosol" href="#PySDM_examples.Lowe_et_al_2019.aerosol.Aerosol">Aerosol</a></li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -375,7 +395,7 @@ class AerosolBoreal(_Aerosol):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@strict
-class AerosolMarine(_Aerosol):
+class AerosolMarine(Aerosol):
     Aitken = {&#39;palmitic&#39;: .2, &#39;SOA1&#39;: 0, &#39;SOA2&#39;: 0, &#39;(NH4)2SO4&#39;: .8, &#39;NH4NO3&#39;: 0, &#39;NaCl&#39;: 0}
     Accumulation = {&#39;palmitic&#39;: .2, &#39;SOA1&#39;: 0, &#39;SOA2&#39;: 0, &#39;(NH4)2SO4&#39;: 0, &#39;NH4NO3&#39;: .8, &#39;NaCl&#39;: 0}
 
@@ -404,7 +424,7 @@ class AerosolMarine(_Aerosol):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>PySDM_examples.Lowe_et_al_2019.aerosol._Aerosol</li>
+<li><a title="PySDM_examples.Lowe_et_al_2019.aerosol.Aerosol" href="#PySDM_examples.Lowe_et_al_2019.aerosol.Aerosol">Aerosol</a></li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -432,7 +452,7 @@ class AerosolMarine(_Aerosol):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@strict
-class AerosolNascent(_Aerosol):
+class AerosolNascent(Aerosol):
     Ultrafine = {&#39;palmitic&#39;: 0, &#39;SOA1&#39;: .52, &#39;SOA2&#39;: 0, &#39;(NH4)2SO4&#39;: .48, &#39;NH4NO3&#39;: 0, &#39;NaCl&#39;: 0}
     Accumulation = {&#39;palmitic&#39;: 0, &#39;SOA1&#39;: 0, &#39;SOA2&#39;: .3, &#39;(NH4)2SO4&#39;: .7, &#39;NH4NO3&#39;: 0, &#39;NaCl&#39;: 0}
 
@@ -461,7 +481,7 @@ class AerosolNascent(_Aerosol):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>PySDM_examples.Lowe_et_al_2019.aerosol._Aerosol</li>
+<li><a title="PySDM_examples.Lowe_et_al_2019.aerosol.Aerosol" href="#PySDM_examples.Lowe_et_al_2019.aerosol.Aerosol">Aerosol</a></li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -502,6 +522,9 @@ class AerosolNascent(_Aerosol):
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="PySDM_examples.Lowe_et_al_2019.aerosol.Aerosol" href="#PySDM_examples.Lowe_et_al_2019.aerosol.Aerosol">Aerosol</a></code></h4>
+</li>
 <li>
 <h4><code><a title="PySDM_examples.Lowe_et_al_2019.aerosol.AerosolBoreal" href="#PySDM_examples.Lowe_et_al_2019.aerosol.AerosolBoreal">AerosolBoreal</a></code></h4>
 <ul class="">

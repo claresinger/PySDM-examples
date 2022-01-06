@@ -39,13 +39,13 @@ from PySDM import products as PySDM_products
 A_VALUE_LARGER_THAN_ONE = 44
 
 
-def make_particulator(*, n_sd, dt, initial_temperature, singular, seed,
+def make_particulator(*, constants, n_sd, dt, initial_temperature, singular, seed,
                       shima_T_fz, ABIFM_spec, droplet_volume, total_particle_number, volume):
     attributes = {
         &#39;volume&#39;: np.ones(n_sd) * droplet_volume
     }
 
-    formulae_ctor_args = {&#39;seed&#39;: seed}
+    formulae_ctor_args = {&#39;seed&#39;: seed, &#39;constants&#39;: constants}
     if singular:
         formulae_ctor_args[&#39;freezing_temperature_spectrum&#39;] = shima_T_fz
     else:
@@ -78,11 +78,11 @@ def make_particulator(*, n_sd, dt, initial_temperature, singular, seed,
 
     return builder.build(
         attributes=attributes,
-        products=[
+        products=(
             PySDM_products.Time(name=&#39;t&#39;),
-            PySDM_products.AmbientTemperature(name=&#39;T_env&#39;),
+            PySDM_products.AmbientTemperature(name=&#39;T&#39;),
             PySDM_products.SpecificIceWaterContent(name=&#39;qi&#39;)
-        ]
+        )
     )</code></pre>
 </details>
 </section>
@@ -94,7 +94,7 @@ def make_particulator(*, n_sd, dt, initial_temperature, singular, seed,
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="PySDM_examples.UIUC_2021.make_particulator.make_particulator"><code class="name flex">
-<span>def <span class="ident">make_particulator</span></span>(<span>*, n_sd, dt, initial_temperature, singular, seed, shima_T_fz, ABIFM_spec, droplet_volume, total_particle_number, volume)</span>
+<span>def <span class="ident">make_particulator</span></span>(<span>*, constants, n_sd, dt, initial_temperature, singular, seed, shima_T_fz, ABIFM_spec, droplet_volume, total_particle_number, volume)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -102,13 +102,13 @@ def make_particulator(*, n_sd, dt, initial_temperature, singular, seed,
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def make_particulator(*, n_sd, dt, initial_temperature, singular, seed,
+<pre><code class="python">def make_particulator(*, constants, n_sd, dt, initial_temperature, singular, seed,
                       shima_T_fz, ABIFM_spec, droplet_volume, total_particle_number, volume):
     attributes = {
         &#39;volume&#39;: np.ones(n_sd) * droplet_volume
     }
 
-    formulae_ctor_args = {&#39;seed&#39;: seed}
+    formulae_ctor_args = {&#39;seed&#39;: seed, &#39;constants&#39;: constants}
     if singular:
         formulae_ctor_args[&#39;freezing_temperature_spectrum&#39;] = shima_T_fz
     else:
@@ -141,11 +141,11 @@ def make_particulator(*, n_sd, dt, initial_temperature, singular, seed,
 
     return builder.build(
         attributes=attributes,
-        products=[
+        products=(
             PySDM_products.Time(name=&#39;t&#39;),
-            PySDM_products.AmbientTemperature(name=&#39;T_env&#39;),
+            PySDM_products.AmbientTemperature(name=&#39;T&#39;),
             PySDM_products.SpecificIceWaterContent(name=&#39;qi&#39;)
-        ]
+        )
     )</code></pre>
 </details>
 </dd>
