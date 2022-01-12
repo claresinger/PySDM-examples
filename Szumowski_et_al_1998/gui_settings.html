@@ -295,7 +295,7 @@ class GUISettings:
         if self.ui_freezing[&#39;INP surface&#39;].value == &#39;lognormal(A, sgm_g)&#39;:
             return Lognormal(
                 norm_factor=1,
-                m_mode=10**(self.ui_freezing[&#39;lognormal_log10_A_um2&#39;].value * si.um**2),
+                m_mode=10**(self.ui_freezing[&#39;lognormal_log10_A_um2&#39;].value) * si.um**2,
                 s_geom=np.exp(self.ui_freezing[&#39;lognormal_ln_sgm_g&#39;].value)
             )
         raise NotImplementedError()
@@ -638,7 +638,7 @@ def set_visibility(widget, visible):
         if self.ui_freezing[&#39;INP surface&#39;].value == &#39;lognormal(A, sgm_g)&#39;:
             return Lognormal(
                 norm_factor=1,
-                m_mode=10**(self.ui_freezing[&#39;lognormal_log10_A_um2&#39;].value * si.um**2),
+                m_mode=10**(self.ui_freezing[&#39;lognormal_log10_A_um2&#39;].value) * si.um**2,
                 s_geom=np.exp(self.ui_freezing[&#39;lognormal_ln_sgm_g&#39;].value)
             )
         raise NotImplementedError()
@@ -790,7 +790,7 @@ def freezing_inp_spec(self):
     if self.ui_freezing[&#39;INP surface&#39;].value == &#39;lognormal(A, sgm_g)&#39;:
         return Lognormal(
             norm_factor=1,
-            m_mode=10**(self.ui_freezing[&#39;lognormal_log10_A_um2&#39;].value * si.um**2),
+            m_mode=10**(self.ui_freezing[&#39;lognormal_log10_A_um2&#39;].value) * si.um**2,
             s_geom=np.exp(self.ui_freezing[&#39;lognormal_ln_sgm_g&#39;].value)
         )
     raise NotImplementedError()</code></pre>
