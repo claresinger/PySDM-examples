@@ -109,6 +109,15 @@ def kappa(mass_fractions: dict):
 
     return result
 
+def nu_org(mass_fractions: dict):
+    volfrac = volume_fractions(mass_fractions)
+    molar_volumes = {i: molar_masses[i] / densities[i] for i in compounds}
+
+    _masked = {k: (is_organic[k]) * volfrac[k] for k in compounds}
+    volume_fractions_of_just_org = {k:_masked[k] / sum(list(_masked.values())) for k in compounds}
+
+    _nu = sum(volume_fractions_of_just_org[i] * molar_volumes[i] for i in compounds)
+    return _nu
 
 class Aerosol:
     pass
@@ -124,6 +133,7 @@ class AerosolMarine(Aerosol):
         {
             &#39;f_org&#39;: f_org_volume(self.Aitken),
             &#39;kappa&#39;: kappa(self.Aitken),
+            &#39;nu_org&#39;: nu_org(self.Aitken),
             &#39;spectrum&#39;: spectra.Lognormal(
                 norm_factor=226 / si.cm ** 3,
                 m_mode=19.6 * si.nm,
@@ -133,6 +143,7 @@ class AerosolMarine(Aerosol):
         {
             &#39;f_org&#39;: f_org_volume(self.Accumulation),
             &#39;kappa&#39;: kappa(self.Accumulation),
+            &#39;nu_org&#39;: nu_org(self.Accumulation),
             &#39;spectrum&#39;: spectra.Lognormal(
                 norm_factor=134 / si.cm ** 3,
                 m_mode=69.5 * si.nm,
@@ -168,6 +179,7 @@ class AerosolBoreal(Aerosol):
         {
             &#39;f_org&#39;: f_org_volume(self.Aitken),
             &#39;kappa&#39;: kappa(self.Aitken),
+            &#39;nu_org&#39;: nu_org(self.Aitken),
             &#39;spectrum&#39;: spectra.Lognormal(
                 norm_factor=1100 / si.cm ** 3,
                 m_mode=22.7 * si.nm,
@@ -177,6 +189,7 @@ class AerosolBoreal(Aerosol):
         {
             &#39;f_org&#39;: f_org_volume(self.Accumulation),
             &#39;kappa&#39;: kappa(self.Accumulation),
+            &#39;nu_org&#39;: nu_org(self.Accumulation),
             &#39;spectrum&#39;: spectra.Lognormal(
                 norm_factor=540 / si.cm ** 3,
                 m_mode=82.2 * si.nm,
@@ -197,6 +210,7 @@ class AerosolNascent(Aerosol):
             {
                 &#39;f_org&#39;: f_org_volume(self.Ultrafine),
                 &#39;kappa&#39;: kappa(self.Ultrafine),
+                &#39;nu_org&#39;: nu_org(self.Ultrafine),
                 &#39;spectrum&#39;: spectra.Lognormal(
                     norm_factor=2000 / si.cm ** 3,
                     m_mode=11.5 * si.nm,
@@ -206,6 +220,7 @@ class AerosolNascent(Aerosol):
             {
                 &#39;f_org&#39;: f_org_volume(self.Accumulation),
                 &#39;kappa&#39;: kappa(self.Accumulation),
+                &#39;nu_org&#39;: nu_org(self.Accumulation),
                 &#39;spectrum&#39;: spectra.Lognormal(
                     norm_factor=30 / si.cm ** 3,
                     m_mode=100 * si.nm,
@@ -270,6 +285,26 @@ class AerosolNascent(Aerosol):
         result[model] = ns_per_vol * Mv / rho_w
 
     return result</code></pre>
+</details>
+</dd>
+<dt id="PySDM_examples.Lowe_et_al_2019.aerosol.nu_org"><code class="name flex">
+<span>def <span class="ident">nu_org</span></span>(<span>mass_fractions: dict)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def nu_org(mass_fractions: dict):
+    volfrac = volume_fractions(mass_fractions)
+    molar_volumes = {i: molar_masses[i] / densities[i] for i in compounds}
+
+    _masked = {k: (is_organic[k]) * volfrac[k] for k in compounds}
+    volume_fractions_of_just_org = {k:_masked[k] / sum(list(_masked.values())) for k in compounds}
+
+    _nu = sum(volume_fractions_of_just_org[i] * molar_volumes[i] for i in compounds)
+    return _nu</code></pre>
 </details>
 </dd>
 <dt id="PySDM_examples.Lowe_et_al_2019.aerosol.volume_fractions"><code class="name flex">
@@ -347,6 +382,7 @@ class AerosolBoreal(Aerosol):
         {
             &#39;f_org&#39;: f_org_volume(self.Aitken),
             &#39;kappa&#39;: kappa(self.Aitken),
+            &#39;nu_org&#39;: nu_org(self.Aitken),
             &#39;spectrum&#39;: spectra.Lognormal(
                 norm_factor=1100 / si.cm ** 3,
                 m_mode=22.7 * si.nm,
@@ -356,6 +392,7 @@ class AerosolBoreal(Aerosol):
         {
             &#39;f_org&#39;: f_org_volume(self.Accumulation),
             &#39;kappa&#39;: kappa(self.Accumulation),
+            &#39;nu_org&#39;: nu_org(self.Accumulation),
             &#39;spectrum&#39;: spectra.Lognormal(
                 norm_factor=540 / si.cm ** 3,
                 m_mode=82.2 * si.nm,
@@ -404,6 +441,7 @@ class AerosolMarine(Aerosol):
         {
             &#39;f_org&#39;: f_org_volume(self.Aitken),
             &#39;kappa&#39;: kappa(self.Aitken),
+            &#39;nu_org&#39;: nu_org(self.Aitken),
             &#39;spectrum&#39;: spectra.Lognormal(
                 norm_factor=226 / si.cm ** 3,
                 m_mode=19.6 * si.nm,
@@ -413,6 +451,7 @@ class AerosolMarine(Aerosol):
         {
             &#39;f_org&#39;: f_org_volume(self.Accumulation),
             &#39;kappa&#39;: kappa(self.Accumulation),
+            &#39;nu_org&#39;: nu_org(self.Accumulation),
             &#39;spectrum&#39;: spectra.Lognormal(
                 norm_factor=134 / si.cm ** 3,
                 m_mode=69.5 * si.nm,
@@ -461,6 +500,7 @@ class AerosolNascent(Aerosol):
             {
                 &#39;f_org&#39;: f_org_volume(self.Ultrafine),
                 &#39;kappa&#39;: kappa(self.Ultrafine),
+                &#39;nu_org&#39;: nu_org(self.Ultrafine),
                 &#39;spectrum&#39;: spectra.Lognormal(
                     norm_factor=2000 / si.cm ** 3,
                     m_mode=11.5 * si.nm,
@@ -470,6 +510,7 @@ class AerosolNascent(Aerosol):
             {
                 &#39;f_org&#39;: f_org_volume(self.Accumulation),
                 &#39;kappa&#39;: kappa(self.Accumulation),
+                &#39;nu_org&#39;: nu_org(self.Accumulation),
                 &#39;spectrum&#39;: spectra.Lognormal(
                     norm_factor=30 / si.cm ** 3,
                     m_mode=100 * si.nm,
@@ -517,6 +558,7 @@ class AerosolNascent(Aerosol):
 <ul class="">
 <li><code><a title="PySDM_examples.Lowe_et_al_2019.aerosol.f_org_volume" href="#PySDM_examples.Lowe_et_al_2019.aerosol.f_org_volume">f_org_volume</a></code></li>
 <li><code><a title="PySDM_examples.Lowe_et_al_2019.aerosol.kappa" href="#PySDM_examples.Lowe_et_al_2019.aerosol.kappa">kappa</a></code></li>
+<li><code><a title="PySDM_examples.Lowe_et_al_2019.aerosol.nu_org" href="#PySDM_examples.Lowe_et_al_2019.aerosol.nu_org">nu_org</a></code></li>
 <li><code><a title="PySDM_examples.Lowe_et_al_2019.aerosol.volume_fractions" href="#PySDM_examples.Lowe_et_al_2019.aerosol.volume_fractions">volume_fractions</a></code></li>
 </ul>
 </li>
