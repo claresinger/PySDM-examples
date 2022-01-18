@@ -34,8 +34,8 @@ import PyMPDATA
 import PySDM
 from PySDM import Formulae
 from PySDM.physics import si
-from PySDM.dynamics import condensation, coalescence
-from PySDM.physics.coalescence_kernels import Geometric
+from PySDM.dynamics import condensation, collisions
+from PySDM.dynamics.collisions.kernels import Geometric
 from PySDM.initialisation import spectra
 
 
@@ -52,7 +52,7 @@ class Common:
         self.condensation_schedule = condensation.DEFAULTS.schedule
 
         self.coalescence_adaptive = True
-        self.coalescence_dt_coal_range = coalescence.DEFAULTS.dt_coal_range
+        self.coalescence_dt_coal_range = collisions.coalescence.DEFAULTS.dt_coal_range
         self.coalescence_optimized_random = True
         self.coalescence_substeps = 1
         self.kernel = Geometric(collection_efficiency=1)
@@ -195,7 +195,7 @@ class Common:
         self.condensation_schedule = condensation.DEFAULTS.schedule
 
         self.coalescence_adaptive = True
-        self.coalescence_dt_coal_range = coalescence.DEFAULTS.dt_coal_range
+        self.coalescence_dt_coal_range = collisions.coalescence.DEFAULTS.dt_coal_range
         self.coalescence_optimized_random = True
         self.coalescence_substeps = 1
         self.kernel = Geometric(collection_efficiency=1)
