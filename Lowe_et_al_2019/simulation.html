@@ -31,12 +31,13 @@ from PySDM.environments import Parcel
 from PySDM import Builder
 from PySDM.backends import CPU
 from PySDM.dynamics import AmbientThermodynamics, Condensation
-from PySDM.initialisation import discretise_multiplicities, equilibrate_wet_radii
+from PySDM.initialisation import equilibrate_wet_radii
 from PySDM.initialisation.spectra import Sum
 import PySDM.products as PySDM_products
+from PySDM_examples.utils import BasicSimulation
 
 
-class Simulation:
+class Simulation(BasicSimulation):
     def __init__(self, settings, products=None):
         env = Parcel(dt=settings.dt,
                      mass_of_dry_air=settings.mass_of_dry_air,
@@ -44,7 +45,7 @@ class Simulation:
                      q0=settings.q0,
                      T0=settings.T0,
                      w=settings.w)
-        n_sd = settings.n_sd_per_mode * len(settings.aerosol.aerosol_modes_per_cc)
+        n_sd = settings.n_sd_per_mode * len(settings.aerosol.aerosol_modes)
         builder = Builder(n_sd=n_sd, backend=CPU(formulae=settings.formulae))
         builder.set_environment(env)
 
@@ -54,12 +55,13 @@ class Simulation:
             &#39;kappa times dry volume&#39;:np.empty(0),
             &#39;n&#39;: np.ndarray(0)
         }
-        for mode in settings.aerosol.aerosol_modes_per_cc:
+        for mode in settings.aerosol.aerosol_modes:
             r_dry, n_in_dv = settings.spectral_sampling(
                 spectrum=mode[&#39;spectrum&#39;]).sample(settings.n_sd_per_mode)
-            n_in_dv /= (settings.rho0 / settings.mass_of_dry_air)
+            V = settings.mass_of_dry_air / settings.rho0
+            N = n_in_dv * V
             v_dry = settings.formulae.trivia.volume(radius=r_dry)
-            attributes[&#39;n&#39;] = np.append(attributes[&#39;n&#39;], n_in_dv)
+            attributes[&#39;n&#39;] = np.append(attributes[&#39;n&#39;], N)
             attributes[&#39;dry volume&#39;] = np.append(attributes[&#39;dry volume&#39;], v_dry)
             attributes[&#39;dry volume organic&#39;] = np.append(
                 attributes[&#39;dry volume organic&#39;], mode[&#39;f_org&#39;] * v_dry)
@@ -68,14 +70,11 @@ class Simulation:
         for attribute in attributes.values():
             assert attribute.shape[0] == n_sd
 
-        attributes[&#39;n&#39;] = discretise_multiplicities(attributes[&#39;n&#39;])
-
-        dv = settings.mass_of_dry_air / settings.rho0
         np.testing.assert_approx_equal(
-            np.sum(attributes[&#39;n&#39;]) / dv,
+            np.sum(attributes[&#39;n&#39;]) / V,
             Sum(tuple(
-                settings.aerosol.aerosol_modes_per_cc[i][&#39;spectrum&#39;]
-                for i in range(len(settings.aerosol.aerosol_modes_per_cc))
+                settings.aerosol.aerosol_modes[i][&#39;spectrum&#39;]
+                for i in range(len(settings.aerosol.aerosol_modes))
             )).norm_factor,
             significant=5
         )
@@ -101,14 +100,16 @@ class Simulation:
                 radius_range=settings.cloud_radius_range),
             PySDM_products.ParticleSizeSpectrumPerVolume(
                 radius_bins_edges=settings.wet_radius_bins_edges),
+            PySDM_products.ActivableFraction()
         )
 
-        self.particulator = builder.build(attributes=attributes, products=products)
+        particulator = builder.build(attributes=attributes, products=products)
         self.settings = settings
+        super().__init__(particulator=particulator)
 
     def _save_scalars(self, output):
         for k, v in self.particulator.products.items():
-            if len(v.shape) &gt; 1:
+            if len(v.shape) &gt; 1 or k == &#34;activable fraction&#34;:
                 continue
             value = v.get()
             if isinstance(value, np.ndarray) and value.size == 1:
@@ -125,6 +126,8 @@ class Simulation:
             self.particulator.run(step - self.particulator.n_steps)
             self._save_scalars(output)
         self._save_spectrum(output)
+        output[&#34;Activated Fraction&#34;] = self.particulator.products[&#34;activable fraction&#34;].get(
+            S_max=np.nanmax(output[&#34;S_max&#34;]))
         return output</code></pre>
 </details>
 </section>
@@ -147,7 +150,7 @@ class Simulation:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Simulation:
+<pre><code class="python">class Simulation(BasicSimulation):
     def __init__(self, settings, products=None):
         env = Parcel(dt=settings.dt,
                      mass_of_dry_air=settings.mass_of_dry_air,
@@ -155,7 +158,7 @@ class Simulation:
                      q0=settings.q0,
                      T0=settings.T0,
                      w=settings.w)
-        n_sd = settings.n_sd_per_mode * len(settings.aerosol.aerosol_modes_per_cc)
+        n_sd = settings.n_sd_per_mode * len(settings.aerosol.aerosol_modes)
         builder = Builder(n_sd=n_sd, backend=CPU(formulae=settings.formulae))
         builder.set_environment(env)
 
@@ -165,12 +168,13 @@ class Simulation:
             &#39;kappa times dry volume&#39;:np.empty(0),
             &#39;n&#39;: np.ndarray(0)
         }
-        for mode in settings.aerosol.aerosol_modes_per_cc:
+        for mode in settings.aerosol.aerosol_modes:
             r_dry, n_in_dv = settings.spectral_sampling(
                 spectrum=mode[&#39;spectrum&#39;]).sample(settings.n_sd_per_mode)
-            n_in_dv /= (settings.rho0 / settings.mass_of_dry_air)
+            V = settings.mass_of_dry_air / settings.rho0
+            N = n_in_dv * V
             v_dry = settings.formulae.trivia.volume(radius=r_dry)
-            attributes[&#39;n&#39;] = np.append(attributes[&#39;n&#39;], n_in_dv)
+            attributes[&#39;n&#39;] = np.append(attributes[&#39;n&#39;], N)
             attributes[&#39;dry volume&#39;] = np.append(attributes[&#39;dry volume&#39;], v_dry)
             attributes[&#39;dry volume organic&#39;] = np.append(
                 attributes[&#39;dry volume organic&#39;], mode[&#39;f_org&#39;] * v_dry)
@@ -179,14 +183,11 @@ class Simulation:
         for attribute in attributes.values():
             assert attribute.shape[0] == n_sd
 
-        attributes[&#39;n&#39;] = discretise_multiplicities(attributes[&#39;n&#39;])
-
-        dv = settings.mass_of_dry_air / settings.rho0
         np.testing.assert_approx_equal(
-            np.sum(attributes[&#39;n&#39;]) / dv,
+            np.sum(attributes[&#39;n&#39;]) / V,
             Sum(tuple(
-                settings.aerosol.aerosol_modes_per_cc[i][&#39;spectrum&#39;]
-                for i in range(len(settings.aerosol.aerosol_modes_per_cc))
+                settings.aerosol.aerosol_modes[i][&#39;spectrum&#39;]
+                for i in range(len(settings.aerosol.aerosol_modes))
             )).norm_factor,
             significant=5
         )
@@ -212,14 +213,16 @@ class Simulation:
                 radius_range=settings.cloud_radius_range),
             PySDM_products.ParticleSizeSpectrumPerVolume(
                 radius_bins_edges=settings.wet_radius_bins_edges),
+            PySDM_products.ActivableFraction()
         )
 
-        self.particulator = builder.build(attributes=attributes, products=products)
+        particulator = builder.build(attributes=attributes, products=products)
         self.settings = settings
+        super().__init__(particulator=particulator)
 
     def _save_scalars(self, output):
         for k, v in self.particulator.products.items():
-            if len(v.shape) &gt; 1:
+            if len(v.shape) &gt; 1 or k == &#34;activable fraction&#34;:
                 continue
             value = v.get()
             if isinstance(value, np.ndarray) and value.size == 1:
@@ -236,8 +239,14 @@ class Simulation:
             self.particulator.run(step - self.particulator.n_steps)
             self._save_scalars(output)
         self._save_spectrum(output)
+        output[&#34;Activated Fraction&#34;] = self.particulator.products[&#34;activable fraction&#34;].get(
+            S_max=np.nanmax(output[&#34;S_max&#34;]))
         return output</code></pre>
 </details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="PySDM_examples.utils.basic_simulation.BasicSimulation" href="../utils/basic_simulation.html#PySDM_examples.utils.basic_simulation.BasicSimulation">BasicSimulation</a></li>
+</ul>
 <h3>Methods</h3>
 <dl>
 <dt id="PySDM_examples.Lowe_et_al_2019.simulation.Simulation.run"><code class="name flex">
@@ -255,6 +264,8 @@ class Simulation:
         self.particulator.run(step - self.particulator.n_steps)
         self._save_scalars(output)
     self._save_spectrum(output)
+    output[&#34;Activated Fraction&#34;] = self.particulator.products[&#34;activable fraction&#34;].get(
+        S_max=np.nanmax(output[&#34;S_max&#34;]))
     return output</code></pre>
 </details>
 </dd>
