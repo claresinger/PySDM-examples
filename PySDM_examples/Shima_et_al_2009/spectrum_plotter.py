@@ -4,7 +4,6 @@ import matplotlib
 from matplotlib import pyplot
 from atmos_cloud_sim_uj_utils import show_plot
 from PySDM.physics.constants import si
-from PySDM_examples.Shima_et_al_2009.error_measure import error_measure
 
 _matplotlib_version_3_3_3 = StrictVersion("3.3.0")
 _matplotlib_version_actual = StrictVersion(matplotlib.__version__)
@@ -27,7 +26,7 @@ class SpectrumColors:
 
 
 class SpectrumPlotter:
-    def __init__(self, settings, title=None, grid=True, legend=True, log_base=10):
+    def __init__(self, settings, grid=True, legend=True, log_base=10):
         self.settings = settings
         self.format = 'pdf'
         self.colors = SpectrumColors()
@@ -35,7 +34,6 @@ class SpectrumPlotter:
         self.smooth_scope = 2
         self.legend = legend
         self.grid = grid
-        self.title = title
         self.xlabel = 'particle radius [µm]'
         self.ylabel = 'dm/dlnr [g/m^3/(unit dr/r)]'
         self.log_base = log_base
@@ -54,11 +52,6 @@ class SpectrumPlotter:
             "base" + ("x" if _matplotlib_version_actual < _matplotlib_version_3_3_3 else ""):
                 self.log_base
         }
-        if self.title is not None:
-            try:
-                self.ax.title(self.title)
-            except TypeError:
-                self.ax.set_title(self.title)
         try:
             self.ax.xscale('log', **base_arg)
             self.ax.xlabel(self.xlabel)
@@ -114,9 +107,6 @@ class SpectrumPlotter:
 
         if spectrum is not None:
             y = spectrum * si.kilograms / si.grams
-            error = error_measure(y, y_true, x)
-            self.title = f'error measure: {error:.2f}' # TODO #327 relative error
-            return error
         return None
 
     def plot_data(self, settings, t, spectrum):
