@@ -8,10 +8,7 @@ class ProfilePlotter:
     def __init__(self, settings, title=None, legend=True, log_base=10):
         self.settings = settings
         self.format = 'pdf'
-        # self.title = title
         self.legend = legend
-        # self.xlabel = 'particle radius [µm]'
-        # self.ylabel = 'dm/dlnr [g/m^3/(unit dr/r)]'
         self.log_base = log_base
         self.ax = pyplot
         self.fig = pyplot
