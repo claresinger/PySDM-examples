@@ -27,8 +27,8 @@ class Settings:
         self.spectrum = spectra.Exponential(norm_factor=self.norm_factor, scale=self.X0)
         self.radius_bins_edges = np.logspace(
             np.log10(10 * si.um),
-            np.log10(5e4 * si.um),
-            num=256, endpoint=True
+            np.log10(5e3 * si.um),
+            num=128, endpoint=True
         )
 
     @property

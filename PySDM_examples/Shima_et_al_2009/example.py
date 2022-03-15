@@ -10,8 +10,8 @@ from PySDM_examples.Shima_et_al_2009.settings import Settings
 from PySDM_examples.Shima_et_al_2009.spectrum_plotter import SpectrumPlotter
 
 
-def run(settings, observers=()):
-    builder = Builder(n_sd=settings.n_sd, backend=CPU(formulae=settings.formulae))
+def run(settings, backend=CPU, observers=()):
+    builder = Builder(n_sd=settings.n_sd, backend=backend(formulae=settings.formulae))
     builder.set_environment(Box(dv=settings.dv, dt=settings.dt))
     attributes = {}
     sampling = ConstantMultiplicity(settings.spectrum)
