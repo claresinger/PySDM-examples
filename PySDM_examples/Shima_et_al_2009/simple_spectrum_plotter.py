@@ -31,7 +31,7 @@ class SpectrumPlotter:
         self.legend = legend
         self.grid = grid
         self.xlabel = 'particle radius [µm]'
-        self.ylabel = 'dm/dlnr [g/m^3/(unit dr/r)]'
+        self.ylabel = 'dm/dlnr [g/m$^3$]'
         self.log_base = log_base
         self.ax = pyplot
         self.fig = pyplot
