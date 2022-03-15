@@ -5,10 +5,6 @@ from matplotlib import pyplot
 from atmos_cloud_sim_uj_utils import show_plot
 from PySDM.physics.constants import si
 
-_matplotlib_version_3_3_3 = StrictVersion("3.3.0")
-_matplotlib_version_actual = StrictVersion(matplotlib.__version__)
-
-
 class SpectrumColors:
 
     def __init__(self, begining='#2cbdfe', end='#b317b1'):
@@ -48,18 +44,9 @@ class SpectrumPlotter:
         if self.grid:
             self.ax.grid()
 
-        base_arg = {
-            "base" + ("x" if _matplotlib_version_actual < _matplotlib_version_3_3_3 else ""):
-                self.log_base
-        }
-        try:
-            self.ax.xscale('log', **base_arg)
-            self.ax.xlabel(self.xlabel)
-            self.ax.ylabel(self.ylabel)
-        except AttributeError:
-            self.ax.set_xscale('log', **base_arg)
-            self.ax.set_xlabel(self.xlabel)
-            self.ax.set_ylabel(self.ylabel)
+        self.ax.xscale('log')
+        self.ax.xlabel(self.xlabel)
+        self.ax.ylabel(self.ylabel)
         if self.legend:
             self.ax.legend()
 
