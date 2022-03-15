@@ -6,8 +6,6 @@ from PySDM.environments import Box
 from PySDM.dynamics import Coalescence
 from PySDM.initialisation.sampling.spectral_sampling import ConstantMultiplicity
 from PySDM.products import ParticleVolumeVersusRadiusLogarithmSpectrum, WallTime
-from PySDM_examples.ESE134_homework.settings_collision import Settings
-from PySDM_examples.ESE134_homework.spectrum_plotter import SpectrumPlotter
 
 
 def run(settings, observers=()):
@@ -36,30 +34,3 @@ def run(settings, observers=()):
 
     exec_time = particulator.products['wall time'].get()
     return vals, exec_time
-
-
-def main(plot: bool, save: str):
-    with np.errstate(all='raise'):
-        settings = Settings()
-
-        settings.n_sd = 2 ** 15
-
-        states, _ = run(settings)
-
-    with np.errstate(invalid='ignore'):
-        plotter = SpectrumPlotter(settings)
-        plotter.smooth = True
-        for step, vals in states.items():
-            _ = plotter.plot(vals, step * settings.dt)
-            #assert _ < 200  # TODO #327
-        if save is not None:
-            n_sd = settings.n_sd
-            plotter.save(save + "/" +
-                         f"{n_sd}_shima_fig_2" +
-                         "." + plotter.format)
-        if plot:
-            plotter.show()
-
-
-if __name__ == '__main__':
-    main(plot='CI' not in os.environ, save=None)
