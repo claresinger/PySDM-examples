@@ -1,8 +1,8 @@
 import numpy as np
-from pystrict import strict
-from PySDM.physics.constants import si
-from PySDM.dynamics import condensation
 from PySDM import Formulae
+from PySDM.dynamics import condensation
+from PySDM.physics.constants import si
+from pystrict import strict
 
 
 @strict
@@ -13,16 +13,16 @@ class Settings:
         N_STP: float,
         r_dry: float,
         mass_of_dry_air: float,
-        coord: str = 'VolumeLogarithm'
+        coord: str = "VolumeLogarithm",
     ):
         self.formulae = Formulae(
-            saturation_vapour_pressure='AugustRocheMagnus',
-            condensation_coordinate=coord
+            saturation_vapour_pressure="AugustRocheMagnus",
+            condensation_coordinate=coord,
         )
         const = self.formulae.constants
         self.p0 = 1000 * si.hectopascals
-        self.RH0 = .98
-        self.kappa = .2  # TODO #441
+        self.RH0 = 0.98
+        self.kappa = 0.2  # TODO #441
         self.T0 = 300 * si.kelvin
         self.z_half = 150 * si.metres
 
@@ -37,7 +37,7 @@ class Settings:
 
         self.rtol_x = condensation.DEFAULTS.rtol_x
         self.rtol_thd = condensation.DEFAULTS.rtol_thd
-        self.coord = 'volume logarithm'
+        self.coord = "volume logarithm"
         self.dt_cond_range = condensation.DEFAULTS.cond_range
 
     @property
@@ -55,27 +55,23 @@ class Settings:
 w_avgs = (
     100 * si.centimetre / si.second,
     # 50 * si.centimetre / si.second,
-    .2 * si.centimetre / si.second
+    0.2 * si.centimetre / si.second,
 )
 
-N_STPs = (
-    50 / si.centimetre ** 3,
-    500 / si.centimetre ** 3
-)
+N_STPs = (50 / si.centimetre ** 3, 500 / si.centimetre ** 3)
 
-r_drys = (
-    .1 * si.micrometre,
-    .05 * si.micrometre
-)
+r_drys = (0.1 * si.micrometre, 0.05 * si.micrometre)
 
 setups = []
 for w_i, _ in enumerate(w_avgs):
     for N_i, __ in enumerate(N_STPs):
         for rd_i, ___ in enumerate(r_drys):
             if not rd_i == N_i == 1:
-                setups.append(Settings(
-                    w_avg=w_avgs[w_i],
-                    N_STP=N_STPs[N_i],
-                    r_dry=r_drys[rd_i],
-                    mass_of_dry_air=1000 * si.kilogram
-                ))
+                setups.append(
+                    Settings(
+                        w_avg=w_avgs[w_i],
+                        N_STP=N_STPs[N_i],
+                        r_dry=r_drys[rd_i],
+                        mass_of_dry_air=1000 * si.kilogram,
+                    )
+                )

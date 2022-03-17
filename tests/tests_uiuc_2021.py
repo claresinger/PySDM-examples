@@ -1,22 +1,25 @@
 import numpy as np
 from PySDM.physics import constants_defaults as const
+
 from PySDM_examples.UIUC_2021.frozen_fraction import FrozenFraction
 
-TOTAL_PARTICLE_NUMBER =1
+TOTAL_PARTICLE_NUMBER = 1
 DROPLET_VOLUME = 1
 VOLUME = 1
 FF = FrozenFraction(
     volume=VOLUME,
     total_particle_number=TOTAL_PARTICLE_NUMBER,
     droplet_volume=DROPLET_VOLUME,
-    rho_w=const.rho_w
+    rho_w=const.rho_w,
 )
 
 
-class TestFrozenFraction():
+class TestFrozenFraction:
     @staticmethod
     def test_qi2ff():
-        all_frozen = FF.qi2ff(TOTAL_PARTICLE_NUMBER * DROPLET_VOLUME * const.rho_w / VOLUME)
+        all_frozen = FF.qi2ff(
+            TOTAL_PARTICLE_NUMBER * DROPLET_VOLUME * const.rho_w / VOLUME
+        )
         np.testing.assert_almost_equal(all_frozen, 1)
 
     @staticmethod

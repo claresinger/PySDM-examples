@@ -1,14 +1,14 @@
 import numba
-import scipy
 import numpy
 import numpy as np  # pylint: disable=reimported
 import PyMPDATA
 import PySDM
+import scipy
 from PySDM import Formulae
-from PySDM.physics import si
-from PySDM.dynamics import condensation, collisions
+from PySDM.dynamics import collisions, condensation
 from PySDM.dynamics.collisions.collision_kernels import Geometric
 from PySDM.initialisation import spectra
+from PySDM.physics import si
 
 
 class Common:
@@ -34,22 +34,28 @@ class Common:
 
         self.n_sd_per_gridbox = 20
 
-        self.aerosol_radius_threshold = .5 * si.micrometre
+        self.aerosol_radius_threshold = 0.5 * si.micrometre
         self.drizzle_radius_threshold = 25 * si.micrometre
 
-        self.r_bins_edges = np.logspace(np.log10(0.001 * si.micrometre),
-                                        np.log10(100 * si.micrometre),
-                                        64, endpoint=True)
-        self.T_bins_edges = np.linspace(const.T0-40, const.T0-20, 64, endpoint=True)
+        self.r_bins_edges = np.logspace(
+            np.log10(0.001 * si.micrometre),
+            np.log10(100 * si.micrometre),
+            64,
+            endpoint=True,
+        )
+        self.T_bins_edges = np.linspace(const.T0 - 40, const.T0 - 20, 64, endpoint=True)
 
         # TODO #599
         n_bins_per_phase = 25
-        solid_phase_radii = np.linspace(-n_bins_per_phase, -1, n_bins_per_phase+1) * si.um
-        liquid_phase_radii = np.linspace(0, n_bins_per_phase, n_bins_per_phase+1) * si.um
-        self.terminal_velocity_radius_bin_edges = np.concatenate([
-            solid_phase_radii,
-            liquid_phase_radii
-        ])
+        solid_phase_radii = (
+            np.linspace(-n_bins_per_phase, -1, n_bins_per_phase + 1) * si.um
+        )
+        liquid_phase_radii = (
+            np.linspace(0, n_bins_per_phase, n_bins_per_phase + 1) * si.um
+        )
+        self.terminal_velocity_radius_bin_edges = np.concatenate(
+            [solid_phase_radii, liquid_phase_radii]
+        )
 
         self.output_interval = 1 * si.minute
         self.spin_up_time = 0
@@ -57,12 +63,12 @@ class Common:
         self.mode_1 = spectra.Lognormal(
             norm_factor=60 / si.centimetre ** 3 / const.rho_STP,
             m_mode=0.04 * si.micrometre,
-            s_geom=1.4
+            s_geom=1.4,
         )
         self.mode_2 = spectra.Lognormal(
-          norm_factor=40 / si.centimetre**3 / const.rho_STP,
-          m_mode=0.15 * si.micrometre,
-          s_geom=1.6
+            norm_factor=40 / si.centimetre ** 3 / const.rho_STP,
+            m_mode=0.15 * si.micrometre,
+            s_geom=1.6,
         )
         self.spectrum_per_mass_of_dry_air = spectra.Sum((self.mode_1, self.mode_2))
         self.kappa = 1  # TODO #441!
@@ -73,7 +79,7 @@ class Common:
             "coalescence": True,
             "condensation": True,
             "sedimentation": True,
-            "freezing": False
+            "freezing": False,
         }
 
         self.mpdata_iters = 2
@@ -84,6 +90,7 @@ class Common:
         key_packages = [PySDM, PyMPDATA, numba, numpy, scipy]
         try:
             import ThrustRTC  # pylint: disable=import-outside-toplevel
+
             key_packages.append(ThrustRTC)
         except:  # pylint: disable=bare-except
             pass
@@ -131,5 +138,5 @@ class Common:
     def initial_dry_potential_temperature_profile(self):
         return np.full(
             self.grid[-1],
-            self.formulae.state_variable_triplet.th_dry(self.th_std0, self.qv0)
+            self.formulae.state_variable_triplet.th_dry(self.th_std0, self.qv0),
         )

@@ -1,11 +1,13 @@
 import os
+
 from matplotlib import pyplot as plt
+from PySDM.backends import Numba, ThrustRTC
 from PySDM.builder import Builder
 from PySDM.dynamics import Coalescence
 from PySDM.environments import Box
 from PySDM.initialisation.sampling.spectral_sampling import ConstantMultiplicity
 from PySDM.products import WallTime
-from PySDM.backends import Numba, ThrustRTC
+
 from PySDM_examples.Shima_et_al_2009.settings import Settings
 
 
@@ -14,7 +16,7 @@ def run(settings, backend):
     builder.set_environment(Box(dv=settings.dv, dt=settings.dt))
     attributes = {}
     sampling = ConstantMultiplicity(settings.spectrum)
-    attributes['volume'], attributes['n'] = sampling.sample(settings.n_sd)
+    attributes["volume"], attributes["n"] = sampling.sample(settings.n_sd)
     builder.add_dynamic(Coalescence(settings.kernel))
     particles = builder.build(attributes, products=(WallTime(),))
 
@@ -22,14 +24,14 @@ def run(settings, backend):
     last_wall_time = None
     for step in settings.output_steps:
         particles.run(step - particles.n_steps)
-        last_wall_time = particles.products['wall time'].get()
+        last_wall_time = particles.products["wall time"].get()
 
     return states, last_wall_time
 
 
 def main(plot: bool):
     settings = Settings()
-    settings.steps = [100, 3600] if 'CI' not in os.environ else [1, 2]
+    settings.steps = [100, 3600] if "CI" not in os.environ else [1, 2]
 
     times = {}
     for backend in (ThrustRTC, Numba):
@@ -42,7 +44,7 @@ def main(plot: bool):
             times[key].append(wall_time)
 
     for backend, t in times.items():
-        plt.plot(nsds, t, label=backend, linestyle='--', marker='o')
+        plt.plot(nsds, t, label=backend, linestyle="--", marker="o")
     plt.ylabel("wall time [s]")
     plt.xlabel("number of particles")
     plt.grid()
@@ -52,5 +54,5 @@ def main(plot: bool):
         plt.show()
 
 
-if __name__ == '__main__':
-    main(plot='CI' not in os.environ)
+if __name__ == "__main__":
+    main(plot="CI" not in os.environ)

@@ -1,6 +1,7 @@
 import os
 import tempfile
 from pathlib import Path
+
 import numpy as np
 
 
@@ -48,7 +49,12 @@ class Storage:
     def save(self, data: (float, np.ndarray), step: int, name: str):
         if isinstance(data, (int, float)):
             path = self._filepath(name)
-            np.save(path, np.concatenate((() if step == 0 else np.load(path), (self.dtype(data),))))
+            np.save(
+                path,
+                np.concatenate(
+                    (() if step == 0 else np.load(path), (self.dtype(data),))
+                ),
+            )
         elif data.shape[0:2] == self.grid:
             np.save(self._filepath(name, step), data.astype(self.dtype))
         else:
@@ -60,12 +66,12 @@ class Storage:
         self._data_range[name] = (
             min(
                 self._data_range[name][0] if just_nans else np.nanmin(data),
-                self._data_range[name][0]
+                self._data_range[name][0],
             ),
             max(
                 self._data_range[name][1] if just_nans else np.nanmax(data),
-                self._data_range[name][1]
-            )
+                self._data_range[name][1],
+            ),
         )
 
     def data_range(self, name):

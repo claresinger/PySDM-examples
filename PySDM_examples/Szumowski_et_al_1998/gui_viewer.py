@@ -1,22 +1,41 @@
 import warnings
+
 import numpy as np
-from matplotlib import pyplot, rcParams
 from atmos_cloud_sim_uj_utils import save_and_make_link
+from matplotlib import pyplot, rcParams
 from PySDM.physics import constants as const
-from PySDM_examples.utils.widgets import VBox, Box, Play, Output, IntSlider, IntRangeSlider,\
-    jslink, HBox, Dropdown, Button, Layout, clear_output, display
-from PySDM_examples.Szumowski_et_al_1998.plots import _ImagePlot, _SpectrumPlot, _TimeseriesPlot,\
-    _TemperaturePlot, _TerminalVelocityPlot
+
+from PySDM_examples.Szumowski_et_al_1998.plots import (
+    _ImagePlot,
+    _SpectrumPlot,
+    _TemperaturePlot,
+    _TerminalVelocityPlot,
+    _TimeseriesPlot,
+)
+from PySDM_examples.utils.widgets import (
+    Box,
+    Button,
+    Dropdown,
+    HBox,
+    IntRangeSlider,
+    IntSlider,
+    Layout,
+    Output,
+    Play,
+    VBox,
+    clear_output,
+    display,
+    jslink,
+)
 
 
 class GUIViewer:
-
     def __init__(self, storage, settings):
         self.storage = storage
         self.settings = settings
 
         self.play = Play(interval=1000)
-        self.step_slider = IntSlider(continuous_update=False, description='t/dt_out:')
+        self.step_slider = IntSlider(continuous_update=False, description="t/dt_out:")
         self.product_select = Dropdown()
         self.spectrum_select = Dropdown()
         self.plots_box = Box()
@@ -32,11 +51,15 @@ class GUIViewer:
         self.products = None
 
         self.slider = {}
-        self.lines = {'X': [{}, {}], 'Z': [{}, {}]}
-        for xz in ('X', 'Z'):
-            self.slider[xz] = IntRangeSlider(min=0, max=1, description=f'{xz}',
-                                             continuous_update=False,
-                                             orientation='horizontal' if xz == 'X' else 'vertical')
+        self.lines = {"X": [{}, {}], "Z": [{}, {}]}
+        for xz in ("X", "Z"):
+            self.slider[xz] = IntRangeSlider(
+                min=0,
+                max=1,
+                description=f"{xz}",
+                continuous_update=False,
+                orientation="horizontal" if xz == "X" else "vertical",
+            )
 
         self.reinit({})
 
@@ -51,12 +74,12 @@ class GUIViewer:
             if len(val.shape) == 2
         )
         opts = [
-            ("particle size spectra", 'size'),
-            ('terminal velocity', 'terminal velocity')
+            ("particle size spectra", "size"),
+            ("terminal velocity", "terminal velocity"),
         ]
-        if 'freezable specific concentration' in products:
-            opts.append(("freezing temperature spectra", 'temperature'))
-        if 'immersed surface area' in products:
+        if "freezable specific concentration" in products:
+            opts.append(("freezing temperature spectra", "temperature"))
+        if "immersed surface area" in products:
             pass  # TODO #599
         self.spectrum_select.options = tuple(opts)
 
@@ -64,22 +87,27 @@ class GUIViewer:
         const.convert_to(r_bins, const.si.micrometres)
         self.spectrumOutputs = {}
         self.spectrumPlots = {}
-        for key in ('size', 'terminal velocity', 'temperature'):
+        for key in ("size", "terminal velocity", "temperature"):
             self.spectrumOutputs[key] = Output()
             with self.spectrumOutputs[key]:
-                self.spectrumPlots[key] = \
-                    _SpectrumPlot(r_bins, self.settings.spectrum_per_mass_of_dry_air) \
-                    if key == 'size' else \
-                        _TemperaturePlot(self.settings.T_bins_edges, self.settings.formulae) \
-                        if key == 'temperature' else \
-                            _TerminalVelocityPlot(self.settings.terminal_velocity_radius_bin_edges,
-                                                  self.settings.formulae)
+                self.spectrumPlots[key] = (
+                    _SpectrumPlot(r_bins, self.settings.spectrum_per_mass_of_dry_air)
+                    if key == "size"
+                    else _TemperaturePlot(
+                        self.settings.T_bins_edges, self.settings.formulae
+                    )
+                    if key == "temperature"
+                    else _TerminalVelocityPlot(
+                        self.settings.terminal_velocity_radius_bin_edges,
+                        self.settings.formulae,
+                    )
+                )
                 clear_output()
 
         self.timeseriesOutput = Output()
         with self.timeseriesOutput:
             default_figsize = rcParams["figure.figsize"]
-            fig_kw = {'figsize': (2.5 * default_figsize[0], default_figsize[1] / 2)}
+            fig_kw = {"figsize": (2.5 * default_figsize[0], default_figsize[1] / 2)}
             fig, ax = pyplot.subplots(1, 1, **fig_kw)
             self.timeseriesPlot = _TimeseriesPlot(
                 fig, ax, self.settings.output_steps * self.settings.dt
@@ -93,55 +121,64 @@ class GUIViewer:
                 self.outputs[key] = Output()
                 with self.outputs[key]:
                     fig, ax = pyplot.subplots(1, 1)
-                    self.plots[key] = _ImagePlot(fig, ax,
-                                                 self.settings.grid,
-                                                 self.settings.size,
-                                                 product, show=True, lines=True)
+                    self.plots[key] = _ImagePlot(
+                        fig,
+                        ax,
+                        self.settings.grid,
+                        self.settings.size,
+                        product,
+                        show=True,
+                        lines=True,
+                    )
                     clear_output()
 
         self.plot_box = Box()
         self.spectrum_box = Box()
         if len(products.keys()) > 0:
-            layout_flex_end = Layout(display='flex', justify_content='flex-end')
-            save_map = Button(icon='save')
+            layout_flex_end = Layout(display="flex", justify_content="flex-end")
+            save_map = Button(icon="save")
             save_map.on_click(self.handle_save_map)
-            save_spe = Button(icon='save')
+            save_spe = Button(icon="save")
             save_spe.on_click(self.handle_save_spe)
             self.plots_box.children = (
-                VBox(children=(
-                    HBox(
-                        children=(
-                            VBox(
-                                children=(
-                                    Box(
-                                        layout=layout_flex_end,
-                                        children=(save_map, self.product_select)
+                VBox(
+                    children=(
+                        HBox(
+                            children=(
+                                VBox(
+                                    children=(
+                                        Box(
+                                            layout=layout_flex_end,
+                                            children=(save_map, self.product_select),
+                                        ),
+                                        HBox((self.slider["Z"], self.plot_box)),
+                                        HBox(
+                                            (self.slider["X"],), layout=layout_flex_end
+                                        ),
+                                    )
+                                ),
+                                VBox(
+                                    layout=Layout(),
+                                    children=(
+                                        Box(
+                                            children=(save_spe, self.spectrum_select),
+                                            layout=layout_flex_end,
+                                        ),
+                                        self.spectrum_box,
                                     ),
-                                    HBox((self.slider['Z'], self.plot_box)),
-                                    HBox((self.slider['X'],), layout=layout_flex_end)
-                                )
-                            ),
-                            VBox(
-                                layout=Layout(),
-                                children=(
-                                    Box(
-                                        children=(save_spe, self.spectrum_select),
-                                        layout=layout_flex_end
-                                    ),
-                                    self.spectrum_box
                                 ),
                             )
-                        )
-                    ),
-                    HBox((self.timeseriesOutput,))
-                )),
+                        ),
+                        HBox((self.timeseriesOutput,)),
+                    )
+                ),
             )
 
         for widget in (self.step_slider, self.play):
             widget.value = 0
             widget.max = len(self.settings.output_steps) - 1
 
-        for j, xz in enumerate(('X', 'Z')):
+        for j, xz in enumerate(("X", "Z")):
             slider = self.slider[xz]
             mx = self.settings.grid[j]
             slider.max = mx
@@ -182,11 +219,11 @@ class GUIViewer:
 
         step = self.step_slider.value
 
-        xrange = slice(*self.slider['X'].value)
-        yrange = slice(*self.slider['Z'].value)
+        xrange = slice(*self.slider["X"].value)
+        yrange = slice(*self.slider["Z"].value)
 
-        if selected == 'size':
-            for key in ('Particles Wet Size Spectrum', 'Particles Dry Size Spectrum'):
+        if selected == "size":
+            for key in ("Particles Wet Size Spectrum", "Particles Dry Size Spectrum"):
                 if xrange.start == xrange.stop or yrange.start == yrange.stop:
                     continue
                 try:
@@ -194,17 +231,17 @@ class GUIViewer:
                     data = data[xrange, yrange, :]
                     data = np.mean(np.mean(data, axis=0), axis=0)
                     data = np.concatenate(((0,), data))
-                    if key == 'Particles Wet Size Spectrum':
+                    if key == "Particles Wet Size Spectrum":
                         plot.update_wet(data, step)
-                    if key == 'Particles Dry Size Spectrum':
+                    if key == "Particles Dry Size Spectrum":
                         plot.update_dry(data)
                 except self.storage.Exception:
                     pass
-        elif selected == 'terminal velocity':
+        elif selected == "terminal velocity":
             try:
                 data = self.storage.load(
-                    'radius binned number averaged terminal velocity',
-                    self.settings.output_steps[step]
+                    "radius binned number averaged terminal velocity",
+                    self.settings.output_steps[step],
                 )
 
                 data = data[xrange, yrange, :]
@@ -219,25 +256,25 @@ class GUIViewer:
                 plot.update(data_min, data_max, step)
             except self.storage.Exception:
                 pass
-        elif selected == 'temperature':
+        elif selected == "temperature":
             try:
                 dT = abs(self.settings.T_bins_edges[1] - self.settings.T_bins_edges[0])
                 np.testing.assert_allclose(np.diff(self.settings.T_bins_edges), dT)
 
                 conc = self.storage.load(
-                    'particle specific concentration',
-                    self.settings.output_steps[step]
+                    "particle specific concentration", self.settings.output_steps[step]
                 )
                 # TODO #705: assert unit == mg^-1
                 conc = conc[xrange, yrange]
 
                 data = self.storage.load(
-                    'freezable specific concentration',
-                    self.settings.output_steps[step]
+                    "freezable specific concentration", self.settings.output_steps[step]
                 )
                 data = data[xrange, yrange, :]
 
-                data = np.sum(np.sum(data, axis=0), axis=0) / np.sum(np.sum(conc, axis=0), axis=0)
+                data = np.sum(np.sum(data, axis=0), axis=0) / np.sum(
+                    np.sum(conc, axis=0), axis=0
+                )
                 data = np.concatenate(((0,), dT * np.cumsum(data[::-1])))[::-1]
 
                 plot.update(data, step)
@@ -252,7 +289,9 @@ class GUIViewer:
         selected = self.product_select.value
         if selected is None or selected not in self.plots:
             return
-        self.plots[selected].update_lines(self.slider['X'].value, self.slider['Z'].value)
+        self.plots[selected].update_lines(
+            self.slider["X"].value, self.slider["Z"].value
+        )
 
         self.outputs[selected].clear_output(wait=True)
 
@@ -276,8 +315,7 @@ class GUIViewer:
             data = None
 
         self.plots[selected].update(
-            data, step,
-            self.storage.data_range(selected) if data is not None else None
+            data, step, self.storage.data_range(selected) if data is not None else None
         )
 
     def replot_image(self, *_):
@@ -292,12 +330,11 @@ class GUIViewer:
 
     def update_timeseries(self):
         try:
-            data = self.storage.load('surf_precip')
+            data = self.storage.load("surf_precip")
         except self.storage.Exception:
             data = None
         self.timeseriesPlot.update(
-            data,
-            self.storage.data_range('surf_precip') if data is not None else None
+            data, self.storage.data_range("surf_precip") if data is not None else None
         )
 
     def replot_timeseries(self):
@@ -307,13 +344,10 @@ class GUIViewer:
             display(self.timeseriesPlot.fig)
 
     def box(self):
-        jslink((self.play, 'value'), (self.step_slider, 'value'))
-        self.step_slider.observe(self.replot, 'value')
-        self.product_select.observe(self.replot_image, 'value')
-        self.spectrum_select.observe(self.replot_spectra, 'value')
-        for xz in ('X', 'Z'):
-            self.slider[xz].observe(self.replot_spectra, 'value')
-        return VBox([
-            Box([self.play, self.step_slider]),
-            self.plots_box
-        ])
+        jslink((self.play, "value"), (self.step_slider, "value"))
+        self.step_slider.observe(self.replot, "value")
+        self.product_select.observe(self.replot_image, "value")
+        self.spectrum_select.observe(self.replot_spectra, "value")
+        for xz in ("X", "Z"):
+            self.slider[xz].observe(self.replot_spectra, "value")
+        return VBox([Box([self.play, self.step_slider]), self.plots_box])

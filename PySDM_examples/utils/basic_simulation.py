@@ -15,7 +15,7 @@ class BasicSimulation:
     def _run(self, nt, steps_per_output_interval):
         output = {k: [] for k in self.particulator.products}
         self._save(output)
-        for _ in range(0, nt+1, steps_per_output_interval):
+        for _ in range(0, nt + 1, steps_per_output_interval):
             self.particulator.run(steps=steps_per_output_interval)
             self._save(output)
         return output

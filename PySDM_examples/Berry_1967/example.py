@@ -1,21 +1,28 @@
 import os
+
 import numpy as np
-from PySDM.dynamics.collisions.collision_kernels import Geometric, Hydrodynamic, Electric
+from PySDM.dynamics.collisions.collision_kernels import (
+    Electric,
+    Geometric,
+    Hydrodynamic,
+)
 from PySDM.dynamics.terminal_velocity import gunn_and_kinzer
+
 from PySDM_examples.Berry_1967.settings import Settings
 from PySDM_examples.Berry_1967.spectrum_plotter import SpectrumPlotter
 from PySDM_examples.Shima_et_al_2009.example import run
 
 
 def main(plot: bool, save):
-    with np.errstate(all='ignore'):
+    with np.errstate(all="ignore"):
 
         u_term_approxs = (gunn_and_kinzer.Interpolation,)
-        dts = (1, 10, 'adaptive')
-        setup_prop = {Geometric: (0, 100, 200, 300, 400, 500, 600, 700, 750, 800, 850),
-                      Electric: (0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000),
-                      Hydrodynamic: (0, 1600, 1800, 2000, 2200)
-                      }
+        dts = (1, 10, "adaptive")
+        setup_prop = {
+            Geometric: (0, 100, 200, 300, 400, 500, 600, 700, 750, 800, 850),
+            Electric: (0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000),
+            Hydrodynamic: (0, 1600, 1800, 2000, 2200),
+        }
         setups = {}
 
         for u_term_approx in u_term_approxs:
@@ -25,8 +32,8 @@ def main(plot: bool, save):
 
                 for kernel_type, steps in setup_prop.items():
                     s = Settings()
-                    s.dt = 10 if dt == 'adaptive' else dt
-                    s.adaptive = dt == 'adaptive'
+                    s.dt = 10 if dt == "adaptive" else dt
+                    s.adaptive = dt == "adaptive"
                     s.kernel = kernel_type()
                     s._steps = steps
                     setups[u_term_approx][dt][kernel_type] = s
@@ -48,12 +55,16 @@ def main(plot: bool, save):
                         plotter.plot(vals, step * setup[dt][kernel].dt)
                     if save is not None:
                         n_sd = setup[dt][kernel].n_sd
-                        plotter.save(save + "/" +
-                                     f"{n_sd}_{u_term_approx.__name__}_{dt}_{kernel.__name__}" +
-                                     "." + plotter.format)
+                        plotter.save(
+                            save
+                            + "/"
+                            + f"{n_sd}_{u_term_approx.__name__}_{dt}_{kernel.__name__}"
+                            + "."
+                            + plotter.format
+                        )
                     if plot:
                         plotter.show()
 
 
-if __name__ == '__main__':
-    main(plot='CI' not in os.environ, save=".")
+if __name__ == "__main__":
+    main(plot="CI" not in os.environ, save=".")

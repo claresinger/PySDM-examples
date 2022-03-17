@@ -1,5 +1,8 @@
 import sys
+
+from IPython.display import FileLink, clear_output, display
 from ipywidgets import (
+    HTML,
     Accordion,
     Box,
     Button,
@@ -8,7 +11,6 @@ from ipywidgets import (
     FloatProgress,
     FloatSlider,
     HBox,
-    HTML,
     IntProgress,
     IntRangeSlider,
     IntSlider,
@@ -20,12 +22,8 @@ from ipywidgets import (
     Tab,
     VBox,
     interactive_output,
-    jslink
+    jslink,
 )
-from IPython.display import (
-    clear_output,
-    display,
-    FileLink
-)
+
 from PySDM_examples.utils.widgets.freezer import Freezer
 from PySDM_examples.utils.widgets.progbar_updater import ProgbarUpdater

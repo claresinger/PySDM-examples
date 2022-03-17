@@ -1,13 +1,16 @@
 # pylint: disable=wrong-import-position
 # https://bugs.python.org/issue37373
 import sys
-if sys.platform == 'win32' and sys.version_info[:2] >= (3, 7):
+
+if sys.platform == "win32" and sys.version_info[:2] >= (3, 7):
     import asyncio
+
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-import re
 import os
 import pathlib
+import re
+
 import nbformat
 import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
@@ -24,7 +27,9 @@ def findfiles(path, regex):
     return res
 
 
-@pytest.fixture(params=findfiles(pathlib.Path(__file__).parent.parent.absolute(), r'.*\.(ipynb)$'))
+@pytest.fixture(
+    params=findfiles(pathlib.Path(__file__).parent.parent.absolute(), r".*\.(ipynb)$")
+)
 def notebook_filename(request):
     return request.param
 
@@ -33,5 +38,5 @@ def notebook_filename(request):
 def test_run_notebooks(notebook_filename, tmp_path):
     with open(notebook_filename, encoding="utf8") as f:
         nb = nbformat.read(f, as_version=4)
-        ep = ExecutePreprocessor(timeout=15*60, kernel_name='python3')
-        ep.preprocess(nb, {'metadata': {'path': tmp_path}})
+        ep = ExecutePreprocessor(timeout=15 * 60, kernel_name="python3")
+        ep.preprocess(nb, {"metadata": {"path": tmp_path}})

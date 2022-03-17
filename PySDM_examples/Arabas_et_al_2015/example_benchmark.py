@@ -1,9 +1,11 @@
 import importlib
-from matplotlib import pyplot as plt
-from PySDM.products import WallTime
-from PySDM import Formulae
+
 import PySDM.backends.impl_numba.conf
+from matplotlib import pyplot as plt
+from PySDM import Formulae
 from PySDM.backends import CPU, GPU
+from PySDM.products import WallTime
+
 from PySDM_examples.Arabas_et_al_2015 import Settings
 from PySDM_examples.Szumowski_et_al_1998 import Simulation, Storage
 
@@ -33,7 +35,7 @@ def main():
         "coalescence": True,
         "condensation": False,
         "sedimentation": True,
-        'freezing': False
+        "freezing": False,
     }
 
     n_sd = range(14, 16, 1)
@@ -54,7 +56,7 @@ def main():
             simulation = Simulation(settings, storage, None, backend)
             simulation.reinit(products=[WallTime()])
             simulation.run()
-            times[key].append(storage.load('wall time')[-1])
+            times[key].append(storage.load("wall time")[-1])
 
     for parallelization, t in times.items():
         plt.plot(n_sd, t, label=parallelization)
@@ -63,5 +65,5 @@ def main():
     plt.savefig("benchmark.pdf", format="pdf")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,19 +1,21 @@
 import os
-import numpy as np
-import matplotlib.pyplot as plt
+
 import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.collections import LineCollection
-from PySDM.backends.impl_numba.test_helpers import bdf
 from PySDM.backends import CPU, GPU
-from PySDM_examples.Arabas_and_Shima_2017.simulation import Simulation
+from PySDM.backends.impl_numba.test_helpers import bdf
+
 from PySDM_examples.Arabas_and_Shima_2017.settings import setups
+from PySDM_examples.Arabas_and_Shima_2017.simulation import Simulation
 
 
 def data(n_output, rtols, schemes, setups_num):
     resultant_data = {}
     for scheme in schemes:
         resultant_data[scheme] = {}
-        if scheme == 'BDF':
+        if scheme == "BDF":
             for rtol in rtols:
                 resultant_data[scheme][rtol] = []
             for settings_idx in range(setups_num):
@@ -32,7 +34,9 @@ def data(n_output, rtols, schemes, setups_num):
                     settings.rtol_x = rtol
                     settings.rtol_thd = rtol
                     settings.n_output = n_output
-                    simulation = Simulation(settings, backend=CPU if scheme=='CPU' else GPU)
+                    simulation = Simulation(
+                        settings, backend=CPU if scheme == "CPU" else GPU
+                    )
                     results = simulation.run()
                     resultant_data[scheme][rtol].append(results)
     return resultant_data
@@ -42,9 +46,12 @@ def add_color_line(fig, ax, x, y, z):
     points = np.array([x, y]).T.reshape(-1, 1, 2)
     segments = np.concatenate([points[:-1], points[1:]], axis=1)
     z = np.array(z)
-    vmin = min(np.nanmin(z), np.nanmax(z)/2)
-    lc = LineCollection(segments, cmap=plt.get_cmap('plasma'),
-                        norm=matplotlib.colors.LogNorm(vmax=1, vmin=vmin))
+    vmin = min(np.nanmin(z), np.nanmax(z) / 2)
+    lc = LineCollection(
+        segments,
+        cmap=plt.get_cmap("plasma"),
+        norm=matplotlib.colors.LogNorm(vmax=1, vmin=vmin),
+    )
     lc.set_array(z)
     lc.set_linewidth(3)
 
@@ -53,11 +60,12 @@ def add_color_line(fig, ax, x, y, z):
 
 
 def plot(plot_data, rtols, schemes, setups_num, show_plot, path=None):
-    _rtol = '$r_{tol}$'
+    _rtol = "$r_{tol}$"
 
     plt.ioff()
-    fig, axs = plt.subplots(setups_num, len(rtols),
-                            sharex=True, sharey=True, figsize=(10, 13))
+    fig, axs = plt.subplots(
+        setups_num, len(rtols), sharex=True, sharey=True, figsize=(10, 13)
+    )
     for settings_idx in range(setups_num):
         BDF_S = None
         PySDM_S = None
@@ -65,11 +73,11 @@ def plot(plot_data, rtols, schemes, setups_num, show_plot, path=None):
             ax = axs[settings_idx, rtol_idx]
             for scheme in schemes:
                 datum = plot_data[scheme][rtols[rtol_idx]][settings_idx]
-                S = datum['S']
-                z = datum['z']
-                dt = datum['dt_cond_min']
-                if scheme == 'BDF':
-                    ax.plot(S, z, label=scheme, color='grey')
+                S = datum["S"]
+                z = datum["z"]
+                dt = datum["dt_cond_min"]
+                if scheme == "BDF":
+                    ax.plot(S, z, label=scheme, color="grey")
                     BDF_S = np.array(S)
                 else:
                     add_color_line(fig, ax, S, z, dt)
@@ -81,27 +89,27 @@ def plot(plot_data, rtols, schemes, setups_num, show_plot, path=None):
             ax.set_ylim(0, 180)
             ax.get_xaxis().set_minor_locator(matplotlib.ticker.AutoMinorLocator())
             ax.grid()
-            plt.setp(ax.get_xticklabels(), rotation=30, horizontalalignment='right')
+            plt.setp(ax.get_xticklabels(), rotation=30, horizontalalignment="right")
     for i, ax in enumerate(axs[:, 0]):
-        ax.set(ylabel=r'$\bf{settings: ' + str(i) + '}$\ndisplacement [m]')
+        ax.set(ylabel=r"$\bf{settings: " + str(i) + "}$\ndisplacement [m]")
     for i, ax in enumerate(axs[-1, :]):
-        ax.set(xlabel='supersaturation\n' + r'$\bf{r_{tol}: ' + str(rtols[i]) + '}$')
+        ax.set(xlabel="supersaturation\n" + r"$\bf{r_{tol}: " + str(rtols[i]) + "}$")
 
     plt.tight_layout()
 
     if path is not None:
-        plt.savefig(path + '.pdf', format='pdf')
+        plt.savefig(path + ".pdf", format="pdf")
     if show_plot:
         plt.show()
 
 
 def main(save=None, show_plot=True):
     rtols = [1e-7, 1e-11]
-    schemes = ['CPU', 'BDF']
+    schemes = ["CPU", "BDF"]
     setups_num = len(setups)
     input_data = data(80, rtols, schemes, setups_num)
     plot(input_data, rtols, schemes, setups_num, show_plot, save)
 
 
-if __name__ == '__main__':
-    main('BDF_VS_ADAPTIVE', show_plot='CI' not in os.environ)
+if __name__ == "__main__":
+    main("BDF_VS_ADAPTIVE", show_plot="CI" not in os.environ)
