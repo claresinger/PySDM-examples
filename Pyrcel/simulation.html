@@ -29,24 +29,27 @@
 <pre><code class="python">import numpy as np
 from PySDM import Builder
 from PySDM.backends import CPU
-from PySDM.environments import Parcel
+from PySDM.backends.impl_numba.test_helpers import bdf
 from PySDM.dynamics import AmbientThermodynamics, Condensation
+from PySDM.environments import Parcel
 from PySDM.initialisation import equilibrate_wet_radii
 from PySDM.initialisation.sampling.spectral_sampling import ConstantMultiplicity
 from PySDM.physics import si
-from PySDM.backends.impl_numba.test_helpers import bdf
+
 from PySDM_examples.utils import BasicSimulation
 
 
 class Simulation(BasicSimulation):
-    def __init__(self, settings, products=None, scipy_solver=False, rtol_thd=1e-10, rtol_x=1e-10):
+    def __init__(
+        self, settings, products=None, scipy_solver=False, rtol_thd=1e-10, rtol_x=1e-10
+    ):
         env = Parcel(
             dt=settings.timestep,
             p0=settings.initial_pressure,
             q0=settings.initial_vapour_mixing_ratio,
             T0=settings.initial_temperature,
             w=settings.vertical_velocity,
-            mass_of_dry_air=44 * si.kg
+            mass_of_dry_air=44 * si.kg,
         )
         n_sd = sum(settings.n_sd_per_mode)
         builder = Builder(n_sd=n_sd, backend=CPU(formulae=settings.formulae))
@@ -55,27 +58,34 @@ class Simulation(BasicSimulation):
         builder.add_dynamic(Condensation(rtol_thd=rtol_thd, rtol_x=rtol_x))
 
         volume = env.mass_of_dry_air / settings.initial_air_density
-        attributes = {k: np.empty(0) for k in (&#39;dry volume&#39;, &#39;kappa times dry volume&#39;, &#39;n&#39;)}
+        attributes = {
+            k: np.empty(0) for k in (&#34;dry volume&#34;, &#34;kappa times dry volume&#34;, &#34;n&#34;)
+        }
         for i, (kappa, spectrum) in enumerate(settings.aerosol_modes_by_kappa.items()):
             sampling = ConstantMultiplicity(spectrum)
             r_dry, n_per_volume = sampling.sample(settings.n_sd_per_mode[i])
             v_dry = settings.formulae.trivia.volume(radius=r_dry)
-            attributes[&#39;n&#39;] = np.append(attributes[&#39;n&#39;], n_per_volume * volume)
-            attributes[&#39;dry volume&#39;] = np.append(attributes[&#39;dry volume&#39;], v_dry)
-            attributes[&#39;kappa times dry volume&#39;] = np.append(
-                attributes[&#39;kappa times dry volume&#39;], v_dry * kappa)
+            attributes[&#34;n&#34;] = np.append(attributes[&#34;n&#34;], n_per_volume * volume)
+            attributes[&#34;dry volume&#34;] = np.append(attributes[&#34;dry volume&#34;], v_dry)
+            attributes[&#34;kappa times dry volume&#34;] = np.append(
+                attributes[&#34;kappa times dry volume&#34;], v_dry * kappa
+            )
         r_wet = equilibrate_wet_radii(
-            r_dry=settings.formulae.trivia.radius(volume=attributes[&#39;dry volume&#39;]),
+            r_dry=settings.formulae.trivia.radius(volume=attributes[&#34;dry volume&#34;]),
             environment=env,
-            kappa_times_dry_volume=attributes[&#39;kappa times dry volume&#39;],
+            kappa_times_dry_volume=attributes[&#34;kappa times dry volume&#34;],
         )
-        attributes[&#39;volume&#39;] = settings.formulae.trivia.volume(radius=r_wet)
+        attributes[&#34;volume&#34;] = settings.formulae.trivia.volume(radius=r_wet)
 
-        super().__init__(particulator=builder.build(attributes=attributes, products=products))
+        super().__init__(
+            particulator=builder.build(attributes=attributes, products=products)
+        )
         if scipy_solver:
             bdf.patch_particulator(self.particulator)
 
-        self.output_attributes = {&#39;volume&#39;: tuple([] for _ in range(self.particulator.n_sd))}
+        self.output_attributes = {
+            &#34;volume&#34;: tuple([] for _ in range(self.particulator.n_sd))
+        }
         self.settings = settings
 
         self.__sanity_checks(attributes, volume)
@@ -84,9 +94,12 @@ class Simulation(BasicSimulation):
         for attribute in attributes.values():
             assert attribute.shape[0] == self.particulator.n_sd
         np.testing.assert_approx_equal(
-            sum(attributes[&#39;n&#39;]) / volume,
-            sum(mode.norm_factor for mode in self.settings.aerosol_modes_by_kappa.values()),
-            significant=4
+            sum(attributes[&#34;n&#34;]) / volume,
+            sum(
+                mode.norm_factor
+                for mode in self.settings.aerosol_modes_by_kappa.values()
+            ),
+            significant=4,
         )
 
     def _save(self, output):
@@ -97,11 +110,10 @@ class Simulation(BasicSimulation):
         super()._save(output)
 
     def run(self):
-        output_products = super()._run(self.settings.nt, self.settings.steps_per_output_interval)
-        return {
-            &#39;products&#39;: output_products,
-            &#39;attributes&#39;: self.output_attributes
-        }</code></pre>
+        output_products = super()._run(
+            self.settings.nt, self.settings.steps_per_output_interval
+        )
+        return {&#34;products&#34;: output_products, &#34;attributes&#34;: self.output_attributes}</code></pre>
 </details>
 </section>
 <section>
@@ -124,14 +136,16 @@ class Simulation(BasicSimulation):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Simulation(BasicSimulation):
-    def __init__(self, settings, products=None, scipy_solver=False, rtol_thd=1e-10, rtol_x=1e-10):
+    def __init__(
+        self, settings, products=None, scipy_solver=False, rtol_thd=1e-10, rtol_x=1e-10
+    ):
         env = Parcel(
             dt=settings.timestep,
             p0=settings.initial_pressure,
             q0=settings.initial_vapour_mixing_ratio,
             T0=settings.initial_temperature,
             w=settings.vertical_velocity,
-            mass_of_dry_air=44 * si.kg
+            mass_of_dry_air=44 * si.kg,
         )
         n_sd = sum(settings.n_sd_per_mode)
         builder = Builder(n_sd=n_sd, backend=CPU(formulae=settings.formulae))
@@ -140,27 +154,34 @@ class Simulation(BasicSimulation):
         builder.add_dynamic(Condensation(rtol_thd=rtol_thd, rtol_x=rtol_x))
 
         volume = env.mass_of_dry_air / settings.initial_air_density
-        attributes = {k: np.empty(0) for k in (&#39;dry volume&#39;, &#39;kappa times dry volume&#39;, &#39;n&#39;)}
+        attributes = {
+            k: np.empty(0) for k in (&#34;dry volume&#34;, &#34;kappa times dry volume&#34;, &#34;n&#34;)
+        }
         for i, (kappa, spectrum) in enumerate(settings.aerosol_modes_by_kappa.items()):
             sampling = ConstantMultiplicity(spectrum)
             r_dry, n_per_volume = sampling.sample(settings.n_sd_per_mode[i])
             v_dry = settings.formulae.trivia.volume(radius=r_dry)
-            attributes[&#39;n&#39;] = np.append(attributes[&#39;n&#39;], n_per_volume * volume)
-            attributes[&#39;dry volume&#39;] = np.append(attributes[&#39;dry volume&#39;], v_dry)
-            attributes[&#39;kappa times dry volume&#39;] = np.append(
-                attributes[&#39;kappa times dry volume&#39;], v_dry * kappa)
+            attributes[&#34;n&#34;] = np.append(attributes[&#34;n&#34;], n_per_volume * volume)
+            attributes[&#34;dry volume&#34;] = np.append(attributes[&#34;dry volume&#34;], v_dry)
+            attributes[&#34;kappa times dry volume&#34;] = np.append(
+                attributes[&#34;kappa times dry volume&#34;], v_dry * kappa
+            )
         r_wet = equilibrate_wet_radii(
-            r_dry=settings.formulae.trivia.radius(volume=attributes[&#39;dry volume&#39;]),
+            r_dry=settings.formulae.trivia.radius(volume=attributes[&#34;dry volume&#34;]),
             environment=env,
-            kappa_times_dry_volume=attributes[&#39;kappa times dry volume&#39;],
+            kappa_times_dry_volume=attributes[&#34;kappa times dry volume&#34;],
         )
-        attributes[&#39;volume&#39;] = settings.formulae.trivia.volume(radius=r_wet)
+        attributes[&#34;volume&#34;] = settings.formulae.trivia.volume(radius=r_wet)
 
-        super().__init__(particulator=builder.build(attributes=attributes, products=products))
+        super().__init__(
+            particulator=builder.build(attributes=attributes, products=products)
+        )
         if scipy_solver:
             bdf.patch_particulator(self.particulator)
 
-        self.output_attributes = {&#39;volume&#39;: tuple([] for _ in range(self.particulator.n_sd))}
+        self.output_attributes = {
+            &#34;volume&#34;: tuple([] for _ in range(self.particulator.n_sd))
+        }
         self.settings = settings
 
         self.__sanity_checks(attributes, volume)
@@ -169,9 +190,12 @@ class Simulation(BasicSimulation):
         for attribute in attributes.values():
             assert attribute.shape[0] == self.particulator.n_sd
         np.testing.assert_approx_equal(
-            sum(attributes[&#39;n&#39;]) / volume,
-            sum(mode.norm_factor for mode in self.settings.aerosol_modes_by_kappa.values()),
-            significant=4
+            sum(attributes[&#34;n&#34;]) / volume,
+            sum(
+                mode.norm_factor
+                for mode in self.settings.aerosol_modes_by_kappa.values()
+            ),
+            significant=4,
         )
 
     def _save(self, output):
@@ -182,11 +206,10 @@ class Simulation(BasicSimulation):
         super()._save(output)
 
     def run(self):
-        output_products = super()._run(self.settings.nt, self.settings.steps_per_output_interval)
-        return {
-            &#39;products&#39;: output_products,
-            &#39;attributes&#39;: self.output_attributes
-        }</code></pre>
+        output_products = super()._run(
+            self.settings.nt, self.settings.steps_per_output_interval
+        )
+        return {&#34;products&#34;: output_products, &#34;attributes&#34;: self.output_attributes}</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -204,11 +227,10 @@ class Simulation(BasicSimulation):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def run(self):
-    output_products = super()._run(self.settings.nt, self.settings.steps_per_output_interval)
-    return {
-        &#39;products&#39;: output_products,
-        &#39;attributes&#39;: self.output_attributes
-    }</code></pre>
+    output_products = super()._run(
+        self.settings.nt, self.settings.steps_per_output_interval
+    )
+    return {&#34;products&#34;: output_products, &#34;attributes&#34;: self.output_attributes}</code></pre>
 </details>
 </dd>
 </dl>

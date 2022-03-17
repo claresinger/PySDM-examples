@@ -27,40 +27,47 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">from collections import namedtuple
-import numpy as np
 
-from PySDM import Formulae
-from PySDM import Builder, products as PySDM_products
-from PySDM.physics import si
-from PySDM.initialisation import equilibrate_wet_radii
-from PySDM.initialisation.sampling.spectral_sampling import ConstantMultiplicity
+import numpy as np
+from PySDM import Builder, Formulae
+from PySDM import products as PySDM_products
 from PySDM.backends import CPU
 from PySDM.backends.impl_numba.test_helpers import bdf
 from PySDM.dynamics import AmbientThermodynamics, Condensation
 from PySDM.environments import Parcel
+from PySDM.initialisation import equilibrate_wet_radii
+from PySDM.initialisation.sampling.spectral_sampling import ConstantMultiplicity
+from PySDM.physics import si
 
 from PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol import AerosolARG
 
+
 class Magick:
-    def register(self, builder): # pylint: disable=no-self-use
+    def register(self, builder):  # pylint: disable=no-self-use
         builder.request_attribute(&#34;critical supersaturation&#34;)
 
     def __call__(self):
         pass
 
-def run_parcel(w, sol2, N2, rad2, n_sd_per_mode,
-               RH0=1.,
-               T0=294*si.K,
-               p0=1e5*si.Pa,
-               n_steps=50,
-               mass_of_dry_air=1e3 * si.kg,
-               dt=2*si.s
-              ):
+
+def run_parcel(
+    w,
+    sol2,
+    N2,
+    rad2,
+    n_sd_per_mode,
+    RH0=1.0,
+    T0=294 * si.K,
+    p0=1e5 * si.Pa,
+    n_steps=50,
+    mass_of_dry_air=1e3 * si.kg,
+    dt=2 * si.s,
+):
     products = (
         PySDM_products.WaterMixingRatio(unit=&#34;g/kg&#34;, name=&#34;ql&#34;),
         PySDM_products.PeakSupersaturation(name=&#34;S max&#34;),
         PySDM_products.AmbientRelativeHumidity(name=&#34;RH&#34;),
-        PySDM_products.ParcelDisplacement(name=&#34;z&#34;)
+        PySDM_products.ParcelDisplacement(name=&#34;z&#34;),
     )
 
     formulae = Formulae()
@@ -68,14 +75,7 @@ def run_parcel(w, sol2, N2, rad2, n_sd_per_mode,
     pv0 = RH0 * formulae.saturation_vapour_pressure.pvs_Celsius(T0 - const.T0)
     q0 = const.eps * pv0 / (p0 - pv0)
 
-    env = Parcel(
-     dt=dt,
-     mass_of_dry_air=mass_of_dry_air,
-     p0=p0,
-     q0=q0,
-     w=w,
-     T0=T0
-    )
+    env = Parcel(dt=dt, mass_of_dry_air=mass_of_dry_air, p0=p0, q0=q0, w=w, T0=T0)
 
     aerosol = AerosolARG(M2_sol=sol2, M2_N=N2, M2_rad=rad2)
     n_sd = n_sd_per_mode * len(aerosol.aerosol_modes)
@@ -86,32 +86,37 @@ def run_parcel(w, sol2, N2, rad2, n_sd_per_mode,
     builder.add_dynamic(Condensation())
     builder.add_dynamic(Magick())
 
-    attributes = {k: np.empty(0) for k in (&#39;dry volume&#39;, &#39;kappa times dry volume&#39;, &#39;n&#39;)}
+    attributes = {k: np.empty(0) for k in (&#34;dry volume&#34;, &#34;kappa times dry volume&#34;, &#34;n&#34;)}
     for i, mode in enumerate(aerosol.aerosol_modes):
         kappa, spectrum = mode[&#34;kappa&#34;], mode[&#34;spectrum&#34;]
         r_dry, concentration = ConstantMultiplicity(spectrum).sample(n_sd_per_mode)
         v_dry = builder.formulae.trivia.volume(radius=r_dry)
         specific_concentration = concentration / builder.formulae.constants.rho_STP
-        attributes[&#39;n&#39;] = np.append(attributes[&#39;n&#39;], specific_concentration * env.mass_of_dry_air)
-        attributes[&#39;dry volume&#39;] = np.append(attributes[&#39;dry volume&#39;], v_dry)
-        attributes[&#39;kappa times dry volume&#39;] = np.append(
-            attributes[&#39;kappa times dry volume&#39;], v_dry * kappa)
+        attributes[&#34;n&#34;] = np.append(
+            attributes[&#34;n&#34;], specific_concentration * env.mass_of_dry_air
+        )
+        attributes[&#34;dry volume&#34;] = np.append(attributes[&#34;dry volume&#34;], v_dry)
+        attributes[&#34;kappa times dry volume&#34;] = np.append(
+            attributes[&#34;kappa times dry volume&#34;], v_dry * kappa
+        )
 
     r_wet = equilibrate_wet_radii(
-        r_dry=builder.formulae.trivia.radius(volume=attributes[&#39;dry volume&#39;]),
+        r_dry=builder.formulae.trivia.radius(volume=attributes[&#34;dry volume&#34;]),
         environment=env,
-        kappa_times_dry_volume=attributes[&#39;kappa times dry volume&#39;],
+        kappa_times_dry_volume=attributes[&#34;kappa times dry volume&#34;],
     )
-    attributes[&#39;volume&#39;] = builder.formulae.trivia.volume(radius=r_wet)
+    attributes[&#34;volume&#34;] = builder.formulae.trivia.volume(radius=r_wet)
 
     particulator = builder.build(attributes, products=products)
     bdf.patch_particulator(particulator)
 
     output = {product.name: [] for product in particulator.products.values()}
-    output_attributes = {&#39;n&#39;: tuple([] for _ in range(particulator.n_sd)),
-                        &#39;volume&#39;: tuple([] for _ in range(particulator.n_sd)),
-                        &#39;critical volume&#39;: tuple([] for _ in range(particulator.n_sd)),
-                        &#39;critical supersaturation&#39;: tuple([] for _ in range(particulator.n_sd))}
+    output_attributes = {
+        &#34;n&#34;: tuple([] for _ in range(particulator.n_sd)),
+        &#34;volume&#34;: tuple([] for _ in range(particulator.n_sd)),
+        &#34;critical volume&#34;: tuple([] for _ in range(particulator.n_sd)),
+        &#34;critical supersaturation&#34;: tuple([] for _ in range(particulator.n_sd)),
+    }
 
     for _ in range(n_steps):
         particulator.run(steps=1)
@@ -129,25 +134,41 @@ def run_parcel(w, sol2, N2, rad2, n_sd_per_mode,
     for j, mode in enumerate(aerosol.aerosol_modes):
         activated_drops_j_S = 0
         activated_drops_j_V = 0
-        RHmax = np.nanmax(np.asarray(output[&#39;RH&#39;]))
-        for i, volume in enumerate(output_attributes[&#39;volume&#39;]):
-            if j*n_sd_per_mode &lt;= i &lt; (j+1)*n_sd_per_mode:
-                if output_attributes[&#39;critical supersaturation&#39;][i][-1] &lt; RHmax:
-                    activated_drops_j_S += output_attributes[&#39;n&#39;][i][-1]
-                if output_attributes[&#39;critical volume&#39;][i][-1] &lt; volume[-1]:
-                    activated_drops_j_V += output_attributes[&#39;n&#39;][i][-1]
-        Nj = np.asarray(output_attributes[&#39;n&#39;])[j*n_sd_per_mode:(j+1)*n_sd_per_mode, -1]
+        RHmax = np.nanmax(np.asarray(output[&#34;RH&#34;]))
+        for i, volume in enumerate(output_attributes[&#34;volume&#34;]):
+            if j * n_sd_per_mode &lt;= i &lt; (j + 1) * n_sd_per_mode:
+                if output_attributes[&#34;critical supersaturation&#34;][i][-1] &lt; RHmax:
+                    activated_drops_j_S += output_attributes[&#34;n&#34;][i][-1]
+                if output_attributes[&#34;critical volume&#34;][i][-1] &lt; volume[-1]:
+                    activated_drops_j_V += output_attributes[&#34;n&#34;][i][-1]
+        Nj = np.asarray(output_attributes[&#34;n&#34;])[
+            j * n_sd_per_mode : (j + 1) * n_sd_per_mode, -1
+        ]
         max_multiplicity_j = np.max(Nj)
         sum_multiplicity_j = np.sum(Nj)
         error[j] = max_multiplicity_j / sum_multiplicity_j
         activated_fraction_S[j] = activated_drops_j_S / sum_multiplicity_j
         activated_fraction_V[j] = activated_drops_j_V / sum_multiplicity_j
 
-    Output = namedtuple(&#34;Output&#34;, [&#34;profile&#34;, &#34;attributes&#34;, &#34;aerosol&#34;, &#34;activated_fraction_S&#34;,
-                                    &#34;activated_fraction_V&#34;, &#34;error&#34;])
-    return Output(profile=output, attributes=output_attributes, aerosol=aerosol,
-            activated_fraction_S=activated_fraction_S, activated_fraction_V=activated_fraction_V,
-            error=error)</code></pre>
+    Output = namedtuple(
+        &#34;Output&#34;,
+        [
+            &#34;profile&#34;,
+            &#34;attributes&#34;,
+            &#34;aerosol&#34;,
+            &#34;activated_fraction_S&#34;,
+            &#34;activated_fraction_V&#34;,
+            &#34;error&#34;,
+        ],
+    )
+    return Output(
+        profile=output,
+        attributes=output_attributes,
+        aerosol=aerosol,
+        activated_fraction_S=activated_fraction_S,
+        activated_fraction_V=activated_fraction_V,
+        error=error,
+    )</code></pre>
 </details>
 </section>
 <section>
@@ -166,19 +187,24 @@ def run_parcel(w, sol2, N2, rad2, n_sd_per_mode,
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_parcel(w, sol2, N2, rad2, n_sd_per_mode,
-               RH0=1.,
-               T0=294*si.K,
-               p0=1e5*si.Pa,
-               n_steps=50,
-               mass_of_dry_air=1e3 * si.kg,
-               dt=2*si.s
-              ):
+<pre><code class="python">def run_parcel(
+    w,
+    sol2,
+    N2,
+    rad2,
+    n_sd_per_mode,
+    RH0=1.0,
+    T0=294 * si.K,
+    p0=1e5 * si.Pa,
+    n_steps=50,
+    mass_of_dry_air=1e3 * si.kg,
+    dt=2 * si.s,
+):
     products = (
         PySDM_products.WaterMixingRatio(unit=&#34;g/kg&#34;, name=&#34;ql&#34;),
         PySDM_products.PeakSupersaturation(name=&#34;S max&#34;),
         PySDM_products.AmbientRelativeHumidity(name=&#34;RH&#34;),
-        PySDM_products.ParcelDisplacement(name=&#34;z&#34;)
+        PySDM_products.ParcelDisplacement(name=&#34;z&#34;),
     )
 
     formulae = Formulae()
@@ -186,14 +212,7 @@ def run_parcel(w, sol2, N2, rad2, n_sd_per_mode,
     pv0 = RH0 * formulae.saturation_vapour_pressure.pvs_Celsius(T0 - const.T0)
     q0 = const.eps * pv0 / (p0 - pv0)
 
-    env = Parcel(
-     dt=dt,
-     mass_of_dry_air=mass_of_dry_air,
-     p0=p0,
-     q0=q0,
-     w=w,
-     T0=T0
-    )
+    env = Parcel(dt=dt, mass_of_dry_air=mass_of_dry_air, p0=p0, q0=q0, w=w, T0=T0)
 
     aerosol = AerosolARG(M2_sol=sol2, M2_N=N2, M2_rad=rad2)
     n_sd = n_sd_per_mode * len(aerosol.aerosol_modes)
@@ -204,32 +223,37 @@ def run_parcel(w, sol2, N2, rad2, n_sd_per_mode,
     builder.add_dynamic(Condensation())
     builder.add_dynamic(Magick())
 
-    attributes = {k: np.empty(0) for k in (&#39;dry volume&#39;, &#39;kappa times dry volume&#39;, &#39;n&#39;)}
+    attributes = {k: np.empty(0) for k in (&#34;dry volume&#34;, &#34;kappa times dry volume&#34;, &#34;n&#34;)}
     for i, mode in enumerate(aerosol.aerosol_modes):
         kappa, spectrum = mode[&#34;kappa&#34;], mode[&#34;spectrum&#34;]
         r_dry, concentration = ConstantMultiplicity(spectrum).sample(n_sd_per_mode)
         v_dry = builder.formulae.trivia.volume(radius=r_dry)
         specific_concentration = concentration / builder.formulae.constants.rho_STP
-        attributes[&#39;n&#39;] = np.append(attributes[&#39;n&#39;], specific_concentration * env.mass_of_dry_air)
-        attributes[&#39;dry volume&#39;] = np.append(attributes[&#39;dry volume&#39;], v_dry)
-        attributes[&#39;kappa times dry volume&#39;] = np.append(
-            attributes[&#39;kappa times dry volume&#39;], v_dry * kappa)
+        attributes[&#34;n&#34;] = np.append(
+            attributes[&#34;n&#34;], specific_concentration * env.mass_of_dry_air
+        )
+        attributes[&#34;dry volume&#34;] = np.append(attributes[&#34;dry volume&#34;], v_dry)
+        attributes[&#34;kappa times dry volume&#34;] = np.append(
+            attributes[&#34;kappa times dry volume&#34;], v_dry * kappa
+        )
 
     r_wet = equilibrate_wet_radii(
-        r_dry=builder.formulae.trivia.radius(volume=attributes[&#39;dry volume&#39;]),
+        r_dry=builder.formulae.trivia.radius(volume=attributes[&#34;dry volume&#34;]),
         environment=env,
-        kappa_times_dry_volume=attributes[&#39;kappa times dry volume&#39;],
+        kappa_times_dry_volume=attributes[&#34;kappa times dry volume&#34;],
     )
-    attributes[&#39;volume&#39;] = builder.formulae.trivia.volume(radius=r_wet)
+    attributes[&#34;volume&#34;] = builder.formulae.trivia.volume(radius=r_wet)
 
     particulator = builder.build(attributes, products=products)
     bdf.patch_particulator(particulator)
 
     output = {product.name: [] for product in particulator.products.values()}
-    output_attributes = {&#39;n&#39;: tuple([] for _ in range(particulator.n_sd)),
-                        &#39;volume&#39;: tuple([] for _ in range(particulator.n_sd)),
-                        &#39;critical volume&#39;: tuple([] for _ in range(particulator.n_sd)),
-                        &#39;critical supersaturation&#39;: tuple([] for _ in range(particulator.n_sd))}
+    output_attributes = {
+        &#34;n&#34;: tuple([] for _ in range(particulator.n_sd)),
+        &#34;volume&#34;: tuple([] for _ in range(particulator.n_sd)),
+        &#34;critical volume&#34;: tuple([] for _ in range(particulator.n_sd)),
+        &#34;critical supersaturation&#34;: tuple([] for _ in range(particulator.n_sd)),
+    }
 
     for _ in range(n_steps):
         particulator.run(steps=1)
@@ -247,25 +271,41 @@ def run_parcel(w, sol2, N2, rad2, n_sd_per_mode,
     for j, mode in enumerate(aerosol.aerosol_modes):
         activated_drops_j_S = 0
         activated_drops_j_V = 0
-        RHmax = np.nanmax(np.asarray(output[&#39;RH&#39;]))
-        for i, volume in enumerate(output_attributes[&#39;volume&#39;]):
-            if j*n_sd_per_mode &lt;= i &lt; (j+1)*n_sd_per_mode:
-                if output_attributes[&#39;critical supersaturation&#39;][i][-1] &lt; RHmax:
-                    activated_drops_j_S += output_attributes[&#39;n&#39;][i][-1]
-                if output_attributes[&#39;critical volume&#39;][i][-1] &lt; volume[-1]:
-                    activated_drops_j_V += output_attributes[&#39;n&#39;][i][-1]
-        Nj = np.asarray(output_attributes[&#39;n&#39;])[j*n_sd_per_mode:(j+1)*n_sd_per_mode, -1]
+        RHmax = np.nanmax(np.asarray(output[&#34;RH&#34;]))
+        for i, volume in enumerate(output_attributes[&#34;volume&#34;]):
+            if j * n_sd_per_mode &lt;= i &lt; (j + 1) * n_sd_per_mode:
+                if output_attributes[&#34;critical supersaturation&#34;][i][-1] &lt; RHmax:
+                    activated_drops_j_S += output_attributes[&#34;n&#34;][i][-1]
+                if output_attributes[&#34;critical volume&#34;][i][-1] &lt; volume[-1]:
+                    activated_drops_j_V += output_attributes[&#34;n&#34;][i][-1]
+        Nj = np.asarray(output_attributes[&#34;n&#34;])[
+            j * n_sd_per_mode : (j + 1) * n_sd_per_mode, -1
+        ]
         max_multiplicity_j = np.max(Nj)
         sum_multiplicity_j = np.sum(Nj)
         error[j] = max_multiplicity_j / sum_multiplicity_j
         activated_fraction_S[j] = activated_drops_j_S / sum_multiplicity_j
         activated_fraction_V[j] = activated_drops_j_V / sum_multiplicity_j
 
-    Output = namedtuple(&#34;Output&#34;, [&#34;profile&#34;, &#34;attributes&#34;, &#34;aerosol&#34;, &#34;activated_fraction_S&#34;,
-                                    &#34;activated_fraction_V&#34;, &#34;error&#34;])
-    return Output(profile=output, attributes=output_attributes, aerosol=aerosol,
-            activated_fraction_S=activated_fraction_S, activated_fraction_V=activated_fraction_V,
-            error=error)</code></pre>
+    Output = namedtuple(
+        &#34;Output&#34;,
+        [
+            &#34;profile&#34;,
+            &#34;attributes&#34;,
+            &#34;aerosol&#34;,
+            &#34;activated_fraction_S&#34;,
+            &#34;activated_fraction_V&#34;,
+            &#34;error&#34;,
+        ],
+    )
+    return Output(
+        profile=output,
+        attributes=output_attributes,
+        aerosol=aerosol,
+        activated_fraction_S=activated_fraction_S,
+        activated_fraction_V=activated_fraction_V,
+        error=error,
+    )</code></pre>
 </details>
 </dd>
 </dl>
@@ -283,7 +323,7 @@ def run_parcel(w, sol2, N2, rad2, n_sd_per_mode,
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Magick:
-    def register(self, builder): # pylint: disable=no-self-use
+    def register(self, builder):  # pylint: disable=no-self-use
         builder.request_attribute(&#34;critical supersaturation&#34;)
 
     def __call__(self):
@@ -300,7 +340,7 @@ def run_parcel(w, sol2, N2, rad2, n_sd_per_mode,
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def register(self, builder): # pylint: disable=no-self-use
+<pre><code class="python">def register(self, builder):  # pylint: disable=no-self-use
     builder.request_attribute(&#34;critical supersaturation&#34;)</code></pre>
 </details>
 </dd>
