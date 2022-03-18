@@ -1,13 +1,14 @@
 from distutils.version import StrictVersion
-import numpy as np
+
 import matplotlib
-from matplotlib import pyplot
+import numpy as np
 from atmos_cloud_sim_uj_utils import show_plot
+from matplotlib import pyplot
 from PySDM.physics.constants import si
 
-class SpectrumColors:
 
-    def __init__(self, begining='#2cbdfe', end='#b317b1'):
+class SpectrumColors:
+    def __init__(self, begining="#2cbdfe", end="#b317b1"):
         self.b = begining
         self.e = end
 
@@ -24,14 +25,14 @@ class SpectrumColors:
 class SpectrumPlotter:
     def __init__(self, settings, grid=True, legend=True, log_base=10):
         self.settings = settings
-        self.format = 'pdf'
+        self.format = "pdf"
         self.colors = SpectrumColors()
         self.smooth = False
         self.smooth_scope = 2
         self.legend = legend
         self.grid = grid
-        self.xlabel = 'particle radius [µm]'
-        self.ylabel = 'dm/dlnr [g/m$^3$]'
+        self.xlabel = "particle radius [µm]"
+        self.ylabel = "dm/dlnr [g/m$^3$]"
         self.log_base = log_base
         self.ax = pyplot
         self.fig = pyplot
@@ -44,7 +45,7 @@ class SpectrumPlotter:
         if self.grid:
             self.ax.grid()
 
-        self.ax.xscale('log')
+        self.ax.xscale("log")
         self.ax.xlabel(self.xlabel)
         self.ax.ylabel(self.ylabel)
         if self.legend:
@@ -68,11 +69,16 @@ class SpectrumPlotter:
         if t == 0:
             analytic_solution = settings.spectrum.size_distribution
         else:
-            analytic_solution = lambda x: settings.norm_factor * settings.kernel.analytic_solution(
-                x=x, t=t, x_0=settings.X0, N_0=settings.n_part
+            analytic_solution = (
+                lambda x: settings.norm_factor
+                * settings.kernel.analytic_solution(
+                    x=x, t=t, x_0=settings.X0, N_0=settings.n_part
+                )
             )
 
-        volume_bins_edges = self.settings.formulae.trivia.volume(settings.radius_bins_edges)
+        volume_bins_edges = self.settings.formulae.trivia.volume(
+            settings.radius_bins_edges
+        )
         dm = np.diff(volume_bins_edges)
         dr = np.diff(settings.radius_bins_edges)
 
@@ -86,11 +92,13 @@ class SpectrumPlotter:
         y_true = (
             pdf_r_y
             * self.settings.formulae.trivia.volume(radius=pdf_r_x)
-            * settings.rho / settings.dv
-            * si.kilograms / si.grams
+            * settings.rho
+            / settings.dv
+            * si.kilograms
+            / si.grams
         )
 
-        self.ax.plot(x, y_true, color='black')
+        self.ax.plot(x, y_true, color="black")
 
         if spectrum is not None:
             y = spectrum * si.kilograms / si.grams
@@ -103,24 +111,28 @@ class SpectrumPlotter:
                 new = np.copy(spectrum)
                 for _ in range(2):
                     for i in range(scope, len(spectrum) - scope):
-                        new[i] = np.mean(spectrum[i - scope:i + scope + 1])
+                        new[i] = np.mean(spectrum[i - scope : i + scope + 1])
                     scope = 1
                     for i in range(scope, len(spectrum) - scope):
-                        spectrum[i] = np.mean(new[i - scope:i + scope + 1])
+                        spectrum[i] = np.mean(new[i - scope : i + scope + 1])
 
             x = settings.radius_bins_edges[:-scope]
             dx = np.diff(x)
             self.ax.plot(
-                (x[:-1] + dx/2) * si.metres / si.micrometres,
+                (x[:-1] + dx / 2) * si.metres / si.micrometres,
                 spectrum[:-scope] * si.kilograms / si.grams,
                 label=f"t = {t}s",
-                color=self.colors(t / (self.settings.output_steps[-1] * self.settings.dt))
+                color=self.colors(
+                    t / (self.settings.output_steps[-1] * self.settings.dt)
+                ),
             )
         else:
             self.ax.step(
                 settings.radius_bins_edges[:-1] * si.metres / si.micrometres,
                 spectrum * si.kilograms / si.grams,
-                where='post',
+                where="post",
                 label=f"t = {t}s",
-                color=self.colors(t / (self.settings.output_steps[-1] * self.settings.dt))
+                color=self.colors(
+                    t / (self.settings.output_steps[-1] * self.settings.dt)
+                ),
             )

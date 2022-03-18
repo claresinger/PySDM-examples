@@ -1,23 +1,24 @@
 from typing import Dict
+
 import numpy as np
-from pystrict import strict
 from PySDM import Formulae
 from PySDM.initialisation.impl.spectrum import Spectrum
+from pystrict import strict
 
 
 @strict
 class Settings:
     def __init__(
-            self,
-            dz: float,
-            n_sd_per_mode: tuple,
-            aerosol_modes_by_kappa: Dict[float, Spectrum],
-            vertical_velocity: float,
-            initial_temperature: float,
-            initial_pressure: float,
-            initial_relative_humidity: float,
-            displacement: float,
-            formulae: Formulae
+        self,
+        dz: float,
+        n_sd_per_mode: tuple,
+        aerosol_modes_by_kappa: Dict[float, Spectrum],
+        vertical_velocity: float,
+        initial_temperature: float,
+        initial_pressure: float,
+        initial_relative_humidity: float,
+        displacement: float,
+        formulae: Formulae,
     ):
         self.formulae = formulae
         self.n_sd_per_mode = n_sd_per_mode
@@ -27,8 +28,11 @@ class Settings:
         self.vertical_velocity = vertical_velocity
         self.initial_pressure = initial_pressure
         self.initial_temperature = initial_temperature
-        pv0 = initial_relative_humidity * formulae.saturation_vapour_pressure.pvs_Celsius(
-            initial_temperature - const.T0
+        pv0 = (
+            initial_relative_humidity
+            * formulae.saturation_vapour_pressure.pvs_Celsius(
+                initial_temperature - const.T0
+            )
         )
         self.initial_vapour_mixing_ratio = const.eps * pv0 / (initial_pressure - pv0)
         self.t_max = displacement / vertical_velocity
@@ -38,10 +42,13 @@ class Settings:
     @property
     def initial_air_density(self):
         const = self.formulae.constants
-        dry_air_density = self.formulae.trivia.p_d(
-            self.initial_pressure,
-            self.initial_vapour_mixing_ratio
-        ) / self.initial_temperature / const.Rd
+        dry_air_density = (
+            self.formulae.trivia.p_d(
+                self.initial_pressure, self.initial_vapour_mixing_ratio
+            )
+            / self.initial_temperature
+            / const.Rd
+        )
         return dry_air_density * (1 + self.initial_vapour_mixing_ratio)
 
     @property
