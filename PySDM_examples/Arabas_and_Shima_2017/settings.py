@@ -58,7 +58,7 @@ w_avgs = (
     0.2 * si.centimetre / si.second,
 )
 
-N_STPs = (50 / si.centimetre ** 3, 500 / si.centimetre ** 3)
+N_STPs = (50 / si.centimetre**3, 500 / si.centimetre**3)
 
 r_drys = (0.1 * si.micrometre, 0.05 * si.micrometre)
 

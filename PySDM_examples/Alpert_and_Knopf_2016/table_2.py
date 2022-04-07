@@ -8,13 +8,13 @@ class Table2(Table):
     def label(self, key):
         return f"r={self[key]['cooling_rate']/(si.K/si.min)} K/min"
 
-    def __init__(self, *, volume=1 * si.cm ** 3):
+    def __init__(self, *, volume=1 * si.cm**3):
         super().__init__(
             volume=volume,
             data={
                 "Cr1": {
                     "ISA": Lognormal(
-                        norm_factor=1000 / volume, s_geom=10, m_mode=1e-5 * si.cm ** 2
+                        norm_factor=1000 / volume, s_geom=10, m_mode=1e-5 * si.cm**2
                     ),
                     "cooling_rate": 0.5 * si.K / si.min,
                     "color": "orange",
@@ -23,7 +23,7 @@ class Table2(Table):
                 },
                 "Cr2": {
                     "ISA": Lognormal(
-                        norm_factor=1000 / volume, s_geom=10, m_mode=1e-5 * si.cm ** 2
+                        norm_factor=1000 / volume, s_geom=10, m_mode=1e-5 * si.cm**2
                     ),
                     "cooling_rate": 5 * si.K / si.min,
                     "color": "blue",
@@ -32,7 +32,7 @@ class Table2(Table):
                 },
                 "CrHE1": {
                     "ISA": Lognormal(
-                        norm_factor=40 / volume, s_geom=8.5, m_mode=2.1e-2 * si.cm ** 2
+                        norm_factor=40 / volume, s_geom=8.5, m_mode=2.1e-2 * si.cm**2
                     ),
                     "cooling_rate": 0.2 * si.K / si.min,
                     "color": "orange",
@@ -41,7 +41,7 @@ class Table2(Table):
                 },
                 "CrHE2": {
                     "ISA": Lognormal(
-                        norm_factor=40 / volume, s_geom=8.5, m_mode=2.1e-2 * si.cm ** 2
+                        norm_factor=40 / volume, s_geom=8.5, m_mode=2.1e-2 * si.cm**2
                     ),
                     "cooling_rate": 2 * si.K / si.min,
                     "color": "blue",

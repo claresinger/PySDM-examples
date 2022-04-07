@@ -132,5 +132,5 @@ class Cumulus(Common):
             -self.A1(t)
             * np.cos(self.alpha(x) * np.pi * (x - self.x0) / self.hx)
             * np.sin(self.beta(x) * np.pi * (z - self.z0(z)) / self.hz(z))
-            + self.A2(t) / 2 * zZ ** 2
+            + self.A2(t) / 2 * zZ**2
         )

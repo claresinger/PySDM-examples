@@ -16,12 +16,12 @@ molar_masses = {
 }
 
 densities = {
-    "palmitic": 0.852 * si.g / si.cm ** 3,
-    "SOA1": 1.24 * si.g / si.cm ** 3,
-    "SOA2": 1.2 * si.g / si.cm ** 3,
-    "(NH4)2SO4": 1.77 * si.g / si.cm ** 3,
-    "NH4NO3": 1.72 * si.g / si.cm ** 3,
-    "NaCl": 2.16 * si.g / si.cm ** 3,
+    "palmitic": 0.852 * si.g / si.cm**3,
+    "SOA1": 1.24 * si.g / si.cm**3,
+    "SOA2": 1.2 * si.g / si.cm**3,
+    "(NH4)2SO4": 1.77 * si.g / si.cm**3,
+    "NH4NO3": 1.72 * si.g / si.cm**3,
+    "NaCl": 2.16 * si.g / si.cm**3,
 }
 
 is_organic = {
@@ -134,7 +134,7 @@ class AerosolMarine(Aerosol):
                 "kappa": kappa(Aitken),
                 "nu_org": nu_org(Aitken),
                 "spectrum": spectra.Lognormal(
-                    norm_factor=226 / si.cm ** 3, m_mode=19.6 * si.nm, s_geom=1.71
+                    norm_factor=226 / si.cm**3, m_mode=19.6 * si.nm, s_geom=1.71
                 ),
             },
             {
@@ -142,7 +142,7 @@ class AerosolMarine(Aerosol):
                 "kappa": kappa(Accumulation),
                 "nu_org": nu_org(Accumulation),
                 "spectrum": spectra.Lognormal(
-                    norm_factor=Acc_N2 / si.cm ** 3, m_mode=69.5 * si.nm, s_geom=1.7
+                    norm_factor=Acc_N2 / si.cm**3, m_mode=69.5 * si.nm, s_geom=1.7
                 ),
             },
         )
@@ -177,7 +177,7 @@ class AerosolBoreal(Aerosol):
                 "kappa": kappa(Aitken),
                 "nu_org": nu_org(Aitken),
                 "spectrum": spectra.Lognormal(
-                    norm_factor=1100 / si.cm ** 3, m_mode=22.7 * si.nm, s_geom=1.75
+                    norm_factor=1100 / si.cm**3, m_mode=22.7 * si.nm, s_geom=1.75
                 ),
             },
             {
@@ -185,7 +185,7 @@ class AerosolBoreal(Aerosol):
                 "kappa": kappa(Accumulation),
                 "nu_org": nu_org(Accumulation),
                 "spectrum": spectra.Lognormal(
-                    norm_factor=Acc_N2 / si.cm ** 3, m_mode=82.2 * si.nm, s_geom=1.62
+                    norm_factor=Acc_N2 / si.cm**3, m_mode=82.2 * si.nm, s_geom=1.62
                 ),
             },
         )
@@ -218,7 +218,7 @@ class AerosolNascent(Aerosol):
                 "kappa": kappa(Ultrafine),
                 "nu_org": nu_org(Ultrafine),
                 "spectrum": spectra.Lognormal(
-                    norm_factor=2000 / si.cm ** 3, m_mode=11.5 * si.nm, s_geom=1.71
+                    norm_factor=2000 / si.cm**3, m_mode=11.5 * si.nm, s_geom=1.71
                 ),
             },
             {
@@ -226,7 +226,7 @@ class AerosolNascent(Aerosol):
                 "kappa": kappa(Accumulation),
                 "nu_org": nu_org(Accumulation),
                 "spectrum": spectra.Lognormal(
-                    norm_factor=Acc_N2 / si.cm ** 3, m_mode=100 * si.nm, s_geom=1.70
+                    norm_factor=Acc_N2 / si.cm**3, m_mode=100 * si.nm, s_geom=1.70
                 ),
             },
         )

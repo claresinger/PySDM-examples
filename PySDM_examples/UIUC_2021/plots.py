@@ -10,7 +10,7 @@ labels = {
     False: "time-dependent (ABIFM, illite)",
 }
 colors = {True: "black", False: "teal"}
-qi_unit = si.g / si.m ** 3
+qi_unit = si.g / si.m**3
 
 
 def make_sampling_plot(data):
@@ -131,8 +131,8 @@ def make_pdf_plot(A_spec, Shima_T_fz, A_range, T_range):
     ax.set_ylabel("insoluble surface [$μm^2$]")
     cnt = ax.contourf(
         grid[0],
-        grid[1] / si.um ** 2,
-        sampled_pdf * si.um ** 2,
+        grid[1] / si.um**2,
+        sampled_pdf * si.um**2,
         norm=matplotlib.colors.LogNorm(),
         cmap="Blues",
         levels=np.logspace(-3, 0, 7),

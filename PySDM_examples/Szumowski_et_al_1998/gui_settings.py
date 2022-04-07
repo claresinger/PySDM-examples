@@ -250,11 +250,11 @@ class GUISettings:
 
     @property
     def condensation_rtol_x(self):
-        return 10 ** self.ui_condensation_rtol_x.value
+        return 10**self.ui_condensation_rtol_x.value
 
     @property
     def condensation_rtol_thd(self):
-        return 10 ** self.ui_condensation_rtol_thd.value
+        return 10**self.ui_condensation_rtol_thd.value
 
     @property
     def condensation_adaptive(self):
@@ -316,7 +316,7 @@ class GUISettings:
             return Lognormal(
                 norm_factor=1,
                 m_mode=10 ** (self.ui_freezing["lognormal_log10_A_um2"].value)
-                * si.um ** 2,
+                * si.um**2,
                 s_geom=np.exp(self.ui_freezing["lognormal_ln_sgm_g"].value),
             )
         raise NotImplementedError()

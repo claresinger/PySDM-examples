@@ -25,7 +25,7 @@ class Simulation:
         n_runs_per_case=10,
         multiplicity=1,
         time_step,
-        droplet_volume=1 * si.um ** 3,
+        droplet_volume=1 * si.um**3,
         heterogeneous_ice_nucleation_rate="Constant",
         total_time: Union[None, float] = None,
         temperature_range: Union[None, tuple] = None,
@@ -137,7 +137,7 @@ class Simulation:
             },
         )
 
-        yunit = 1 / si.cm ** 2 / si.s
+        yunit = 1 / si.cm**2 / si.s
         svp = formulae.saturation_vapour_pressure
         plot_x = np.linspace(*self.temperature_range) * si.K
         plot_y = formulae.heterogeneous_ice_nucleation_rate.j_het(

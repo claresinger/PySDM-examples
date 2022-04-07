@@ -50,7 +50,7 @@ def main(plot: bool, save: str):
     with np.errstate(all="raise"):
         settings = Settings()
 
-        settings.n_sd = 2 ** 15
+        settings.n_sd = 2**15
 
         states, _ = run(settings)
 

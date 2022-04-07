@@ -22,7 +22,7 @@ class Settings:
         self.n_sd_per_gridbox = n_sd_per_gridbox
         self.kappa = 0.9  # TODO #424: not in the paper
         self.wet_radius_spectrum_per_mass_of_dry_air = spectra.Lognormal(
-            norm_factor=50 / si.cm ** 3,  # TODO #424: / self.rho,
+            norm_factor=50 / si.cm**3,  # TODO #424: / self.rho,
             m_mode=0.08 / 2 * si.um,
             s_geom=1.4,
         )

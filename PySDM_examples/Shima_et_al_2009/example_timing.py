@@ -35,7 +35,7 @@ def main(plot: bool):
 
     times = {}
     for backend in (ThrustRTC, Numba):
-        nsds = [2 ** n for n in range(12, 19, 3)]
+        nsds = [2**n for n in range(12, 19, 3)]
         key = backend.__name__
         times[key] = []
         for sd in nsds:

@@ -20,10 +20,10 @@ class Settings:
     ):
         self.formulae = Formulae(
             saturation_vapour_pressure="AugustRocheMagnus",
-            constants={"g_std": 10 * si.m / si.s ** 2},
+            constants={"g_std": 10 * si.m / si.s**2},
         )
         const = self.formulae.constants
-        self.DRY_RHO = 1800 * si.kg / (si.m ** 3)
+        self.DRY_RHO = 1800 * si.kg / (si.m**3)
         self.dry_molar_mass = Substance.from_formula("NH4HSO4").mass * si.gram / si.mole
 
         self.system_type = "closed"
@@ -52,7 +52,7 @@ class Settings:
 
         self.r_dry, self.n_in_dv = spectral_sampling(
             spectrum=spectra.Lognormal(
-                norm_factor=566 / si.cm ** 3 / rho0 * self.mass_of_dry_air,
+                norm_factor=566 / si.cm**3 / rho0 * self.mass_of_dry_air,
                 m_mode=0.08 * si.um / 2,
                 s_geom=2,
             )

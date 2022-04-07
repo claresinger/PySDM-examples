@@ -25,7 +25,7 @@ def main(plot: bool = True, save: str = None):
             for _ in range(iters):
                 settings = Settings()
 
-                settings.n_sd = 2 ** n_sd
+                settings.n_sd = 2**n_sd
                 settings.dt = dt if dt != "adaptive" else 10
                 settings.adaptive = dt == "adaptive"
 

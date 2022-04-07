@@ -88,7 +88,7 @@ class _SpectrumPlot(_Plot):
         vals = initial_spectrum_per_mass_of_dry_air.size_distribution(
             r_bins * const.si.um
         )
-        const.convert_to(vals, const.si.mg ** -1 / const.si.um)
+        const.convert_to(vals, const.si.mg**-1 / const.si.um)
         self.ax.plot(r_bins, vals, label="spectrum sampled at t=0")
         self.spec_wet = self.ax.step(
             r_bins,

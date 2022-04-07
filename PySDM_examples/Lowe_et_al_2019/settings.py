@@ -22,7 +22,7 @@ class Settings:
         MAC: float = 1,
         HAC: float = 1,
         c_pd: float = 1005 * si.joule / si.kilogram / si.kelvin,
-        g_std: float = sci.g * si.metre / si.second ** 2,
+        g_std: float = sci.g * si.metre / si.second**2,
     ):
         assert model in ("bulk", "film")
         self.model = model
@@ -54,7 +54,7 @@ class Settings:
         self.dt = dz / self.w
         self.output_interval = 1 * self.dt
 
-        self.g = 9.81 * si.m / si.s ** 2
+        self.g = 9.81 * si.m / si.s**2
 
         self.p0 = 980 * si.mbar
         self.T0 = 280 * si.K
