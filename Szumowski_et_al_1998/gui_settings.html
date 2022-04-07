@@ -278,11 +278,11 @@ class GUISettings:
 
     @property
     def condensation_rtol_x(self):
-        return 10 ** self.ui_condensation_rtol_x.value
+        return 10**self.ui_condensation_rtol_x.value
 
     @property
     def condensation_rtol_thd(self):
-        return 10 ** self.ui_condensation_rtol_thd.value
+        return 10**self.ui_condensation_rtol_thd.value
 
     @property
     def condensation_adaptive(self):
@@ -344,7 +344,7 @@ class GUISettings:
             return Lognormal(
                 norm_factor=1,
                 m_mode=10 ** (self.ui_freezing[&#34;lognormal_log10_A_um2&#34;].value)
-                * si.um ** 2,
+                * si.um**2,
                 s_geom=np.exp(self.ui_freezing[&#34;lognormal_ln_sgm_g&#34;].value),
             )
         raise NotImplementedError()
@@ -675,11 +675,11 @@ def set_visibility(widget, visible):
 
     @property
     def condensation_rtol_x(self):
-        return 10 ** self.ui_condensation_rtol_x.value
+        return 10**self.ui_condensation_rtol_x.value
 
     @property
     def condensation_rtol_thd(self):
-        return 10 ** self.ui_condensation_rtol_thd.value
+        return 10**self.ui_condensation_rtol_thd.value
 
     @property
     def condensation_adaptive(self):
@@ -741,7 +741,7 @@ def set_visibility(widget, visible):
             return Lognormal(
                 norm_factor=1,
                 m_mode=10 ** (self.ui_freezing[&#34;lognormal_log10_A_um2&#34;].value)
-                * si.um ** 2,
+                * si.um**2,
                 s_geom=np.exp(self.ui_freezing[&#34;lognormal_ln_sgm_g&#34;].value),
             )
         raise NotImplementedError()
@@ -840,7 +840,7 @@ def condensation_adaptive(self):
 </summary>
 <pre><code class="python">@property
 def condensation_rtol_thd(self):
-    return 10 ** self.ui_condensation_rtol_thd.value</code></pre>
+    return 10**self.ui_condensation_rtol_thd.value</code></pre>
 </details>
 </dd>
 <dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.condensation_rtol_x"><code class="name">var <span class="ident">condensation_rtol_x</span></code></dt>
@@ -852,7 +852,7 @@ def condensation_rtol_thd(self):
 </summary>
 <pre><code class="python">@property
 def condensation_rtol_x(self):
-    return 10 ** self.ui_condensation_rtol_x.value</code></pre>
+    return 10**self.ui_condensation_rtol_x.value</code></pre>
 </details>
 </dd>
 <dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.drizzle_radius_threshold"><code class="name">var <span class="ident">drizzle_radius_threshold</span></code></dt>
@@ -908,7 +908,7 @@ def freezing_inp_spec(self):
         return Lognormal(
             norm_factor=1,
             m_mode=10 ** (self.ui_freezing[&#34;lognormal_log10_A_um2&#34;].value)
-            * si.um ** 2,
+            * si.um**2,
             s_geom=np.exp(self.ui_freezing[&#34;lognormal_ln_sgm_g&#34;].value),
         )
     raise NotImplementedError()</code></pre>

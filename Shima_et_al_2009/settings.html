@@ -41,12 +41,12 @@ class Settings:
     def __init__(self, steps: Optional[list] = None):
         steps = steps or [0, 1200, 2400, 3600]
         self.formulae = Formulae()
-        self.n_sd = 2 ** 13
-        self.n_part = 2 ** 23 / si.metre ** 3
+        self.n_sd = 2**13
+        self.n_part = 2**23 / si.metre**3
         self.X0 = self.formulae.trivia.volume(radius=30.531 * si.micrometres)
-        self.dv = 1e6 * si.metres ** 3
+        self.dv = 1e6 * si.metres**3
         self.norm_factor = self.n_part * self.dv
-        self.rho = 1000 * si.kilogram / si.metre ** 3
+        self.rho = 1000 * si.kilogram / si.metre**3
         self.dt = 1 * si.seconds
         self.adaptive = False
         self.seed = 44
@@ -86,12 +86,12 @@ class Settings:
     def __init__(self, steps: Optional[list] = None):
         steps = steps or [0, 1200, 2400, 3600]
         self.formulae = Formulae()
-        self.n_sd = 2 ** 13
-        self.n_part = 2 ** 23 / si.metre ** 3
+        self.n_sd = 2**13
+        self.n_part = 2**23 / si.metre**3
         self.X0 = self.formulae.trivia.volume(radius=30.531 * si.micrometres)
-        self.dv = 1e6 * si.metres ** 3
+        self.dv = 1e6 * si.metres**3
         self.norm_factor = self.n_part * self.dv
-        self.rho = 1000 * si.kilogram / si.metre ** 3
+        self.rho = 1000 * si.kilogram / si.metre**3
         self.dt = 1 * si.seconds
         self.adaptive = False
         self.seed = 44

@@ -41,12 +41,12 @@ from pystrict import strict
 class Settings:
     def __init__(self):
         self.formulae = Formulae()
-        self.n_sd = 2 ** 12
-        self.n_part = 100 / si.cm ** 3
+        self.n_sd = 2**12
+        self.n_part = 100 / si.cm**3
         self.X0 = self.formulae.trivia.volume(radius=100 * si.micrometres)
-        self.dv = 1 * si.m ** 3
+        self.dv = 1 * si.m**3
         self.norm_factor = self.n_part * self.dv
-        self.rho = 1000 * si.kilogram / si.metre ** 3
+        self.rho = 1000 * si.kilogram / si.metre**3
         self.dt = 1 * si.seconds
         self.adaptive = False
         self.seed = 44
@@ -88,12 +88,12 @@ class Settings:
 class Settings:
     def __init__(self):
         self.formulae = Formulae()
-        self.n_sd = 2 ** 12
-        self.n_part = 100 / si.cm ** 3
+        self.n_sd = 2**12
+        self.n_part = 100 / si.cm**3
         self.X0 = self.formulae.trivia.volume(radius=100 * si.micrometres)
-        self.dv = 1 * si.m ** 3
+        self.dv = 1 * si.m**3
         self.norm_factor = self.n_part * self.dv
-        self.rho = 1000 * si.kilogram / si.metre ** 3
+        self.rho = 1000 * si.kilogram / si.metre**3
         self.dt = 1 * si.seconds
         self.adaptive = False
         self.seed = 44

@@ -40,8 +40,8 @@ molar_masses = {
 }
 
 densities = {
-    &#34;(NH4)2SO4&#34;: 1.77 * si.g / si.cm ** 3,
-    &#34;insoluble&#34;: 1.77 * si.g / si.cm ** 3,
+    &#34;(NH4)2SO4&#34;: 1.77 * si.g / si.cm**3,
+    &#34;insoluble&#34;: 1.77 * si.g / si.cm**3,
 }
 
 is_soluble = {&#34;(NH4)2SO4&#34;: True, &#34;insoluble&#34;: False}
@@ -97,7 +97,7 @@ class AerosolARG(Aerosol):
     def __init__(
         self,
         M2_sol: float = 0,
-        M2_N: float = 100 / si.cm ** 3,
+        M2_N: float = 100 / si.cm**3,
         M2_rad: float = 50 * si.nm,
     ):
         mode1 = {
@@ -113,7 +113,7 @@ class AerosolARG(Aerosol):
             {
                 &#34;kappa&#34;: kappa(mode1),
                 &#34;spectrum&#34;: spectra.Lognormal(
-                    norm_factor=100.0 / si.cm ** 3, m_mode=50.0 * si.nm, s_geom=2.0
+                    norm_factor=100.0 / si.cm**3, m_mode=50.0 * si.nm, s_geom=2.0
                 ),
             },
             {
@@ -138,19 +138,19 @@ class AerosolWhitby(Aerosol):
             {
                 &#34;kappa&#34;: kappa(nuclei),
                 &#34;spectrum&#34;: spectra.Lognormal(
-                    norm_factor=1000.0 / si.cm ** 3, m_mode=0.008 * si.um, s_geom=1.6
+                    norm_factor=1000.0 / si.cm**3, m_mode=0.008 * si.um, s_geom=1.6
                 ),
             },
             {
                 &#34;kappa&#34;: kappa(accum),
                 &#34;spectrum&#34;: spectra.Lognormal(
-                    norm_factor=800 / si.cm ** 3, m_mode=0.034 * si.um, s_geom=2.1
+                    norm_factor=800 / si.cm**3, m_mode=0.034 * si.um, s_geom=2.1
                 ),
             },
             {
                 &#34;kappa&#34;: kappa(coarse),
                 &#34;spectrum&#34;: spectra.Lognormal(
-                    norm_factor=0.72 / si.cm ** 3, m_mode=0.46 * si.um, s_geom=2.2
+                    norm_factor=0.72 / si.cm**3, m_mode=0.46 * si.um, s_geom=2.2
                 ),
             },
         )</code></pre>
@@ -276,7 +276,7 @@ class AerosolARG(Aerosol):
     def __init__(
         self,
         M2_sol: float = 0,
-        M2_N: float = 100 / si.cm ** 3,
+        M2_N: float = 100 / si.cm**3,
         M2_rad: float = 50 * si.nm,
     ):
         mode1 = {
@@ -292,7 +292,7 @@ class AerosolARG(Aerosol):
             {
                 &#34;kappa&#34;: kappa(mode1),
                 &#34;spectrum&#34;: spectra.Lognormal(
-                    norm_factor=100.0 / si.cm ** 3, m_mode=50.0 * si.nm, s_geom=2.0
+                    norm_factor=100.0 / si.cm**3, m_mode=50.0 * si.nm, s_geom=2.0
                 ),
             },
             {
@@ -330,19 +330,19 @@ class AerosolWhitby(Aerosol):
             {
                 &#34;kappa&#34;: kappa(nuclei),
                 &#34;spectrum&#34;: spectra.Lognormal(
-                    norm_factor=1000.0 / si.cm ** 3, m_mode=0.008 * si.um, s_geom=1.6
+                    norm_factor=1000.0 / si.cm**3, m_mode=0.008 * si.um, s_geom=1.6
                 ),
             },
             {
                 &#34;kappa&#34;: kappa(accum),
                 &#34;spectrum&#34;: spectra.Lognormal(
-                    norm_factor=800 / si.cm ** 3, m_mode=0.034 * si.um, s_geom=2.1
+                    norm_factor=800 / si.cm**3, m_mode=0.034 * si.um, s_geom=2.1
                 ),
             },
             {
                 &#34;kappa&#34;: kappa(coarse),
                 &#34;spectrum&#34;: spectra.Lognormal(
-                    norm_factor=0.72 / si.cm ** 3, m_mode=0.46 * si.um, s_geom=2.2
+                    norm_factor=0.72 / si.cm**3, m_mode=0.46 * si.um, s_geom=2.2
                 ),
             },
         )</code></pre>
