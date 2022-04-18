@@ -127,6 +127,16 @@ class GUISettings:
             value=settings.condensation_adaptive,
             description=&#34;coalescence adaptive time-step&#34;,
         )
+        self.ui_displacement_rtol = IntSlider(
+            value=np.log10(settings.displacement_rtol),
+            min=-3,
+            max=0,
+            description=&#34;log$_{10}$(rtol)&#34;,
+        )
+        self.ui_displacement_adaptive = Checkbox(
+            value=settings.displacement_adaptive,
+            description=&#34;displacement adaptive time-step&#34;,
+        )
         self.ui_processes = [
             Checkbox(value=settings.processes[key], description=key)
             for key in settings.processes.keys()
@@ -293,6 +303,14 @@ class GUISettings:
         return self.ui_coalescence_adaptive.value
 
     @property
+    def displacement_rtol(self):
+        return 10**self.ui_displacement_rtol.value
+
+    @property
+    def displacement_adaptive(self):
+        return self.ui_displacement_adaptive.value
+
+    @property
     def processes(self):
         result = {}
         for checkbox in self.ui_processes:
@@ -373,6 +391,8 @@ class GUISettings:
                         self.ui_condensation_rtol_thd,
                         self.ui_condensation_adaptive,
                         self.ui_coalescence_adaptive,
+                        self.ui_displacement_rtol,
+                        self.ui_displacement_adaptive,
                         *self.ui_mpdata_options,
                     ]
                 ),
@@ -524,6 +544,16 @@ def set_visibility(widget, visible):
             value=settings.condensation_adaptive,
             description=&#34;coalescence adaptive time-step&#34;,
         )
+        self.ui_displacement_rtol = IntSlider(
+            value=np.log10(settings.displacement_rtol),
+            min=-3,
+            max=0,
+            description=&#34;log$_{10}$(rtol)&#34;,
+        )
+        self.ui_displacement_adaptive = Checkbox(
+            value=settings.displacement_adaptive,
+            description=&#34;displacement adaptive time-step&#34;,
+        )
         self.ui_processes = [
             Checkbox(value=settings.processes[key], description=key)
             for key in settings.processes.keys()
@@ -690,6 +720,14 @@ def set_visibility(widget, visible):
         return self.ui_coalescence_adaptive.value
 
     @property
+    def displacement_rtol(self):
+        return 10**self.ui_displacement_rtol.value
+
+    @property
+    def displacement_adaptive(self):
+        return self.ui_displacement_adaptive.value
+
+    @property
     def processes(self):
         result = {}
         for checkbox in self.ui_processes:
@@ -770,6 +808,8 @@ def set_visibility(widget, visible):
                         self.ui_condensation_rtol_thd,
                         self.ui_condensation_adaptive,
                         self.ui_coalescence_adaptive,
+                        self.ui_displacement_rtol,
+                        self.ui_displacement_adaptive,
                         *self.ui_mpdata_options,
                     ]
                 ),
@@ -853,6 +893,30 @@ def condensation_rtol_thd(self):
 <pre><code class="python">@property
 def condensation_rtol_x(self):
     return 10**self.ui_condensation_rtol_x.value</code></pre>
+</details>
+</dd>
+<dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.displacement_adaptive"><code class="name">var <span class="ident">displacement_adaptive</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def displacement_adaptive(self):
+    return self.ui_displacement_adaptive.value</code></pre>
+</details>
+</dd>
+<dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.displacement_rtol"><code class="name">var <span class="ident">displacement_rtol</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def displacement_rtol(self):
+    return 10**self.ui_displacement_rtol.value</code></pre>
 </details>
 </dd>
 <dt id="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.drizzle_radius_threshold"><code class="name">var <span class="ident">drizzle_radius_threshold</span></code></dt>
@@ -1175,6 +1239,8 @@ def steps_per_output_interval(self) -&gt; int:
                     self.ui_condensation_rtol_thd,
                     self.ui_condensation_adaptive,
                     self.ui_coalescence_adaptive,
+                    self.ui_displacement_rtol,
+                    self.ui_displacement_adaptive,
                     *self.ui_mpdata_options,
                 ]
             ),
@@ -1256,6 +1322,8 @@ def steps_per_output_interval(self) -&gt; int:
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.condensation_adaptive" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.condensation_adaptive">condensation_adaptive</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.condensation_rtol_thd" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.condensation_rtol_thd">condensation_rtol_thd</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.condensation_rtol_x" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.condensation_rtol_x">condensation_rtol_x</a></code></li>
+<li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.displacement_adaptive" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.displacement_adaptive">displacement_adaptive</a></code></li>
+<li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.displacement_rtol" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.displacement_rtol">displacement_rtol</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.drizzle_radius_threshold" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.drizzle_radius_threshold">drizzle_radius_threshold</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.dt" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.dt">dt</a></code></li>
 <li><code><a title="PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.formulae" href="#PySDM_examples.Szumowski_et_al_1998.gui_settings.GUISettings.formulae">formulae</a></code></li>

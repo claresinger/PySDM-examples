@@ -92,7 +92,9 @@ class Simulation:
         displacement = None
         if self.settings.processes[&#34;particle advection&#34;]:
             displacement = Displacement(
-                enable_sedimentation=self.settings.processes[&#34;sedimentation&#34;]
+                enable_sedimentation=self.settings.processes[&#34;sedimentation&#34;],
+                adaptive=self.settings.displacement_adaptive,
+                rtol=self.settings.displacement_rtol,
             )
         if self.settings.processes[&#34;fluid advection&#34;]:
             initial_profiles = {
@@ -253,7 +255,9 @@ class Simulation:
         displacement = None
         if self.settings.processes[&#34;particle advection&#34;]:
             displacement = Displacement(
-                enable_sedimentation=self.settings.processes[&#34;sedimentation&#34;]
+                enable_sedimentation=self.settings.processes[&#34;sedimentation&#34;],
+                adaptive=self.settings.displacement_adaptive,
+                rtol=self.settings.displacement_rtol,
             )
         if self.settings.processes[&#34;fluid advection&#34;]:
             initial_profiles = {
@@ -408,7 +412,9 @@ def products(self):
     displacement = None
     if self.settings.processes[&#34;particle advection&#34;]:
         displacement = Displacement(
-            enable_sedimentation=self.settings.processes[&#34;sedimentation&#34;]
+            enable_sedimentation=self.settings.processes[&#34;sedimentation&#34;],
+            adaptive=self.settings.displacement_adaptive,
+            rtol=self.settings.displacement_rtol,
         )
     if self.settings.processes[&#34;fluid advection&#34;]:
         initial_profiles = {

@@ -33,7 +33,7 @@ import PyMPDATA
 import PySDM
 import scipy
 from PySDM import Formulae
-from PySDM.dynamics import collisions, condensation
+from PySDM.dynamics import collisions, condensation, displacement
 from PySDM.dynamics.collisions.collision_kernels import Geometric
 from PySDM.initialisation import spectra
 from PySDM.physics import si
@@ -59,6 +59,9 @@ class Common:
 
         self.freezing_singular = True
         self.freezing_inp_spec = None
+
+        self.displacement_adaptive = displacement.DEFAULTS.adaptive
+        self.displacement_rtol = displacement.DEFAULTS.rtol
 
         self.n_sd_per_gridbox = 20
 
@@ -209,6 +212,9 @@ class Common:
 
         self.freezing_singular = True
         self.freezing_inp_spec = None
+
+        self.displacement_adaptive = displacement.DEFAULTS.adaptive
+        self.displacement_rtol = displacement.DEFAULTS.rtol
 
         self.n_sd_per_gridbox = 20
 
