@@ -64,7 +64,9 @@ class Simulation:
         displacement = None
         if self.settings.processes["particle advection"]:
             displacement = Displacement(
-                enable_sedimentation=self.settings.processes["sedimentation"]
+                enable_sedimentation=self.settings.processes["sedimentation"],
+                adaptive=self.settings.displacement_adaptive,
+                rtol=self.settings.displacement_rtol,
             )
         if self.settings.processes["fluid advection"]:
             initial_profiles = {

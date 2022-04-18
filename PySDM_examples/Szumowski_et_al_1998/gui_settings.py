@@ -99,6 +99,16 @@ class GUISettings:
             value=settings.condensation_adaptive,
             description="coalescence adaptive time-step",
         )
+        self.ui_displacement_rtol = IntSlider(
+            value=np.log10(settings.displacement_rtol),
+            min=-3,
+            max=0,
+            description="log$_{10}$(rtol)",
+        )
+        self.ui_displacement_adaptive = Checkbox(
+            value=settings.displacement_adaptive,
+            description="displacement adaptive time-step",
+        )
         self.ui_processes = [
             Checkbox(value=settings.processes[key], description=key)
             for key in settings.processes.keys()
@@ -265,6 +275,14 @@ class GUISettings:
         return self.ui_coalescence_adaptive.value
 
     @property
+    def displacement_rtol(self):
+        return 10**self.ui_displacement_rtol.value
+
+    @property
+    def displacement_adaptive(self):
+        return self.ui_displacement_adaptive.value
+
+    @property
     def processes(self):
         result = {}
         for checkbox in self.ui_processes:
@@ -345,6 +363,8 @@ class GUISettings:
                         self.ui_condensation_rtol_thd,
                         self.ui_condensation_adaptive,
                         self.ui_coalescence_adaptive,
+                        self.ui_displacement_rtol,
+                        self.ui_displacement_adaptive,
                         *self.ui_mpdata_options,
                     ]
                 ),
