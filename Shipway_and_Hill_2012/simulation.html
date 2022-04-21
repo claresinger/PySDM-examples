@@ -129,7 +129,7 @@ class Simulation:
         self.particulator = builder.build(attributes=attributes, products=products)
         if settings.precip:
             displacement.upload_courant_field(
-                courant_field=(np.zeros(settings.nz + 1),)  # TODO #424
+                courant_field=(np.zeros(settings.nz + 1),)  # TODO #817
             )
 
     def save(self, output, step):
@@ -262,7 +262,7 @@ class Simulation:
         self.particulator = builder.build(attributes=attributes, products=products)
         if settings.precip:
             displacement.upload_courant_field(
-                courant_field=(np.zeros(settings.nz + 1),)  # TODO #424
+                courant_field=(np.zeros(settings.nz + 1),)  # TODO #817
             )
 
     def save(self, output, step):

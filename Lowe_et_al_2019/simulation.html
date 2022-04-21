@@ -30,6 +30,7 @@
 import PySDM.products as PySDM_products
 from PySDM import Builder
 from PySDM.backends import CPU
+from PySDM.backends.impl_numba.test_helpers import bdf
 from PySDM.dynamics import AmbientThermodynamics, Condensation
 from PySDM.environments import Parcel
 from PySDM.initialisation import equilibrate_wet_radii
@@ -105,6 +106,7 @@ class Simulation(BasicSimulation):
             PySDM_products.ParcelDisplacement(name=&#34;z&#34;),
             PySDM_products.Time(name=&#34;t&#34;),
             PySDM_products.PeakSupersaturation(unit=&#34;%&#34;, name=&#34;S_max&#34;),
+            PySDM_products.AmbientRelativeHumidity(unit=&#34;%&#34;, name=&#34;RH&#34;),
             PySDM_products.ParticleConcentration(
                 name=&#34;n_c_cm3&#34;, unit=&#34;cm^-3&#34;, radius_range=settings.cloud_radius_range
             ),
@@ -115,6 +117,8 @@ class Simulation(BasicSimulation):
         )
 
         particulator = builder.build(attributes=attributes, products=products)
+        if settings.BDF:
+            bdf.patch_particulator(particulator)
         self.settings = settings
         super().__init__(particulator=particulator)
 
@@ -137,9 +141,14 @@ class Simulation(BasicSimulation):
             self.particulator.run(step - self.particulator.n_steps)
             self._save_scalars(output)
         self._save_spectrum(output)
-        output[&#34;Activated Fraction&#34;] = self.particulator.products[
-            &#34;activable fraction&#34;
-        ].get(S_max=np.nanmax(output[&#34;S_max&#34;]))
+        if self.settings.BDF:
+            output[&#34;Activated Fraction&#34;] = self.particulator.products[
+                &#34;activable fraction&#34;
+            ].get(S_max=np.nanmax(output[&#34;RH&#34;]) - 100)
+        else:
+            output[&#34;Activated Fraction&#34;] = self.particulator.products[
+                &#34;activable fraction&#34;
+            ].get(S_max=np.nanmax(output[&#34;S_max&#34;]))
         return output</code></pre>
 </details>
 </section>
@@ -229,6 +238,7 @@ class Simulation(BasicSimulation):
             PySDM_products.ParcelDisplacement(name=&#34;z&#34;),
             PySDM_products.Time(name=&#34;t&#34;),
             PySDM_products.PeakSupersaturation(unit=&#34;%&#34;, name=&#34;S_max&#34;),
+            PySDM_products.AmbientRelativeHumidity(unit=&#34;%&#34;, name=&#34;RH&#34;),
             PySDM_products.ParticleConcentration(
                 name=&#34;n_c_cm3&#34;, unit=&#34;cm^-3&#34;, radius_range=settings.cloud_radius_range
             ),
@@ -239,6 +249,8 @@ class Simulation(BasicSimulation):
         )
 
         particulator = builder.build(attributes=attributes, products=products)
+        if settings.BDF:
+            bdf.patch_particulator(particulator)
         self.settings = settings
         super().__init__(particulator=particulator)
 
@@ -261,9 +273,14 @@ class Simulation(BasicSimulation):
             self.particulator.run(step - self.particulator.n_steps)
             self._save_scalars(output)
         self._save_spectrum(output)
-        output[&#34;Activated Fraction&#34;] = self.particulator.products[
-            &#34;activable fraction&#34;
-        ].get(S_max=np.nanmax(output[&#34;S_max&#34;]))
+        if self.settings.BDF:
+            output[&#34;Activated Fraction&#34;] = self.particulator.products[
+                &#34;activable fraction&#34;
+            ].get(S_max=np.nanmax(output[&#34;RH&#34;]) - 100)
+        else:
+            output[&#34;Activated Fraction&#34;] = self.particulator.products[
+                &#34;activable fraction&#34;
+            ].get(S_max=np.nanmax(output[&#34;S_max&#34;]))
         return output</code></pre>
 </details>
 <h3>Ancestors</h3>
@@ -287,9 +304,14 @@ class Simulation(BasicSimulation):
         self.particulator.run(step - self.particulator.n_steps)
         self._save_scalars(output)
     self._save_spectrum(output)
-    output[&#34;Activated Fraction&#34;] = self.particulator.products[
-        &#34;activable fraction&#34;
-    ].get(S_max=np.nanmax(output[&#34;S_max&#34;]))
+    if self.settings.BDF:
+        output[&#34;Activated Fraction&#34;] = self.particulator.products[
+            &#34;activable fraction&#34;
+        ].get(S_max=np.nanmax(output[&#34;RH&#34;]) - 100)
+    else:
+        output[&#34;Activated Fraction&#34;] = self.particulator.products[
+            &#34;activable fraction&#34;
+        ].get(S_max=np.nanmax(output[&#34;S_max&#34;]))
     return output</code></pre>
 </details>
 </dd>
