@@ -21,6 +21,7 @@ setup(
         "atmos-cloud-sim-uj-utils",
         "pystrict",
         "matplotlib",
+        "joblib",
         "ipywidgets",
         "seaborn",
         "ghapi",

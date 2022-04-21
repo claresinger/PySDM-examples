@@ -20,9 +20,9 @@ class Settings:
     ):
         self.formulae = Formulae()
         self.n_sd_per_gridbox = n_sd_per_gridbox
-        self.kappa = 0.9  # TODO #424: not in the paper
+        self.kappa = 0.9  # TODO #817: not in the paper
         self.wet_radius_spectrum_per_mass_of_dry_air = spectra.Lognormal(
-            norm_factor=50 / si.cm**3,  # TODO #424: / self.rho,
+            norm_factor=50 / si.cm**3,  # TODO #817: / self.rho,
             m_mode=0.08 / 2 * si.um,
             s_geom=1.4,
         )
@@ -41,14 +41,14 @@ class Settings:
 
         self._th = interp1d((0, 740, 3260), (297.9, 297.9, 312.66))
 
-        # TODO #424: is initial particle water included in initial qv? (q1 logic)
+        # TODO #817: is initial particle water included in initial qv? (q1 logic)
         self.qv = interp1d((0, 740, 3260), (0.015, 0.0138, 0.0024))
 
         self.thd = lambda z: self.formulae.state_variable_triplet.th_dry(
             self._th(z), self.qv(z)
         )
 
-        p0 = 975 * si.hPa  # TODO #424 not in the paper?
+        p0 = 975 * si.hPa  # TODO #817: not in the paper?
         g = self.formulae.constants.g_std
         self.rhod0 = self.formulae.state_variable_triplet.rho_d(
             p0, self.qv(0), self._th(0)

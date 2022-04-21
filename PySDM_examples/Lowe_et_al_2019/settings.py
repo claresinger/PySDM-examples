@@ -23,10 +23,12 @@ class Settings:
         HAC: float = 1,
         c_pd: float = 1005 * si.joule / si.kilogram / si.kelvin,
         g_std: float = sci.g * si.metre / si.second**2,
+        BDF: bool = False,
     ):
         assert model in ("bulk", "film")
         self.model = model
         self.n_sd_per_mode = n_sd_per_mode
+        self.BDF = BDF
         self.formulae = Formulae(
             surface_tension="CompressedFilmOvadnevaite"
             if model == "film"
@@ -48,7 +50,7 @@ class Settings:
         self.aerosol = aerosol
         self.spectral_sampling = spectral_sampling
 
-        max_altitude = 190 * si.m
+        max_altitude = 200 * si.m
         self.w = w
         self.t_max = max_altitude / self.w
         self.dt = dz / self.w
