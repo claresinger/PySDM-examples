@@ -46,6 +46,7 @@ def plot(var, qlabel, fname, output):
 
     ax1.set_xlabel(&#34;time [s]&#34;)
     ax1.set_ylabel(&#34;z [km]&#34;)
+    ax1.set_ylim(0, None)
 
     cbar = fig.colorbar(mesh, fraction=0.05, location=&#34;top&#34;)
     cbar.set_label(qlabel)
@@ -66,7 +67,7 @@ def plot(var, qlabel, fname, output):
                 ax1.axvline(t, **params)
         last_t = t
 
-    show_plot(filename=fname)</code></pre>
+    show_plot(filename=fname, inline_format=&#34;png&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -99,6 +100,7 @@ def plot(var, qlabel, fname, output):
 
     ax1.set_xlabel(&#34;time [s]&#34;)
     ax1.set_ylabel(&#34;z [km]&#34;)
+    ax1.set_ylim(0, None)
 
     cbar = fig.colorbar(mesh, fraction=0.05, location=&#34;top&#34;)
     cbar.set_label(qlabel)
@@ -119,7 +121,7 @@ def plot(var, qlabel, fname, output):
                 ax1.axvline(t, **params)
         last_t = t
 
-    show_plot(filename=fname)</code></pre>
+    show_plot(filename=fname, inline_format=&#34;png&#34;)</code></pre>
 </details>
 </dd>
 </dl>
