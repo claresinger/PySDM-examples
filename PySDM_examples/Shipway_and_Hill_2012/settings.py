@@ -12,21 +12,25 @@ from scipy.interpolate import interp1d
 class Settings:
     def __init__(
         self,
+        *,
         n_sd_per_gridbox: int,
+        p0: float = 1002 * si.hPa,
+        particle_reservoir_depth: float = 0 * si.m,
+        kappa: float = 1,
         rho_times_w_1: float = 2 * si.m / si.s,
         dt: float = 1 * si.s,
         dz: float = 25 * si.m,
-        precip: bool = True,
+        precip: bool = True
     ):
         self.formulae = Formulae()
         self.n_sd_per_gridbox = n_sd_per_gridbox
-        self.kappa = 0.9  # TODO #817: not in the paper
+        self.kappa = kappa
         self.wet_radius_spectrum_per_mass_of_dry_air = spectra.Lognormal(
-            norm_factor=50 / si.cm**3,  # TODO #817: / self.rho,
+            norm_factor=50 / si.cm**3 / self.formulae.constants.rho_STP,
             m_mode=0.08 / 2 * si.um,
             s_geom=1.4,
         )
-
+        self.particle_reservoir_depth = particle_reservoir_depth
         self.dt = dt
         self.dz = dz
         self.precip = precip
@@ -39,19 +43,27 @@ class Settings:
             lambda t: rho_times_w_1 * np.sin(np.pi * t / t_1) if t < t_1 else 0
         )
 
-        self._th = interp1d((0, 740, 3260), (297.9, 297.9, 312.66))
+        self._th = interp1d(
+            (0.0 * si.m, 740.0 * si.m, 3260.00 * si.m),
+            (297.9 * si.K, 297.9 * si.K, 312.66 * si.K),
+            fill_value="extrapolate",
+        )
 
-        # TODO #817: is initial particle water included in initial qv? (q1 logic)
-        self.qv = interp1d((0, 740, 3260), (0.015, 0.0138, 0.0024))
+        self.qv = interp1d(
+            (-max(particle_reservoir_depth, 1), 0, 740, 3260),
+            (0.015, 0.015, 0.0138, 0.0024),
+            fill_value="extrapolate",
+        )
 
         self.thd = lambda z: self.formulae.state_variable_triplet.th_dry(
             self._th(z), self.qv(z)
         )
 
-        p0 = 975 * si.hPa  # TODO #817: not in the paper?
         g = self.formulae.constants.g_std
         self.rhod0 = self.formulae.state_variable_triplet.rho_d(
-            p0, self.qv(0), self._th(0)
+            p0,
+            self.qv(-self.particle_reservoir_depth),
+            self._th(-self.particle_reservoir_depth),
         )
 
         def drhod_dz(z, rhod):
@@ -60,17 +72,18 @@ class Settings:
             lv = self.formulae.latent_heat.lv(T)
             return self.formulae.hydrostatics.drho_dz(g, p, T, self.qv(z), lv)
 
-        z_points = np.arange(0, self.z_max, self.dz / 2)
+        t_span = (-self.particle_reservoir_depth, self.z_max)
+        z_points = np.linspace(*t_span, 2 * self.nz + 1)
         rhod_solution = solve_ivp(
             fun=drhod_dz,
-            t_span=(0, self.z_max),
+            t_span=t_span,
             y0=np.asarray((self.rhod0,)),
             t_eval=z_points,
         )
         assert rhod_solution.success
-        self.rhod = interp1d(z_points, rhod_solution.y[0])
+        self.rhod = interp1d(z_points, rhod_solution.y[0], assume_sorted=True)
 
-        self.mpdata_settings = {"n_iters": 3, "iga": False, "fct": False, "tot": False}
+        self.mpdata_settings = {"n_iters": 3, "iga": True, "fct": True, "tot": True}
         self.condensation_rtol_x = condensation.DEFAULTS.rtol_x
         self.condensation_rtol_thd = condensation.DEFAULTS.rtol_thd
         self.condensation_adaptive = True
@@ -88,7 +101,11 @@ class Settings:
 
     @property
     def nz(self):
-        nz = self.z_max / self.dz
+        assert (
+            self.particle_reservoir_depth / self.dz
+            == self.particle_reservoir_depth // self.dz
+        )
+        nz = (self.z_max + self.particle_reservoir_depth) / self.dz
         assert nz == int(nz)
         return int(nz)
 

@@ -27,8 +27,9 @@ class MPDATA_1D:
         )
         stepper = Stepper(options=options, grid=grid, non_unit_g_factor=True)
         bcs = (Extrapolated(),)
+        zZ_scalar = arakawa_c.z_scalar_coord(grid) / nz
         g_factor = ScalarField(
-            data=g_factor_of_zZ(arakawa_c.z_scalar_coord(grid)),
+            data=g_factor_of_zZ(zZ_scalar),
             halo=options.n_halo,
             boundary_conditions=bcs,
         )
@@ -38,7 +39,7 @@ class MPDATA_1D:
             boundary_conditions=bcs,
         )
         self.advectee = ScalarField(
-            data=advectee_of_zZ_at_t0(arakawa_c.z_scalar_coord(grid)),
+            data=advectee_of_zZ_at_t0(zZ_scalar),
             halo=options.n_halo,
             boundary_conditions=bcs,
         )
@@ -49,8 +50,12 @@ class MPDATA_1D:
             g_factor=g_factor,
         )
 
+    @property
+    def advector(self):
+        return self.solver.advector.get_component(0)
+
     def __call__(self):
         self.t += 0.5 * self.dt
-        self.solver.advector.get_component(0)[:] = self.advector_of_t(self.t)
+        self.advector[:] = self.advector_of_t(self.t)
         self.solver.advance(1)
         self.t += 0.5 * self.dt
