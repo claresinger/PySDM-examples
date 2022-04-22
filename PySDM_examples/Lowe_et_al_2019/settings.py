@@ -5,7 +5,7 @@ from PySDM.physics import si
 from pystrict import strict
 from scipy import constants as sci
 
-from PySDM_examples.Lowe_et_al_2019.aerosol import Aerosol
+from PySDM_examples.utils import BasicAerosol
 
 
 @strict
@@ -14,7 +14,7 @@ class Settings:
         self,
         dz: float,
         n_sd_per_mode: int,
-        aerosol: Aerosol,
+        aerosol: BasicAerosol,
         model: str,
         spectral_sampling: type(spec_sampling.SpectralSampling),
         w: float = 0.32 * si.m / si.s,
