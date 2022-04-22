@@ -29,71 +29,13 @@
 <pre><code class="python">from chempy import Substance
 from PySDM.initialisation import spectra
 from PySDM.physics import si
-from PySDM.physics.constants_defaults import Mv, rho_w
 from pystrict import strict
 
-compounds = (&#34;(NH4)2SO4&#34;, &#34;insoluble&#34;)
-
-molar_masses = {
-    &#34;(NH4)2SO4&#34;: Substance.from_formula(&#34;(NH4)2SO4&#34;).mass * si.gram / si.mole,
-    &#34;insoluble&#34;: 44 * si.g / si.mole,
-}
-
-densities = {
-    &#34;(NH4)2SO4&#34;: 1.77 * si.g / si.cm**3,
-    &#34;insoluble&#34;: 1.77 * si.g / si.cm**3,
-}
-
-is_soluble = {&#34;(NH4)2SO4&#34;: True, &#34;insoluble&#34;: False}
-
-ionic_dissociation_phi = {&#34;(NH4)2SO4&#34;: 3, &#34;insoluble&#34;: 0}
-
-
-def volume_fractions(mass_fractions: dict):
-    return {
-        k: (mass_fractions[k] / densities[k])
-        / sum(mass_fractions[i] / densities[i] for i in compounds)
-        for k in compounds
-    }
-
-
-def f_soluble_volume(mass_fractions: dict):
-    volfrac = volume_fractions(mass_fractions)
-    return sum(is_soluble[k] * volfrac[k] for k in compounds)
-
-
-def volfrac_just_soluble(volfrac: dict):
-    _masked = {k: (is_soluble[k]) * volfrac[k] for k in compounds}
-
-    _denom = sum(list(_masked.values()))
-    if _denom == 0.0:
-        x = {k: 0.0 for k in compounds}
-    else:
-        x = {k: _masked[k] / _denom for k in compounds}
-    return x
-
-
-def kappa(mass_fractions: dict):
-    volfrac = volume_fractions(mass_fractions)
-    molar_volumes = {i: molar_masses[i] / densities[i] for i in compounds}
-    volume_fractions_of_just_soluble = volfrac_just_soluble(volfrac)
-
-    ns_per_vol = f_soluble_volume(mass_fractions) * sum(
-        ionic_dissociation_phi[i]
-        * volume_fractions_of_just_soluble[i]
-        / molar_volumes[i]
-        for i in compounds
-    )
-
-    return ns_per_vol * Mv / rho_w
-
-
-class Aerosol:
-    pass
+from PySDM_examples.utils import BasicAerosol
 
 
 @strict
-class AerosolARG(Aerosol):
+class AerosolARG(BasicAerosol):
     def __init__(
         self,
         M2_sol: float = 0,
@@ -108,16 +50,30 @@ class AerosolARG(Aerosol):
             &#34;(NH4)2SO4&#34;: M2_sol,
             &#34;insoluble&#34;: (1 - M2_sol),
         }
-
+        super().__init__(
+            ionic_dissociation_phi={&#34;(NH4)2SO4&#34;: 3, &#34;insoluble&#34;: 0},
+            molar_masses={
+                &#34;(NH4)2SO4&#34;: Substance.from_formula(&#34;(NH4)2SO4&#34;).mass
+                * si.gram
+                / si.mole,
+                &#34;insoluble&#34;: 44 * si.g / si.mole,
+            },
+            densities={
+                &#34;(NH4)2SO4&#34;: 1.77 * si.g / si.cm**3,
+                &#34;insoluble&#34;: 1.77 * si.g / si.cm**3,
+            },
+            compounds=(&#34;(NH4)2SO4&#34;, &#34;insoluble&#34;),
+            is_soluble={&#34;(NH4)2SO4&#34;: True, &#34;insoluble&#34;: False},
+        )
         self.aerosol_modes = (
             {
-                &#34;kappa&#34;: kappa(mode1),
+                &#34;kappa&#34;: self.kappa(mode1),
                 &#34;spectrum&#34;: spectra.Lognormal(
                     norm_factor=100.0 / si.cm**3, m_mode=50.0 * si.nm, s_geom=2.0
                 ),
             },
             {
-                &#34;kappa&#34;: kappa(mode2),
+                &#34;kappa&#34;: self.kappa(mode2),
                 &#34;spectrum&#34;: spectra.Lognormal(
                     norm_factor=M2_N, m_mode=M2_rad, s_geom=2.0
                 ),
@@ -126,7 +82,7 @@ class AerosolARG(Aerosol):
 
 
 @strict
-class AerosolWhitby(Aerosol):
+class AerosolWhitby(BasicAerosol):
     def __init__(self):
         nuclei = {
             &#34;(NH4)2SO4&#34;: 1.0,
@@ -134,21 +90,34 @@ class AerosolWhitby(Aerosol):
         accum = {&#34;(NH4)2SO4&#34;: 1.0}
         coarse = {&#34;(NH4)2SO4&#34;: 1.0}
 
+        super().__init__(
+            ionic_dissociation_phi={&#34;(NH4)2SO4&#34;: 3},
+            molar_masses={
+                &#34;(NH4)2SO4&#34;: Substance.from_formula(&#34;(NH4)2SO4&#34;).mass
+                * si.gram
+                / si.mole
+            },
+            densities={&#34;(NH4)2SO4&#34;: 1.77 * si.g / si.cm**3},
+            compounds=&#34;(NH4)2SO4&#34;,
+            is_soluble={&#34;(NH4)2SO4&#34;: True},
+        )
         self.aerosol_modes = (
             {
-                &#34;kappa&#34;: kappa(nuclei),
+                &#34;kappa&#34;: self.kappa(nuclei),
                 &#34;spectrum&#34;: spectra.Lognormal(
-                    norm_factor=1000.0 / si.cm**3, m_mode=0.008 * si.um, s_geom=1.6
+                    norm_factor=1000.0 / si.cm**3,
+                    m_mode=0.008 * si.um,
+                    s_geom=1.6,
                 ),
             },
             {
-                &#34;kappa&#34;: kappa(accum),
+                &#34;kappa&#34;: self.kappa(accum),
                 &#34;spectrum&#34;: spectra.Lognormal(
                     norm_factor=800 / si.cm**3, m_mode=0.034 * si.um, s_geom=2.1
                 ),
             },
             {
-                &#34;kappa&#34;: kappa(coarse),
+                &#34;kappa&#34;: self.kappa(coarse),
                 &#34;spectrum&#34;: spectra.Lognormal(
                     norm_factor=0.72 / si.cm**3, m_mode=0.46 * si.um, s_geom=2.2
                 ),
@@ -161,106 +130,10 @@ class AerosolWhitby(Aerosol):
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.f_soluble_volume"><code class="name flex">
-<span>def <span class="ident">f_soluble_volume</span></span>(<span>mass_fractions: dict)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def f_soluble_volume(mass_fractions: dict):
-    volfrac = volume_fractions(mass_fractions)
-    return sum(is_soluble[k] * volfrac[k] for k in compounds)</code></pre>
-</details>
-</dd>
-<dt id="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.kappa"><code class="name flex">
-<span>def <span class="ident">kappa</span></span>(<span>mass_fractions: dict)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def kappa(mass_fractions: dict):
-    volfrac = volume_fractions(mass_fractions)
-    molar_volumes = {i: molar_masses[i] / densities[i] for i in compounds}
-    volume_fractions_of_just_soluble = volfrac_just_soluble(volfrac)
-
-    ns_per_vol = f_soluble_volume(mass_fractions) * sum(
-        ionic_dissociation_phi[i]
-        * volume_fractions_of_just_soluble[i]
-        / molar_volumes[i]
-        for i in compounds
-    )
-
-    return ns_per_vol * Mv / rho_w</code></pre>
-</details>
-</dd>
-<dt id="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.volfrac_just_soluble"><code class="name flex">
-<span>def <span class="ident">volfrac_just_soluble</span></span>(<span>volfrac: dict)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def volfrac_just_soluble(volfrac: dict):
-    _masked = {k: (is_soluble[k]) * volfrac[k] for k in compounds}
-
-    _denom = sum(list(_masked.values()))
-    if _denom == 0.0:
-        x = {k: 0.0 for k in compounds}
-    else:
-        x = {k: _masked[k] / _denom for k in compounds}
-    return x</code></pre>
-</details>
-</dd>
-<dt id="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.volume_fractions"><code class="name flex">
-<span>def <span class="ident">volume_fractions</span></span>(<span>mass_fractions: dict)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def volume_fractions(mass_fractions: dict):
-    return {
-        k: (mass_fractions[k] / densities[k])
-        / sum(mass_fractions[i] / densities[i] for i in compounds)
-        for k in compounds
-    }</code></pre>
-</details>
-</dd>
-</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.Aerosol"><code class="flex name class">
-<span>class <span class="ident">Aerosol</span></span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Aerosol:
-    pass</code></pre>
-</details>
-<h3>Subclasses</h3>
-<ul class="hlist">
-<li><a title="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.AerosolARG" href="#PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.AerosolARG">AerosolARG</a></li>
-<li><a title="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.AerosolWhitby" href="#PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.AerosolWhitby">AerosolWhitby</a></li>
-</ul>
-</dd>
 <dt id="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.AerosolARG"><code class="flex name class">
 <span>class <span class="ident">AerosolARG</span></span>
 <span>(</span><span>M2_sol: float = 0, M2_N: float = 99999999.99999999, M2_rad: float = 5.0000000000000004e-08)</span>
@@ -272,7 +145,7 @@ class AerosolWhitby(Aerosol):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@strict
-class AerosolARG(Aerosol):
+class AerosolARG(BasicAerosol):
     def __init__(
         self,
         M2_sol: float = 0,
@@ -287,16 +160,30 @@ class AerosolARG(Aerosol):
             &#34;(NH4)2SO4&#34;: M2_sol,
             &#34;insoluble&#34;: (1 - M2_sol),
         }
-
+        super().__init__(
+            ionic_dissociation_phi={&#34;(NH4)2SO4&#34;: 3, &#34;insoluble&#34;: 0},
+            molar_masses={
+                &#34;(NH4)2SO4&#34;: Substance.from_formula(&#34;(NH4)2SO4&#34;).mass
+                * si.gram
+                / si.mole,
+                &#34;insoluble&#34;: 44 * si.g / si.mole,
+            },
+            densities={
+                &#34;(NH4)2SO4&#34;: 1.77 * si.g / si.cm**3,
+                &#34;insoluble&#34;: 1.77 * si.g / si.cm**3,
+            },
+            compounds=(&#34;(NH4)2SO4&#34;, &#34;insoluble&#34;),
+            is_soluble={&#34;(NH4)2SO4&#34;: True, &#34;insoluble&#34;: False},
+        )
         self.aerosol_modes = (
             {
-                &#34;kappa&#34;: kappa(mode1),
+                &#34;kappa&#34;: self.kappa(mode1),
                 &#34;spectrum&#34;: spectra.Lognormal(
                     norm_factor=100.0 / si.cm**3, m_mode=50.0 * si.nm, s_geom=2.0
                 ),
             },
             {
-                &#34;kappa&#34;: kappa(mode2),
+                &#34;kappa&#34;: self.kappa(mode2),
                 &#34;spectrum&#34;: spectra.Lognormal(
                     norm_factor=M2_N, m_mode=M2_rad, s_geom=2.0
                 ),
@@ -305,7 +192,7 @@ class AerosolARG(Aerosol):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.Aerosol" href="#PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.Aerosol">Aerosol</a></li>
+<li><a title="PySDM_examples.utils.basic_aerosol.BasicAerosol" href="../utils/basic_aerosol.html#PySDM_examples.utils.basic_aerosol.BasicAerosol">BasicAerosol</a></li>
 </ul>
 </dd>
 <dt id="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.AerosolWhitby"><code class="flex name class">
@@ -318,7 +205,7 @@ class AerosolARG(Aerosol):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@strict
-class AerosolWhitby(Aerosol):
+class AerosolWhitby(BasicAerosol):
     def __init__(self):
         nuclei = {
             &#34;(NH4)2SO4&#34;: 1.0,
@@ -326,21 +213,34 @@ class AerosolWhitby(Aerosol):
         accum = {&#34;(NH4)2SO4&#34;: 1.0}
         coarse = {&#34;(NH4)2SO4&#34;: 1.0}
 
+        super().__init__(
+            ionic_dissociation_phi={&#34;(NH4)2SO4&#34;: 3},
+            molar_masses={
+                &#34;(NH4)2SO4&#34;: Substance.from_formula(&#34;(NH4)2SO4&#34;).mass
+                * si.gram
+                / si.mole
+            },
+            densities={&#34;(NH4)2SO4&#34;: 1.77 * si.g / si.cm**3},
+            compounds=&#34;(NH4)2SO4&#34;,
+            is_soluble={&#34;(NH4)2SO4&#34;: True},
+        )
         self.aerosol_modes = (
             {
-                &#34;kappa&#34;: kappa(nuclei),
+                &#34;kappa&#34;: self.kappa(nuclei),
                 &#34;spectrum&#34;: spectra.Lognormal(
-                    norm_factor=1000.0 / si.cm**3, m_mode=0.008 * si.um, s_geom=1.6
+                    norm_factor=1000.0 / si.cm**3,
+                    m_mode=0.008 * si.um,
+                    s_geom=1.6,
                 ),
             },
             {
-                &#34;kappa&#34;: kappa(accum),
+                &#34;kappa&#34;: self.kappa(accum),
                 &#34;spectrum&#34;: spectra.Lognormal(
                     norm_factor=800 / si.cm**3, m_mode=0.034 * si.um, s_geom=2.1
                 ),
             },
             {
-                &#34;kappa&#34;: kappa(coarse),
+                &#34;kappa&#34;: self.kappa(coarse),
                 &#34;spectrum&#34;: spectra.Lognormal(
                     norm_factor=0.72 / si.cm**3, m_mode=0.46 * si.um, s_geom=2.2
                 ),
@@ -349,7 +249,7 @@ class AerosolWhitby(Aerosol):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.Aerosol" href="#PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.Aerosol">Aerosol</a></li>
+<li><a title="PySDM_examples.utils.basic_aerosol.BasicAerosol" href="../utils/basic_aerosol.html#PySDM_examples.utils.basic_aerosol.BasicAerosol">BasicAerosol</a></li>
 </ul>
 </dd>
 </dl>
@@ -366,19 +266,8 @@ class AerosolWhitby(Aerosol):
 <li><code><a title="PySDM_examples.Abdul_Razzak_Ghan_2000" href="index.html">PySDM_examples.Abdul_Razzak_Ghan_2000</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.f_soluble_volume" href="#PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.f_soluble_volume">f_soluble_volume</a></code></li>
-<li><code><a title="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.kappa" href="#PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.kappa">kappa</a></code></li>
-<li><code><a title="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.volfrac_just_soluble" href="#PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.volfrac_just_soluble">volfrac_just_soluble</a></code></li>
-<li><code><a title="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.volume_fractions" href="#PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.volume_fractions">volume_fractions</a></code></li>
-</ul>
-</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
-<li>
-<h4><code><a title="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.Aerosol" href="#PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.Aerosol">Aerosol</a></code></h4>
-</li>
 <li>
 <h4><code><a title="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.AerosolARG" href="#PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.AerosolARG">AerosolARG</a></code></h4>
 </li>

@@ -33,7 +33,7 @@ from PySDM.physics import si
 from pystrict import strict
 from scipy import constants as sci
 
-from PySDM_examples.Lowe_et_al_2019.aerosol import Aerosol
+from PySDM_examples.utils import BasicAerosol
 
 
 @strict
@@ -42,7 +42,7 @@ class Settings:
         self,
         dz: float,
         n_sd_per_mode: int,
-        aerosol: Aerosol,
+        aerosol: BasicAerosol,
         model: str,
         spectral_sampling: type(spec_sampling.SpectralSampling),
         w: float = 0.32 * si.m / si.s,
@@ -134,7 +134,7 @@ class Settings:
 <dl>
 <dt id="PySDM_examples.Lowe_et_al_2019.settings.Settings"><code class="flex name class">
 <span>class <span class="ident">Settings</span></span>
-<span>(</span><span>dz: float, n_sd_per_mode: int, aerosol: <a title="PySDM_examples.Lowe_et_al_2019.aerosol.Aerosol" href="aerosol.html#PySDM_examples.Lowe_et_al_2019.aerosol.Aerosol">Aerosol</a>, model: str, spectral_sampling: type, w: float = 0.32, delta_min: float = 0.1, MAC: float = 1, HAC: float = 1, c_pd: float = 1005.0, g_std: float = 9.80665, BDF: bool = False)</span>
+<span>(</span><span>dz: float, n_sd_per_mode: int, aerosol: <a title="PySDM_examples.utils.basic_aerosol.BasicAerosol" href="../utils/basic_aerosol.html#PySDM_examples.utils.basic_aerosol.BasicAerosol">BasicAerosol</a>, model: str, spectral_sampling: type, w: float = 0.32, delta_min: float = 0.1, MAC: float = 1, HAC: float = 1, c_pd: float = 1005.0, g_std: float = 9.80665, BDF: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -148,7 +148,7 @@ class Settings:
         self,
         dz: float,
         n_sd_per_mode: int,
-        aerosol: Aerosol,
+        aerosol: BasicAerosol,
         model: str,
         spectral_sampling: type(spec_sampling.SpectralSampling),
         w: float = 0.32 * si.m / si.s,
