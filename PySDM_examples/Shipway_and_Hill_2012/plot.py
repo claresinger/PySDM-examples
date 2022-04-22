@@ -4,7 +4,8 @@ from matplotlib import pyplot
 from PySDM.physics.constants import convert_to, si
 
 
-def plot(var, qlabel, fname, output):
+def plot(var, qlabel, fname, output, vmin=None, vmax=None, line=None):
+    line = line or {15: ":", 20: "--", 25: "-", 30: "-."}
     dt = output["t"][1] - output["t"][0]
     dz = output["z"][1] - output["z"][0]
     tgrid = np.concatenate(((output["t"][0] - dt / 2,), output["t"] + dt / 2))
@@ -32,11 +33,14 @@ def plot(var, qlabel, fname, output):
         x, z = output[var][:, i], output["z"].copy()
         convert_to(z, si.km)
         params = {"color": "black"}
-        for line_t, line_s in {10: ":", 15: "--", 20: "-", 25: "-."}.items():
+        for line_t, line_s in line.items():
             if last_t < line_t * si.min <= t:
                 params["ls"] = line_s
                 ax2.plot(x, z, **params)
-                ax1.axvline(t, **params)
+                if vmin is not None and vmax is not None:
+                    ax1.axvline(t, ymin=vmin, ymax=vmax, **params)
+                else:
+                    ax1.axvline(t, **params)
         last_t = t
 
     show_plot(filename=fname, inline_format="png")
