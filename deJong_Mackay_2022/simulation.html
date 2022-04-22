@@ -28,17 +28,18 @@
 </summary>
 <pre><code class="python">from PySDM.backends import CPU
 from PySDM.builder import Builder
-from PySDM.dynamics import Collision
+from PySDM.dynamics import Coalescence, Collision
 from PySDM.environments import Box
 from PySDM.initialisation.sampling.spectral_sampling import ConstantMultiplicity
+from PySDM.physics import si
 from PySDM.products.collision.collision_rates import (
     CollisionRateDeficitPerGridbox,
     CollisionRatePerGridbox,
 )
-from PySDM.products.size_spectral import ParticleSizeSpectrumPerVolume
+from PySDM.products.size_spectral import ParticleVolumeVersusRadiusLogarithmSpectrum
 
 
-def make_core(settings):
+def run_box_breakup(settings, step):
     backend = CPU
 
     builder = Builder(n_sd=settings.n_sd, backend=backend(settings.formulae))
@@ -49,22 +50,90 @@ def make_core(settings):
     attributes[&#34;volume&#34;], attributes[&#34;n&#34;] = ConstantMultiplicity(
         settings.spectrum
     ).sample(settings.n_sd)
-    collision = Collision(
+    breakup = Collision(
         settings.kernel,
         settings.coal_eff,
         settings.break_eff,
         settings.fragmentation,
         adaptive=settings.adaptive,
     )
-    builder.add_dynamic(collision)
+    builder.add_dynamic(breakup)
     products = (
-        ParticleSizeSpectrumPerVolume(
+        ParticleVolumeVersusRadiusLogarithmSpectrum(
             radius_bins_edges=settings.radius_bins_edges, name=&#34;dv/dlnr&#34;
         ),
         CollisionRatePerGridbox(name=&#34;cr&#34;),
         CollisionRateDeficitPerGridbox(name=&#34;crd&#34;),
     )
-    return builder.build(attributes, products)</code></pre>
+    core = builder.build(attributes, products)
+
+    # run
+    core.run(step - core.n_steps)
+
+    x = (settings.radius_bins_edges[:-1] / si.micrometres,)
+    y = core.products[&#34;dv/dlnr&#34;].get()
+
+    return (x, y)
+
+
+def run_box_NObreakup(settings, step):
+    backend = CPU
+
+    builder = Builder(n_sd=settings.n_sd, backend=backend(settings.formulae))
+    env = Box(dv=settings.dv, dt=settings.dt)
+    builder.set_environment(env)
+    env[&#34;rhod&#34;] = 1.0
+    attributes = {}
+    attributes[&#34;volume&#34;], attributes[&#34;n&#34;] = ConstantMultiplicity(
+        settings.spectrum
+    ).sample(settings.n_sd)
+    coal = Coalescence(settings.kernel, settings.coal_eff, adaptive=settings.adaptive)
+    builder.add_dynamic(coal)
+    products = (
+        ParticleVolumeVersusRadiusLogarithmSpectrum(
+            radius_bins_edges=settings.radius_bins_edges, name=&#34;dv/dlnr&#34;
+        ),
+        CollisionRatePerGridbox(name=&#34;cr&#34;),
+        CollisionRateDeficitPerGridbox(name=&#34;crd&#34;),
+    )
+    core = builder.build(attributes, products)
+
+    # run
+    core.run(step - core.n_steps)
+
+    x = (settings.radius_bins_edges[:-1] / si.micrometres,)
+    y = core.products[&#34;dv/dlnr&#34;].get()
+
+    return (x, y)
+
+
+# def make_core(settings):
+#     backend = CPU
+
+#     builder = Builder(n_sd=settings.n_sd, backend=backend(settings.formulae))
+#     env = Box(dv=settings.dv, dt=settings.dt)
+#     builder.set_environment(env)
+#     env[&#34;rhod&#34;] = 1.0
+#     attributes = {}
+#     attributes[&#34;volume&#34;], attributes[&#34;n&#34;] = ConstantMultiplicity(
+#         settings.spectrum
+#     ).sample(settings.n_sd)
+#     collision = Collision(
+#         settings.kernel,
+#         settings.coal_eff,
+#         settings.break_eff,
+#         settings.fragmentation,
+#         adaptive=settings.adaptive,
+#     )
+#     builder.add_dynamic(collision)
+#     products = (
+#         ParticleSizeSpectrumPerVolume(
+#             radius_bins_edges=settings.radius_bins_edges, name=&#34;dv/dlnr&#34;
+#         ),
+#         CollisionRatePerGridbox(name=&#34;cr&#34;),
+#         CollisionRateDeficitPerGridbox(name=&#34;crd&#34;),
+#     )
+#     return builder.build(attributes, products)</code></pre>
 </details>
 </section>
 <section>
@@ -74,8 +143,8 @@ def make_core(settings):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="PySDM_examples.deJong_Mackay_2022.simulation.make_core"><code class="name flex">
-<span>def <span class="ident">make_core</span></span>(<span>settings)</span>
+<dt id="PySDM_examples.deJong_Mackay_2022.simulation.run_box_NObreakup"><code class="name flex">
+<span>def <span class="ident">run_box_NObreakup</span></span>(<span>settings, step)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -83,7 +152,7 @@ def make_core(settings):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def make_core(settings):
+<pre><code class="python">def run_box_NObreakup(settings, step):
     backend = CPU
 
     builder = Builder(n_sd=settings.n_sd, backend=backend(settings.formulae))
@@ -94,22 +163,70 @@ def make_core(settings):
     attributes[&#34;volume&#34;], attributes[&#34;n&#34;] = ConstantMultiplicity(
         settings.spectrum
     ).sample(settings.n_sd)
-    collision = Collision(
+    coal = Coalescence(settings.kernel, settings.coal_eff, adaptive=settings.adaptive)
+    builder.add_dynamic(coal)
+    products = (
+        ParticleVolumeVersusRadiusLogarithmSpectrum(
+            radius_bins_edges=settings.radius_bins_edges, name=&#34;dv/dlnr&#34;
+        ),
+        CollisionRatePerGridbox(name=&#34;cr&#34;),
+        CollisionRateDeficitPerGridbox(name=&#34;crd&#34;),
+    )
+    core = builder.build(attributes, products)
+
+    # run
+    core.run(step - core.n_steps)
+
+    x = (settings.radius_bins_edges[:-1] / si.micrometres,)
+    y = core.products[&#34;dv/dlnr&#34;].get()
+
+    return (x, y)</code></pre>
+</details>
+</dd>
+<dt id="PySDM_examples.deJong_Mackay_2022.simulation.run_box_breakup"><code class="name flex">
+<span>def <span class="ident">run_box_breakup</span></span>(<span>settings, step)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_box_breakup(settings, step):
+    backend = CPU
+
+    builder = Builder(n_sd=settings.n_sd, backend=backend(settings.formulae))
+    env = Box(dv=settings.dv, dt=settings.dt)
+    builder.set_environment(env)
+    env[&#34;rhod&#34;] = 1.0
+    attributes = {}
+    attributes[&#34;volume&#34;], attributes[&#34;n&#34;] = ConstantMultiplicity(
+        settings.spectrum
+    ).sample(settings.n_sd)
+    breakup = Collision(
         settings.kernel,
         settings.coal_eff,
         settings.break_eff,
         settings.fragmentation,
         adaptive=settings.adaptive,
     )
-    builder.add_dynamic(collision)
+    builder.add_dynamic(breakup)
     products = (
-        ParticleSizeSpectrumPerVolume(
+        ParticleVolumeVersusRadiusLogarithmSpectrum(
             radius_bins_edges=settings.radius_bins_edges, name=&#34;dv/dlnr&#34;
         ),
         CollisionRatePerGridbox(name=&#34;cr&#34;),
         CollisionRateDeficitPerGridbox(name=&#34;crd&#34;),
     )
-    return builder.build(attributes, products)</code></pre>
+    core = builder.build(attributes, products)
+
+    # run
+    core.run(step - core.n_steps)
+
+    x = (settings.radius_bins_edges[:-1] / si.micrometres,)
+    y = core.products[&#34;dv/dlnr&#34;].get()
+
+    return (x, y)</code></pre>
 </details>
 </dd>
 </dl>
@@ -130,7 +247,8 @@ def make_core(settings):
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="PySDM_examples.deJong_Mackay_2022.simulation.make_core" href="#PySDM_examples.deJong_Mackay_2022.simulation.make_core">make_core</a></code></li>
+<li><code><a title="PySDM_examples.deJong_Mackay_2022.simulation.run_box_NObreakup" href="#PySDM_examples.deJong_Mackay_2022.simulation.run_box_NObreakup">run_box_NObreakup</a></code></li>
+<li><code><a title="PySDM_examples.deJong_Mackay_2022.simulation.run_box_breakup" href="#PySDM_examples.deJong_Mackay_2022.simulation.run_box_breakup">run_box_breakup</a></code></li>
 </ul>
 </li>
 </ul>

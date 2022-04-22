@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>PySDM_examples.Shipway_and_Hill_2012.simulation API documentation</title>
+<title>PySDM_examples.deJong_Mackay_2022.simulation_breakup API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>PySDM_examples.Shipway_and_Hill_2012.simulation</code></h1>
+<h1 class="title">Module <code>PySDM_examples.deJong_Mackay_2022.simulation_breakup</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -32,52 +32,42 @@ from PySDM import Builder
 from PySDM.backends import CPU
 from PySDM.dynamics import (
     AmbientThermodynamics,
-    Coalescence,
+    Collision,
     Condensation,
     Displacement,
     EulerianAdvection,
 )
+from PySDM.dynamics.collisions.breakup_efficiencies import ConstEb
+from PySDM.dynamics.collisions.breakup_fragmentations import ExponFrag
+from PySDM.dynamics.collisions.coalescence_efficiencies import ConstEc
 from PySDM.dynamics.collisions.collision_kernels import Geometric
 from PySDM.environments.kinematic_1d import Kinematic1D
 from PySDM.impl.mesh import Mesh
 from PySDM.initialisation.sampling import spatial_sampling, spectral_sampling
+from PySDM.physics import si
 
 from PySDM_examples.Shipway_and_Hill_2012.mpdata_1d import MPDATA_1D
 
 
-class Simulation:
+class SimulationB:
     def __init__(self, settings, backend=CPU):
         self.nt = settings.nt
-        self.z0 = -settings.particle_reservoir_depth
 
         builder = Builder(
             n_sd=settings.n_sd, backend=backend(formulae=settings.formulae)
         )
-        mesh = Mesh(
-            grid=(settings.nz,),
-            size=(settings.z_max + settings.particle_reservoir_depth,),
-        )
+        mesh = Mesh(grid=(settings.nz,), size=(settings.z_max,))
         env = Kinematic1D(
-            dt=settings.dt,
-            mesh=mesh,
-            thd_of_z=settings.thd,
-            rhod_of_z=settings.rhod,
-            z0=-settings.particle_reservoir_depth,
+            dt=settings.dt, mesh=mesh, thd_of_z=settings.thd, rhod_of_z=settings.rhod
         )
 
-        self.mpdata = MPDATA_1D(
+        mpdata = MPDATA_1D(
             nz=settings.nz,
             dt=settings.dt,
             mpdata_settings=settings.mpdata_settings,
             advector_of_t=lambda t: settings.rho_times_w(t) * settings.dt / settings.dz,
-            advectee_of_zZ_at_t0=lambda zZ: settings.qv(zZ * settings.z_max + self.z0),
-            g_factor_of_zZ=lambda zZ: settings.rhod(zZ * settings.z_max + self.z0),
-        )
-
-        _extra_nz = settings.particle_reservoir_depth // settings.dz
-        self.g_factor_vec = settings.rhod(
-            settings.dz
-            * np.linspace(-_extra_nz, settings.nz - _extra_nz, settings.nz + 1)
+            advectee_of_zZ_at_t0=lambda zZ: settings.qv(zZ * settings.dz),
+            g_factor_of_zZ=lambda zZ: settings.rhod(zZ * settings.dz),
         )
 
         builder.set_environment(env)
@@ -89,16 +79,21 @@ class Simulation:
                 rtol_x=settings.condensation_rtol_x,
             )
         )
-        builder.add_dynamic(EulerianAdvection(self.mpdata))
+        builder.add_dynamic(EulerianAdvection(mpdata))
         if settings.precip:
             builder.add_dynamic(
-                Coalescence(
+                Collision(
                     collision_kernel=Geometric(collection_efficiency=1),
+                    coalescence_efficiency=ConstEc(Ec=0.95),
+                    # coalescence_efficiency=Berry1967(),
+                    breakup_efficiency=ConstEb(Eb=1.0),
+                    fragmentation_function=ExponFrag(scale=100 * si.um),
+                    # fragmentation_function=AlwaysN(n=2),
                     adaptive=settings.coalescence_adaptive,
                 )
             )
-        displacement = Displacement(enable_sedimentation=settings.precip)
-        builder.add_dynamic(displacement)
+            displacement = Displacement(enable_sedimentation=True)
+            builder.add_dynamic(displacement)
         attributes = env.init_attributes(
             spatial_discretisation=spatial_sampling.Pseudorandom(),
             spectral_discretisation=spectral_sampling.ConstantMultiplicity(
@@ -139,9 +134,12 @@ class Simulation:
                 radius_range=settings.cloud_water_radius_range
             ),
             PySDM_products.PeakSupersaturation(unit=&#34;%&#34;),
-            PySDM_products.SuperDropletCountPerGridbox(),
         ]
         self.particulator = builder.build(attributes=attributes, products=products)
+        if settings.precip:
+            displacement.upload_courant_field(
+                courant_field=(np.zeros(settings.nz + 1),)
+            )  # TODO #819
 
     def save(self, output, step):
         for k, v in self.particulator.products.items():
@@ -160,18 +158,11 @@ class Simulation:
             0, self.nt * self.particulator.dt, self.nt + 1, endpoint=True
         )
         output[&#34;z&#34;] = np.linspace(
-            self.z0 + mesh.dz / 2,
-            self.z0 + (mesh.grid[-1] - 1 / 2) * mesh.dz,
-            mesh.grid[-1],
-            endpoint=True,
+            mesh.dz / 2, (mesh.grid[-1] - 1 / 2) * mesh.dz, mesh.grid[-1], endpoint=True
         )
 
         self.save(output, 0)
         for step in range(nt):
-            if &#34;Displacement&#34; in self.particulator.dynamics:
-                self.particulator.dynamics[&#34;Displacement&#34;].upload_courant_field(
-                    (self.mpdata.advector / self.g_factor_vec,)
-                )
             self.particulator.run(steps=1)
             self.save(output, step + 1)
         return output</code></pre>
@@ -186,8 +177,8 @@ class Simulation:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="PySDM_examples.Shipway_and_Hill_2012.simulation.Simulation"><code class="flex name class">
-<span>class <span class="ident">Simulation</span></span>
+<dt id="PySDM_examples.deJong_Mackay_2022.simulation_breakup.SimulationB"><code class="flex name class">
+<span>class <span class="ident">SimulationB</span></span>
 <span>(</span><span>settings, backend=PySDM.backends.numba.Numba)</span>
 </code></dt>
 <dd>
@@ -196,39 +187,25 @@ class Simulation:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Simulation:
+<pre><code class="python">class SimulationB:
     def __init__(self, settings, backend=CPU):
         self.nt = settings.nt
-        self.z0 = -settings.particle_reservoir_depth
 
         builder = Builder(
             n_sd=settings.n_sd, backend=backend(formulae=settings.formulae)
         )
-        mesh = Mesh(
-            grid=(settings.nz,),
-            size=(settings.z_max + settings.particle_reservoir_depth,),
-        )
+        mesh = Mesh(grid=(settings.nz,), size=(settings.z_max,))
         env = Kinematic1D(
-            dt=settings.dt,
-            mesh=mesh,
-            thd_of_z=settings.thd,
-            rhod_of_z=settings.rhod,
-            z0=-settings.particle_reservoir_depth,
+            dt=settings.dt, mesh=mesh, thd_of_z=settings.thd, rhod_of_z=settings.rhod
         )
 
-        self.mpdata = MPDATA_1D(
+        mpdata = MPDATA_1D(
             nz=settings.nz,
             dt=settings.dt,
             mpdata_settings=settings.mpdata_settings,
             advector_of_t=lambda t: settings.rho_times_w(t) * settings.dt / settings.dz,
-            advectee_of_zZ_at_t0=lambda zZ: settings.qv(zZ * settings.z_max + self.z0),
-            g_factor_of_zZ=lambda zZ: settings.rhod(zZ * settings.z_max + self.z0),
-        )
-
-        _extra_nz = settings.particle_reservoir_depth // settings.dz
-        self.g_factor_vec = settings.rhod(
-            settings.dz
-            * np.linspace(-_extra_nz, settings.nz - _extra_nz, settings.nz + 1)
+            advectee_of_zZ_at_t0=lambda zZ: settings.qv(zZ * settings.dz),
+            g_factor_of_zZ=lambda zZ: settings.rhod(zZ * settings.dz),
         )
 
         builder.set_environment(env)
@@ -240,16 +217,21 @@ class Simulation:
                 rtol_x=settings.condensation_rtol_x,
             )
         )
-        builder.add_dynamic(EulerianAdvection(self.mpdata))
+        builder.add_dynamic(EulerianAdvection(mpdata))
         if settings.precip:
             builder.add_dynamic(
-                Coalescence(
+                Collision(
                     collision_kernel=Geometric(collection_efficiency=1),
+                    coalescence_efficiency=ConstEc(Ec=0.95),
+                    # coalescence_efficiency=Berry1967(),
+                    breakup_efficiency=ConstEb(Eb=1.0),
+                    fragmentation_function=ExponFrag(scale=100 * si.um),
+                    # fragmentation_function=AlwaysN(n=2),
                     adaptive=settings.coalescence_adaptive,
                 )
             )
-        displacement = Displacement(enable_sedimentation=settings.precip)
-        builder.add_dynamic(displacement)
+            displacement = Displacement(enable_sedimentation=True)
+            builder.add_dynamic(displacement)
         attributes = env.init_attributes(
             spatial_discretisation=spatial_sampling.Pseudorandom(),
             spectral_discretisation=spectral_sampling.ConstantMultiplicity(
@@ -290,9 +272,12 @@ class Simulation:
                 radius_range=settings.cloud_water_radius_range
             ),
             PySDM_products.PeakSupersaturation(unit=&#34;%&#34;),
-            PySDM_products.SuperDropletCountPerGridbox(),
         ]
         self.particulator = builder.build(attributes=attributes, products=products)
+        if settings.precip:
+            displacement.upload_courant_field(
+                courant_field=(np.zeros(settings.nz + 1),)
+            )  # TODO #819
 
     def save(self, output, step):
         for k, v in self.particulator.products.items():
@@ -311,25 +296,18 @@ class Simulation:
             0, self.nt * self.particulator.dt, self.nt + 1, endpoint=True
         )
         output[&#34;z&#34;] = np.linspace(
-            self.z0 + mesh.dz / 2,
-            self.z0 + (mesh.grid[-1] - 1 / 2) * mesh.dz,
-            mesh.grid[-1],
-            endpoint=True,
+            mesh.dz / 2, (mesh.grid[-1] - 1 / 2) * mesh.dz, mesh.grid[-1], endpoint=True
         )
 
         self.save(output, 0)
         for step in range(nt):
-            if &#34;Displacement&#34; in self.particulator.dynamics:
-                self.particulator.dynamics[&#34;Displacement&#34;].upload_courant_field(
-                    (self.mpdata.advector / self.g_factor_vec,)
-                )
             self.particulator.run(steps=1)
             self.save(output, step + 1)
         return output</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
-<dt id="PySDM_examples.Shipway_and_Hill_2012.simulation.Simulation.run"><code class="name flex">
+<dt id="PySDM_examples.deJong_Mackay_2022.simulation_breakup.SimulationB.run"><code class="name flex">
 <span>def <span class="ident">run</span></span>(<span>self, nt=None)</span>
 </code></dt>
 <dd>
@@ -350,24 +328,17 @@ class Simulation:
         0, self.nt * self.particulator.dt, self.nt + 1, endpoint=True
     )
     output[&#34;z&#34;] = np.linspace(
-        self.z0 + mesh.dz / 2,
-        self.z0 + (mesh.grid[-1] - 1 / 2) * mesh.dz,
-        mesh.grid[-1],
-        endpoint=True,
+        mesh.dz / 2, (mesh.grid[-1] - 1 / 2) * mesh.dz, mesh.grid[-1], endpoint=True
     )
 
     self.save(output, 0)
     for step in range(nt):
-        if &#34;Displacement&#34; in self.particulator.dynamics:
-            self.particulator.dynamics[&#34;Displacement&#34;].upload_courant_field(
-                (self.mpdata.advector / self.g_factor_vec,)
-            )
         self.particulator.run(steps=1)
         self.save(output, step + 1)
     return output</code></pre>
 </details>
 </dd>
-<dt id="PySDM_examples.Shipway_and_Hill_2012.simulation.Simulation.save"><code class="name flex">
+<dt id="PySDM_examples.deJong_Mackay_2022.simulation_breakup.SimulationB.save"><code class="name flex">
 <span>def <span class="ident">save</span></span>(<span>self, output, step)</span>
 </code></dt>
 <dd>
@@ -395,16 +366,16 @@ class Simulation:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="PySDM_examples.Shipway_and_Hill_2012" href="index.html">PySDM_examples.Shipway_and_Hill_2012</a></code></li>
+<li><code><a title="PySDM_examples.deJong_Mackay_2022" href="index.html">PySDM_examples.deJong_Mackay_2022</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="PySDM_examples.Shipway_and_Hill_2012.simulation.Simulation" href="#PySDM_examples.Shipway_and_Hill_2012.simulation.Simulation">Simulation</a></code></h4>
+<h4><code><a title="PySDM_examples.deJong_Mackay_2022.simulation_breakup.SimulationB" href="#PySDM_examples.deJong_Mackay_2022.simulation_breakup.SimulationB">SimulationB</a></code></h4>
 <ul class="">
-<li><code><a title="PySDM_examples.Shipway_and_Hill_2012.simulation.Simulation.run" href="#PySDM_examples.Shipway_and_Hill_2012.simulation.Simulation.run">run</a></code></li>
-<li><code><a title="PySDM_examples.Shipway_and_Hill_2012.simulation.Simulation.save" href="#PySDM_examples.Shipway_and_Hill_2012.simulation.Simulation.save">save</a></code></li>
+<li><code><a title="PySDM_examples.deJong_Mackay_2022.simulation_breakup.SimulationB.run" href="#PySDM_examples.deJong_Mackay_2022.simulation_breakup.SimulationB.run">run</a></code></li>
+<li><code><a title="PySDM_examples.deJong_Mackay_2022.simulation_breakup.SimulationB.save" href="#PySDM_examples.deJong_Mackay_2022.simulation_breakup.SimulationB.save">save</a></code></li>
 </ul>
 </li>
 </ul>

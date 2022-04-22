@@ -32,7 +32,8 @@ from matplotlib import pyplot
 from PySDM.physics.constants import convert_to, si
 
 
-def plot(var, qlabel, fname, output):
+def plot(var, qlabel, fname, output, vmin=None, vmax=None, line=None):
+    line = line or {15: &#34;:&#34;, 20: &#34;--&#34;, 25: &#34;-&#34;, 30: &#34;-.&#34;}
     dt = output[&#34;t&#34;][1] - output[&#34;t&#34;][0]
     dz = output[&#34;z&#34;][1] - output[&#34;z&#34;][0]
     tgrid = np.concatenate(((output[&#34;t&#34;][0] - dt / 2,), output[&#34;t&#34;] + dt / 2))
@@ -60,11 +61,14 @@ def plot(var, qlabel, fname, output):
         x, z = output[var][:, i], output[&#34;z&#34;].copy()
         convert_to(z, si.km)
         params = {&#34;color&#34;: &#34;black&#34;}
-        for line_t, line_s in {10: &#34;:&#34;, 15: &#34;--&#34;, 20: &#34;-&#34;, 25: &#34;-.&#34;}.items():
+        for line_t, line_s in line.items():
             if last_t &lt; line_t * si.min &lt;= t:
                 params[&#34;ls&#34;] = line_s
                 ax2.plot(x, z, **params)
-                ax1.axvline(t, **params)
+                if vmin is not None and vmax is not None:
+                    ax1.axvline(t, ymin=vmin, ymax=vmax, **params)
+                else:
+                    ax1.axvline(t, **params)
         last_t = t
 
     show_plot(filename=fname, inline_format=&#34;png&#34;)</code></pre>
@@ -78,7 +82,7 @@ def plot(var, qlabel, fname, output):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="PySDM_examples.Shipway_and_Hill_2012.plot.plot"><code class="name flex">
-<span>def <span class="ident">plot</span></span>(<span>var, qlabel, fname, output)</span>
+<span>def <span class="ident">plot</span></span>(<span>var, qlabel, fname, output, vmin=None, vmax=None, line=None)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -86,7 +90,8 @@ def plot(var, qlabel, fname, output):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def plot(var, qlabel, fname, output):
+<pre><code class="python">def plot(var, qlabel, fname, output, vmin=None, vmax=None, line=None):
+    line = line or {15: &#34;:&#34;, 20: &#34;--&#34;, 25: &#34;-&#34;, 30: &#34;-.&#34;}
     dt = output[&#34;t&#34;][1] - output[&#34;t&#34;][0]
     dz = output[&#34;z&#34;][1] - output[&#34;z&#34;][0]
     tgrid = np.concatenate(((output[&#34;t&#34;][0] - dt / 2,), output[&#34;t&#34;] + dt / 2))
@@ -114,11 +119,14 @@ def plot(var, qlabel, fname, output):
         x, z = output[var][:, i], output[&#34;z&#34;].copy()
         convert_to(z, si.km)
         params = {&#34;color&#34;: &#34;black&#34;}
-        for line_t, line_s in {10: &#34;:&#34;, 15: &#34;--&#34;, 20: &#34;-&#34;, 25: &#34;-.&#34;}.items():
+        for line_t, line_s in line.items():
             if last_t &lt; line_t * si.min &lt;= t:
                 params[&#34;ls&#34;] = line_s
                 ax2.plot(x, z, **params)
-                ax1.axvline(t, **params)
+                if vmin is not None and vmax is not None:
+                    ax1.axvline(t, ymin=vmin, ymax=vmax, **params)
+                else:
+                    ax1.axvline(t, **params)
         last_t = t
 
     show_plot(filename=fname, inline_format=&#34;png&#34;)</code></pre>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>PySDM_examples.deJong_Mackay_2022.settings API documentation</title>
+<title>PySDM_examples.Bieli_et_al_2022.simulation API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,51 +19,45 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>PySDM_examples.deJong_Mackay_2022.settings</code></h1>
+<h1 class="title">Module <code>PySDM_examples.Bieli_et_al_2022.simulation</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import numpy as np
-from PySDM.dynamics.collisions.breakup_efficiencies import ConstEb
-from PySDM.dynamics.collisions.breakup_fragmentations import ExponFrag
-from PySDM.dynamics.collisions.coalescence_efficiencies import Berry1967
-from PySDM.dynamics.collisions.collision_kernels import Geometric
-from PySDM.formulae import Formulae
-from PySDM.initialisation.spectra import Exponential
-from PySDM.physics.constants import si
-from pystrict import strict
+<pre><code class="python">import PySDM.products.size_spectral.arbitrary_moment as am
+from PySDM.backends import CPU
+from PySDM.builder import Builder
+from PySDM.dynamics import Collision
+from PySDM.environments import Box
+from PySDM.initialisation.sampling.spectral_sampling import ConstantMultiplicity
 
 
-@strict
-class Settings:
-    def __init__(self):
-        self.formulae = Formulae()
-        self.n_sd = 2**20
-        self.n_part = 100 / si.cm**3
-        self.X0 = self.formulae.trivia.volume(radius=30.531 * si.micrometres)
-        self.dv = 1 * si.m**3
-        self.norm_factor = self.n_part * self.dv
-        self.rho = 1000 * si.kilogram / si.metre**3
-        self.dt = 1 * si.seconds
-        self.adaptive = False
-        self.seed = 44
-        self._steps = [0]
-        self.kernel = Geometric()
-        self.coal_eff = Berry1967()
-        self.fragmentation = ExponFrag(scale=100.0 * si.micrometres)
-        self.break_eff = ConstEb(1.0)  # no &#34;bouncing&#34;
-        self.spectrum = Exponential(norm_factor=self.norm_factor, scale=self.X0)
-        self.radius_bins_edges = np.logspace(
-            np.log10(10 * si.um), np.log10(5000 * si.um), num=128, endpoint=True
-        )
-        self.radius_range = [0 * si.um, 1e6 * si.um]
+def make_core(settings, coal_eff):
+    backend = CPU
 
-    @property
-    def output_steps(self):
-        return [int(step / self.dt) for step in self._steps]</code></pre>
+    builder = Builder(n_sd=settings.n_sd, backend=backend(settings.formulae))
+    env = Box(dv=settings.dv, dt=settings.dt)
+    builder.set_environment(env)
+    env[&#34;rhod&#34;] = 1.0
+    attributes = {}
+    attributes[&#34;volume&#34;], attributes[&#34;n&#34;] = ConstantMultiplicity(
+        settings.spectrum
+    ).sample(settings.n_sd)
+    collision = Collision(
+        settings.kernel,
+        coal_eff,
+        settings.break_eff,
+        settings.fragmentation,
+        adaptive=settings.adaptive,
+    )
+    builder.add_dynamic(collision)
+    M0 = am.make_arbitrary_moment_product(rank=0, attr=&#34;volume&#34;, attr_unit=&#34;m^3&#34;)
+    M1 = am.make_arbitrary_moment_product(rank=1, attr=&#34;volume&#34;, attr_unit=&#34;m^3&#34;)
+    M2 = am.make_arbitrary_moment_product(rank=2, attr=&#34;volume&#34;, attr_unit=&#34;m^3&#34;)
+    products = (M0(name=&#34;M0&#34;), M1(name=&#34;M1&#34;), M2(name=&#34;M2&#34;))
+    return builder.build(attributes, products)</code></pre>
 </details>
 </section>
 <section>
@@ -71,12 +65,10 @@ class Settings:
 <section>
 </section>
 <section>
-</section>
-<section>
-<h2 class="section-title" id="header-classes">Classes</h2>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="PySDM_examples.deJong_Mackay_2022.settings.Settings"><code class="flex name class">
-<span>class <span class="ident">Settings</span></span>
+<dt id="PySDM_examples.Bieli_et_al_2022.simulation.make_core"><code class="name flex">
+<span>def <span class="ident">make_core</span></span>(<span>settings, coal_eff)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -84,51 +76,35 @@ class Settings:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@strict
-class Settings:
-    def __init__(self):
-        self.formulae = Formulae()
-        self.n_sd = 2**20
-        self.n_part = 100 / si.cm**3
-        self.X0 = self.formulae.trivia.volume(radius=30.531 * si.micrometres)
-        self.dv = 1 * si.m**3
-        self.norm_factor = self.n_part * self.dv
-        self.rho = 1000 * si.kilogram / si.metre**3
-        self.dt = 1 * si.seconds
-        self.adaptive = False
-        self.seed = 44
-        self._steps = [0]
-        self.kernel = Geometric()
-        self.coal_eff = Berry1967()
-        self.fragmentation = ExponFrag(scale=100.0 * si.micrometres)
-        self.break_eff = ConstEb(1.0)  # no &#34;bouncing&#34;
-        self.spectrum = Exponential(norm_factor=self.norm_factor, scale=self.X0)
-        self.radius_bins_edges = np.logspace(
-            np.log10(10 * si.um), np.log10(5000 * si.um), num=128, endpoint=True
-        )
-        self.radius_range = [0 * si.um, 1e6 * si.um]
+<pre><code class="python">def make_core(settings, coal_eff):
+    backend = CPU
 
-    @property
-    def output_steps(self):
-        return [int(step / self.dt) for step in self._steps]</code></pre>
-</details>
-<h3>Instance variables</h3>
-<dl>
-<dt id="PySDM_examples.deJong_Mackay_2022.settings.Settings.output_steps"><code class="name">var <span class="ident">output_steps</span></code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@property
-def output_steps(self):
-    return [int(step / self.dt) for step in self._steps]</code></pre>
+    builder = Builder(n_sd=settings.n_sd, backend=backend(settings.formulae))
+    env = Box(dv=settings.dv, dt=settings.dt)
+    builder.set_environment(env)
+    env[&#34;rhod&#34;] = 1.0
+    attributes = {}
+    attributes[&#34;volume&#34;], attributes[&#34;n&#34;] = ConstantMultiplicity(
+        settings.spectrum
+    ).sample(settings.n_sd)
+    collision = Collision(
+        settings.kernel,
+        coal_eff,
+        settings.break_eff,
+        settings.fragmentation,
+        adaptive=settings.adaptive,
+    )
+    builder.add_dynamic(collision)
+    M0 = am.make_arbitrary_moment_product(rank=0, attr=&#34;volume&#34;, attr_unit=&#34;m^3&#34;)
+    M1 = am.make_arbitrary_moment_product(rank=1, attr=&#34;volume&#34;, attr_unit=&#34;m^3&#34;)
+    M2 = am.make_arbitrary_moment_product(rank=2, attr=&#34;volume&#34;, attr_unit=&#34;m^3&#34;)
+    products = (M0(name=&#34;M0&#34;), M1(name=&#34;M1&#34;), M2(name=&#34;M2&#34;))
+    return builder.build(attributes, products)</code></pre>
 </details>
 </dd>
 </dl>
-</dd>
-</dl>
+</section>
+<section>
 </section>
 </article>
 <nav id="sidebar">
@@ -139,17 +115,12 @@ def output_steps(self):
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="PySDM_examples.deJong_Mackay_2022" href="index.html">PySDM_examples.deJong_Mackay_2022</a></code></li>
+<li><code><a title="PySDM_examples.Bieli_et_al_2022" href="index.html">PySDM_examples.Bieli_et_al_2022</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-classes">Classes</a></h3>
-<ul>
-<li>
-<h4><code><a title="PySDM_examples.deJong_Mackay_2022.settings.Settings" href="#PySDM_examples.deJong_Mackay_2022.settings.Settings">Settings</a></code></h4>
+<li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="PySDM_examples.deJong_Mackay_2022.settings.Settings.output_steps" href="#PySDM_examples.deJong_Mackay_2022.settings.Settings.output_steps">output_steps</a></code></li>
-</ul>
-</li>
+<li><code><a title="PySDM_examples.Bieli_et_al_2022.simulation.make_core" href="#PySDM_examples.Bieli_et_al_2022.simulation.make_core">make_core</a></code></li>
 </ul>
 </li>
 </ul>
