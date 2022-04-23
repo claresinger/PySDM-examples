@@ -68,7 +68,7 @@ class Simulation(BasicSimulation):
         )
         attributes["volume"] = settings.formulae.trivia.volume(radius=r_wet)
 
-        if settings.model == "bulk":
+        if settings.model == "Constant":
             del attributes["dry volume organic"]
 
         builder.add_dynamic(AmbientThermodynamics())

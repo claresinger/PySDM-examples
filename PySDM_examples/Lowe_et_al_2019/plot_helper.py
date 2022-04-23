@@ -18,9 +18,9 @@ def plot_profiles(subplot_list, updraft_list, forg_list, output, save=False):
             for _, Forg in enumerate(forg_list):
                 key = subplot + f"_w{w:.2f}_f{Forg:.2f}_"
                 var = "n_c_cm3"
-                z = np.array(output[key + "film"]["z"])
-                CDNC_film = np.array(output[key + "film"][var])
-                CDNC_bulk = np.array(output[key + "bulk"][var])
+                z = np.array(output[key + "CompressedFilmOvadnevaite"]["z"])
+                CDNC_film = np.array(output[key + "CompressedFilmOvadnevaite"][var])
+                CDNC_bulk = np.array(output[key + "Constant"][var])
 
                 cmap = matplotlib.cm.get_cmap("Spectral")
                 if len(subplot_list) > 1:
@@ -57,14 +57,16 @@ def plot_contours(
                 if actfrac:
                     var = "Activated Fraction"
                     Naer = 1.0
-                    CDNC_film = output[key + "film"][var][0] * Naer
-                    CDNC_bulk = output[key + "bulk"][var][0] * Naer
+                    CDNC_film = output[key + "CompressedFilmOvadnevaite"][var][0] * Naer
+                    CDNC_bulk = output[key + "Constant"][var][0] * Naer
                 else:
                     var = "n_c_cm3"
-                    z = np.array(output[key + "film"]["z"])
+                    z = np.array(output[key + "CompressedFilmOvadnevaite"]["z"])
                     wz = np.where(z == z[-1])[0][0]
-                    CDNC_film = np.array(output[key + "film"][var])[wz]
-                    CDNC_bulk = np.array(output[key + "bulk"][var])[wz]
+                    CDNC_film = np.array(
+                        output[key + "CompressedFilmOvadnevaite"][var]
+                    )[wz]
+                    CDNC_bulk = np.array(output[key + "Constant"][var])[wz]
                 dCDNC[i, j] = (CDNC_film - CDNC_bulk) / CDNC_bulk * 100.0
 
         if subplot == "a":

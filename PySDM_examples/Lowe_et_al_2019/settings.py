@@ -25,14 +25,12 @@ class Settings:
         g_std: float = sci.g * si.metre / si.second**2,
         BDF: bool = False,
     ):
-        assert model in ("bulk", "film")
+        assert model in ("Constant", "CompressedFilmOvadnevaite")
         self.model = model
         self.n_sd_per_mode = n_sd_per_mode
         self.BDF = BDF
         self.formulae = Formulae(
-            surface_tension="CompressedFilmOvadnevaite"
-            if model == "film"
-            else "Constant",
+            surface_tension=model,
             constants={
                 "sgm_org": 40 * si.mN / si.m,
                 "delta_min": delta_min * si.nm,

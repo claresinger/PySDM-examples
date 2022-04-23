@@ -60,7 +60,7 @@ def run_parcel(
 
     attributes = {k: np.empty(0) for k in ("dry volume", "kappa times dry volume", "n")}
     for i, mode in enumerate(aerosol.aerosol_modes):
-        kappa, spectrum = mode["kappa"]["film"], mode["spectrum"]
+        kappa, spectrum = mode["kappa"]["CompressedFilmOvadnevaite"], mode["spectrum"]
         r_dry, concentration = ConstantMultiplicity(spectrum).sample(n_sd_per_mode)
         v_dry = builder.formulae.trivia.volume(radius=r_dry)
         specific_concentration = concentration / builder.formulae.constants.rho_STP
