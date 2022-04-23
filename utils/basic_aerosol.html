@@ -28,6 +28,8 @@
 </summary>
 <pre><code class="python">from typing import Dict, Tuple
 
+from PySDM import formulae
+from PySDM.physics import surface_tension
 from PySDM.physics.constants_defaults import Mv, rho_w
 
 
@@ -89,27 +91,32 @@ class BasicAerosol:
         molar_volumes = {
             i: self.molar_masses[i] / self.densities[i] for i in self.compounds
         }
+        volume_fractions_of_just_soluble = self.volfrac_just_soluble(
+            volfrac, soluble=True
+        )
+        all_soluble_ns = sum(
+            self.ionic_dissociation_phi[i] * volfrac[i] / molar_volumes[i]
+            for i in self.compounds
+        )
+        part_soluble_ns = self.f_soluble_volume(mass_fractions) * sum(
+            self.ionic_dissociation_phi[i]
+            * volume_fractions_of_just_soluble[i]
+            / molar_volumes[i]
+            for i in self.compounds
+        )
 
         result = {}
-        for model in (&#34;bulk&#34;, &#34;film&#34;):
-            if model == &#34;bulk&#34;:
-                ns_per_vol = sum(
-                    self.ionic_dissociation_phi[i] * volfrac[i] / molar_volumes[i]
-                    for i in self.compounds
-                )
-            elif model == &#34;film&#34;:
-                volume_fractions_of_just_soluble = self.volfrac_just_soluble(
-                    volfrac, soluble=True
-                )
-                ns_per_vol = self.f_soluble_volume(mass_fractions) * sum(
-                    self.ionic_dissociation_phi[i]
-                    * volume_fractions_of_just_soluble[i]
-                    / molar_volumes[i]
-                    for i in self.compounds
-                )
+        for st in formulae._choices(surface_tension).keys():
+            if st in (surface_tension.Constant.__name__):
+                result[st] = all_soluble_ns * Mv / rho_w
+            elif st in (
+                surface_tension.CompressedFilmOvadnevaite.__name__,
+                surface_tension.CompressedFilmRuehl.__name__,
+                surface_tension.SzyszkowskiLangmuir.__name__,
+            ):
+                result[st] = part_soluble_ns * Mv / rho_w
             else:
                 raise AssertionError()
-            result[model] = ns_per_vol * Mv / rho_w
         return result
 
     # calculate molar volume of just organic species
@@ -201,27 +208,32 @@ class BasicAerosol:
         molar_volumes = {
             i: self.molar_masses[i] / self.densities[i] for i in self.compounds
         }
+        volume_fractions_of_just_soluble = self.volfrac_just_soluble(
+            volfrac, soluble=True
+        )
+        all_soluble_ns = sum(
+            self.ionic_dissociation_phi[i] * volfrac[i] / molar_volumes[i]
+            for i in self.compounds
+        )
+        part_soluble_ns = self.f_soluble_volume(mass_fractions) * sum(
+            self.ionic_dissociation_phi[i]
+            * volume_fractions_of_just_soluble[i]
+            / molar_volumes[i]
+            for i in self.compounds
+        )
 
         result = {}
-        for model in (&#34;bulk&#34;, &#34;film&#34;):
-            if model == &#34;bulk&#34;:
-                ns_per_vol = sum(
-                    self.ionic_dissociation_phi[i] * volfrac[i] / molar_volumes[i]
-                    for i in self.compounds
-                )
-            elif model == &#34;film&#34;:
-                volume_fractions_of_just_soluble = self.volfrac_just_soluble(
-                    volfrac, soluble=True
-                )
-                ns_per_vol = self.f_soluble_volume(mass_fractions) * sum(
-                    self.ionic_dissociation_phi[i]
-                    * volume_fractions_of_just_soluble[i]
-                    / molar_volumes[i]
-                    for i in self.compounds
-                )
+        for st in formulae._choices(surface_tension).keys():
+            if st in (surface_tension.Constant.__name__):
+                result[st] = all_soluble_ns * Mv / rho_w
+            elif st in (
+                surface_tension.CompressedFilmOvadnevaite.__name__,
+                surface_tension.CompressedFilmRuehl.__name__,
+                surface_tension.SzyszkowskiLangmuir.__name__,
+            ):
+                result[st] = part_soluble_ns * Mv / rho_w
             else:
                 raise AssertionError()
-            result[model] = ns_per_vol * Mv / rho_w
         return result
 
     # calculate molar volume of just organic species
@@ -288,27 +300,32 @@ def aerosol_modes(self):
     molar_volumes = {
         i: self.molar_masses[i] / self.densities[i] for i in self.compounds
     }
+    volume_fractions_of_just_soluble = self.volfrac_just_soluble(
+        volfrac, soluble=True
+    )
+    all_soluble_ns = sum(
+        self.ionic_dissociation_phi[i] * volfrac[i] / molar_volumes[i]
+        for i in self.compounds
+    )
+    part_soluble_ns = self.f_soluble_volume(mass_fractions) * sum(
+        self.ionic_dissociation_phi[i]
+        * volume_fractions_of_just_soluble[i]
+        / molar_volumes[i]
+        for i in self.compounds
+    )
 
     result = {}
-    for model in (&#34;bulk&#34;, &#34;film&#34;):
-        if model == &#34;bulk&#34;:
-            ns_per_vol = sum(
-                self.ionic_dissociation_phi[i] * volfrac[i] / molar_volumes[i]
-                for i in self.compounds
-            )
-        elif model == &#34;film&#34;:
-            volume_fractions_of_just_soluble = self.volfrac_just_soluble(
-                volfrac, soluble=True
-            )
-            ns_per_vol = self.f_soluble_volume(mass_fractions) * sum(
-                self.ionic_dissociation_phi[i]
-                * volume_fractions_of_just_soluble[i]
-                / molar_volumes[i]
-                for i in self.compounds
-            )
+    for st in formulae._choices(surface_tension).keys():
+        if st in (surface_tension.Constant.__name__):
+            result[st] = all_soluble_ns * Mv / rho_w
+        elif st in (
+            surface_tension.CompressedFilmOvadnevaite.__name__,
+            surface_tension.CompressedFilmRuehl.__name__,
+            surface_tension.SzyszkowskiLangmuir.__name__,
+        ):
+            result[st] = part_soluble_ns * Mv / rho_w
         else:
             raise AssertionError()
-        result[model] = ns_per_vol * Mv / rho_w
     return result</code></pre>
 </details>
 </dd>

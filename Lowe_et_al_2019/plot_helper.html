@@ -46,9 +46,9 @@ def plot_profiles(subplot_list, updraft_list, forg_list, output, save=False):
             for _, Forg in enumerate(forg_list):
                 key = subplot + f&#34;_w{w:.2f}_f{Forg:.2f}_&#34;
                 var = &#34;n_c_cm3&#34;
-                z = np.array(output[key + &#34;film&#34;][&#34;z&#34;])
-                CDNC_film = np.array(output[key + &#34;film&#34;][var])
-                CDNC_bulk = np.array(output[key + &#34;bulk&#34;][var])
+                z = np.array(output[key + &#34;CompressedFilmOvadnevaite&#34;][&#34;z&#34;])
+                CDNC_film = np.array(output[key + &#34;CompressedFilmOvadnevaite&#34;][var])
+                CDNC_bulk = np.array(output[key + &#34;Constant&#34;][var])
 
                 cmap = matplotlib.cm.get_cmap(&#34;Spectral&#34;)
                 if len(subplot_list) &gt; 1:
@@ -85,14 +85,16 @@ def plot_contours(
                 if actfrac:
                     var = &#34;Activated Fraction&#34;
                     Naer = 1.0
-                    CDNC_film = output[key + &#34;film&#34;][var][0] * Naer
-                    CDNC_bulk = output[key + &#34;bulk&#34;][var][0] * Naer
+                    CDNC_film = output[key + &#34;CompressedFilmOvadnevaite&#34;][var][0] * Naer
+                    CDNC_bulk = output[key + &#34;Constant&#34;][var][0] * Naer
                 else:
                     var = &#34;n_c_cm3&#34;
-                    z = np.array(output[key + &#34;film&#34;][&#34;z&#34;])
+                    z = np.array(output[key + &#34;CompressedFilmOvadnevaite&#34;][&#34;z&#34;])
                     wz = np.where(z == z[-1])[0][0]
-                    CDNC_film = np.array(output[key + &#34;film&#34;][var])[wz]
-                    CDNC_bulk = np.array(output[key + &#34;bulk&#34;][var])[wz]
+                    CDNC_film = np.array(
+                        output[key + &#34;CompressedFilmOvadnevaite&#34;][var]
+                    )[wz]
+                    CDNC_bulk = np.array(output[key + &#34;Constant&#34;][var])[wz]
                 dCDNC[i, j] = (CDNC_film - CDNC_bulk) / CDNC_bulk * 100.0
 
         if subplot == &#34;a&#34;:
@@ -228,14 +230,16 @@ def plot_contours(
                 if actfrac:
                     var = &#34;Activated Fraction&#34;
                     Naer = 1.0
-                    CDNC_film = output[key + &#34;film&#34;][var][0] * Naer
-                    CDNC_bulk = output[key + &#34;bulk&#34;][var][0] * Naer
+                    CDNC_film = output[key + &#34;CompressedFilmOvadnevaite&#34;][var][0] * Naer
+                    CDNC_bulk = output[key + &#34;Constant&#34;][var][0] * Naer
                 else:
                     var = &#34;n_c_cm3&#34;
-                    z = np.array(output[key + &#34;film&#34;][&#34;z&#34;])
+                    z = np.array(output[key + &#34;CompressedFilmOvadnevaite&#34;][&#34;z&#34;])
                     wz = np.where(z == z[-1])[0][0]
-                    CDNC_film = np.array(output[key + &#34;film&#34;][var])[wz]
-                    CDNC_bulk = np.array(output[key + &#34;bulk&#34;][var])[wz]
+                    CDNC_film = np.array(
+                        output[key + &#34;CompressedFilmOvadnevaite&#34;][var]
+                    )[wz]
+                    CDNC_bulk = np.array(output[key + &#34;Constant&#34;][var])[wz]
                 dCDNC[i, j] = (CDNC_film - CDNC_bulk) / CDNC_bulk * 100.0
 
         if subplot == &#34;a&#34;:
@@ -365,9 +369,9 @@ def plot_contours(
             for _, Forg in enumerate(forg_list):
                 key = subplot + f&#34;_w{w:.2f}_f{Forg:.2f}_&#34;
                 var = &#34;n_c_cm3&#34;
-                z = np.array(output[key + &#34;film&#34;][&#34;z&#34;])
-                CDNC_film = np.array(output[key + &#34;film&#34;][var])
-                CDNC_bulk = np.array(output[key + &#34;bulk&#34;][var])
+                z = np.array(output[key + &#34;CompressedFilmOvadnevaite&#34;][&#34;z&#34;])
+                CDNC_film = np.array(output[key + &#34;CompressedFilmOvadnevaite&#34;][var])
+                CDNC_bulk = np.array(output[key + &#34;Constant&#34;][var])
 
                 cmap = matplotlib.cm.get_cmap(&#34;Spectral&#34;)
                 if len(subplot_list) &gt; 1:

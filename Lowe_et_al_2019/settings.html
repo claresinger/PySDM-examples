@@ -53,14 +53,12 @@ class Settings:
         g_std: float = sci.g * si.metre / si.second**2,
         BDF: bool = False,
     ):
-        assert model in (&#34;bulk&#34;, &#34;film&#34;)
+        assert model in (&#34;Constant&#34;, &#34;CompressedFilmOvadnevaite&#34;)
         self.model = model
         self.n_sd_per_mode = n_sd_per_mode
         self.BDF = BDF
         self.formulae = Formulae(
-            surface_tension=&#34;CompressedFilmOvadnevaite&#34;
-            if model == &#34;film&#34;
-            else &#34;Constant&#34;,
+            surface_tension=model,
             constants={
                 &#34;sgm_org&#34;: 40 * si.mN / si.m,
                 &#34;delta_min&#34;: delta_min * si.nm,
@@ -159,14 +157,12 @@ class Settings:
         g_std: float = sci.g * si.metre / si.second**2,
         BDF: bool = False,
     ):
-        assert model in (&#34;bulk&#34;, &#34;film&#34;)
+        assert model in (&#34;Constant&#34;, &#34;CompressedFilmOvadnevaite&#34;)
         self.model = model
         self.n_sd_per_mode = n_sd_per_mode
         self.BDF = BDF
         self.formulae = Formulae(
-            surface_tension=&#34;CompressedFilmOvadnevaite&#34;
-            if model == &#34;film&#34;
-            else &#34;Constant&#34;,
+            surface_tension=model,
             constants={
                 &#34;sgm_org&#34;: 40 * si.mN / si.m,
                 &#34;delta_min&#34;: delta_min * si.nm,
