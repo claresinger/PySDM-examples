@@ -28,14 +28,13 @@
 </summary>
 <pre><code class="python">from chempy import Substance
 from PySDM.initialisation import spectra
+from PySDM.initialisation.aerosol_composition import DryAerosolMixture
 from PySDM.physics import si
 from pystrict import strict
 
-from PySDM_examples.utils import BasicAerosol
-
 
 @strict
-class AerosolARG(BasicAerosol):
+class AerosolARG(DryAerosolMixture):
     def __init__(
         self,
         M2_sol: float = 0,
@@ -82,7 +81,7 @@ class AerosolARG(BasicAerosol):
 
 
 @strict
-class AerosolWhitby(BasicAerosol):
+class AerosolWhitby(DryAerosolMixture):
     def __init__(self):
         nuclei = {
             &#34;(NH4)2SO4&#34;: 1.0,
@@ -145,7 +144,7 @@ class AerosolWhitby(BasicAerosol):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@strict
-class AerosolARG(BasicAerosol):
+class AerosolARG(DryAerosolMixture):
     def __init__(
         self,
         M2_sol: float = 0,
@@ -192,7 +191,7 @@ class AerosolARG(BasicAerosol):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="PySDM_examples.utils.basic_aerosol.BasicAerosol" href="../utils/basic_aerosol.html#PySDM_examples.utils.basic_aerosol.BasicAerosol">BasicAerosol</a></li>
+<li>PySDM.initialisation.aerosol_composition.dry_aerosol.DryAerosolMixture</li>
 </ul>
 </dd>
 <dt id="PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol.AerosolWhitby"><code class="flex name class">
@@ -205,7 +204,7 @@ class AerosolARG(BasicAerosol):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@strict
-class AerosolWhitby(BasicAerosol):
+class AerosolWhitby(DryAerosolMixture):
     def __init__(self):
         nuclei = {
             &#34;(NH4)2SO4&#34;: 1.0,
@@ -249,7 +248,7 @@ class AerosolWhitby(BasicAerosol):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="PySDM_examples.utils.basic_aerosol.BasicAerosol" href="../utils/basic_aerosol.html#PySDM_examples.utils.basic_aerosol.BasicAerosol">BasicAerosol</a></li>
+<li>PySDM.initialisation.aerosol_composition.dry_aerosol.DryAerosolMixture</li>
 </ul>
 </dd>
 </dl>

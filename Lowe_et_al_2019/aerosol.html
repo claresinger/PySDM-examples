@@ -28,14 +28,13 @@
 </summary>
 <pre><code class="python">from chempy import Substance
 from PySDM.initialisation import spectra
+from PySDM.initialisation.aerosol_composition import DryAerosolMixture
 from PySDM.physics import si
 from pystrict import strict
 
-from PySDM_examples.utils import BasicAerosol
-
 
 @strict
-class AerosolMarine(BasicAerosol):
+class AerosolMarine(DryAerosolMixture):
     def __init__(self, Acc_Forg: float = 0.2, Acc_N2: float = 134):
         Aitken = {
             &#34;palmitic&#34;: 0.2,
@@ -96,7 +95,7 @@ class AerosolMarine(BasicAerosol):
 
 
 @strict
-class AerosolBoreal(BasicAerosol):
+class AerosolBoreal(DryAerosolMixture):
     def __init__(self, Acc_Forg: float = 0.668, Acc_N2: float = 540):
         # note: SOA1 or SOA2 unclear from the paper
         Aitken = {
@@ -166,7 +165,7 @@ class AerosolBoreal(BasicAerosol):
 
 
 @strict
-class AerosolNascent(BasicAerosol):
+class AerosolNascent(DryAerosolMixture):
     def __init__(self, Acc_Forg: float = 0.3, Acc_N2: float = 30):
         Ultrafine = {
             &#34;SOA1&#34;: 0.52,
@@ -245,7 +244,7 @@ class AerosolNascent(BasicAerosol):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@strict
-class AerosolBoreal(BasicAerosol):
+class AerosolBoreal(DryAerosolMixture):
     def __init__(self, Acc_Forg: float = 0.668, Acc_N2: float = 540):
         # note: SOA1 or SOA2 unclear from the paper
         Aitken = {
@@ -315,7 +314,7 @@ class AerosolBoreal(BasicAerosol):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="PySDM_examples.utils.basic_aerosol.BasicAerosol" href="../utils/basic_aerosol.html#PySDM_examples.utils.basic_aerosol.BasicAerosol">BasicAerosol</a></li>
+<li>PySDM.initialisation.aerosol_composition.dry_aerosol.DryAerosolMixture</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -336,7 +335,7 @@ class AerosolBoreal(BasicAerosol):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@strict
-class AerosolMarine(BasicAerosol):
+class AerosolMarine(DryAerosolMixture):
     def __init__(self, Acc_Forg: float = 0.2, Acc_N2: float = 134):
         Aitken = {
             &#34;palmitic&#34;: 0.2,
@@ -397,7 +396,7 @@ class AerosolMarine(BasicAerosol):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="PySDM_examples.utils.basic_aerosol.BasicAerosol" href="../utils/basic_aerosol.html#PySDM_examples.utils.basic_aerosol.BasicAerosol">BasicAerosol</a></li>
+<li>PySDM.initialisation.aerosol_composition.dry_aerosol.DryAerosolMixture</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
@@ -418,7 +417,7 @@ class AerosolMarine(BasicAerosol):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@strict
-class AerosolNascent(BasicAerosol):
+class AerosolNascent(DryAerosolMixture):
     def __init__(self, Acc_Forg: float = 0.3, Acc_N2: float = 30):
         Ultrafine = {
             &#34;SOA1&#34;: 0.52,
@@ -478,7 +477,7 @@ class AerosolNascent(BasicAerosol):
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li><a title="PySDM_examples.utils.basic_aerosol.BasicAerosol" href="../utils/basic_aerosol.html#PySDM_examples.utils.basic_aerosol.BasicAerosol">BasicAerosol</a></li>
+<li>PySDM.initialisation.aerosol_composition.dry_aerosol.DryAerosolMixture</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
