@@ -1,13 +1,12 @@
 from chempy import Substance
 from PySDM.initialisation import spectra
+from PySDM.initialisation.aerosol_composition import DryAerosolMixture
 from PySDM.physics import si
 from pystrict import strict
 
-from PySDM_examples.utils import BasicAerosol
-
 
 @strict
-class AerosolMarine(BasicAerosol):
+class AerosolMarine(DryAerosolMixture):
     def __init__(self, Acc_Forg: float = 0.2, Acc_N2: float = 134):
         Aitken = {
             "palmitic": 0.2,
@@ -68,7 +67,7 @@ class AerosolMarine(BasicAerosol):
 
 
 @strict
-class AerosolBoreal(BasicAerosol):
+class AerosolBoreal(DryAerosolMixture):
     def __init__(self, Acc_Forg: float = 0.668, Acc_N2: float = 540):
         # note: SOA1 or SOA2 unclear from the paper
         Aitken = {
@@ -138,7 +137,7 @@ class AerosolBoreal(BasicAerosol):
 
 
 @strict
-class AerosolNascent(BasicAerosol):
+class AerosolNascent(DryAerosolMixture):
     def __init__(self, Acc_Forg: float = 0.3, Acc_N2: float = 30):
         Ultrafine = {
             "SOA1": 0.52,

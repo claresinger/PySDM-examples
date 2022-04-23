@@ -1,13 +1,12 @@
 from chempy import Substance
 from PySDM.initialisation import spectra
+from PySDM.initialisation.aerosol_composition import DryAerosolMixture
 from PySDM.physics import si
 from pystrict import strict
 
-from PySDM_examples.utils import BasicAerosol
-
 
 @strict
-class AerosolARG(BasicAerosol):
+class AerosolARG(DryAerosolMixture):
     def __init__(
         self,
         M2_sol: float = 0,
@@ -54,7 +53,7 @@ class AerosolARG(BasicAerosol):
 
 
 @strict
-class AerosolWhitby(BasicAerosol):
+class AerosolWhitby(DryAerosolMixture):
     def __init__(self):
         nuclei = {
             "(NH4)2SO4": 1.0,
