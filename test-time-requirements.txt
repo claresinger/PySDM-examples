@@ -5,5 +5,5 @@ Jinja2<3.0.0  # https://github.com/jupyter/nbconvert/issues/1568
 MarkupSafe<2.1.0  # https://github.com/aws/aws-sam-cli/issues/3661
 Pillow<9.1.0  # https://github.com/python-pillow/Pillow/blob/0606f02860d0c4449bc047a6187043b6188a7404/docs/releasenotes/9.1.0.rst#deprecations
 
-PySDM @ git+https://github.com/claresinger/PySDM@b1bb57be#egg=PySDM
+PySDM @ git+https://github.com/atmos-cloud-sim-uj/PySDM@61b54ba#egg=PySDM
 PyMPDATA @ git+https://github.com/atmos-cloud-sim-uj/PyMPDATA@bb963c2#egg=PyMPDATA
