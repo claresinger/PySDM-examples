@@ -14,7 +14,7 @@ class MPDATA_1D:
         g_factor_of_zZ,
         mpdata_settings,
     ):
-        self.t = 0
+        self.__t = 0
         self.dt = dt
         self.advector_of_t = advector_of_t
 
@@ -54,8 +54,10 @@ class MPDATA_1D:
     def advector(self):
         return self.solver.advector.get_component(0)
 
+    def update_advector_field(self):
+        self.__t += 0.5 * self.dt
+        self.advector[:] = self.advector_of_t(self.__t)
+        self.__t += 0.5 * self.dt
+
     def __call__(self):
-        self.t += 0.5 * self.dt
-        self.advector[:] = self.advector_of_t(self.t)
         self.solver.advance(1)
-        self.t += 0.5 * self.dt

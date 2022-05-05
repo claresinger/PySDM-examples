@@ -26,10 +26,10 @@ def run_box_breakup(settings, step):
         settings.spectrum
     ).sample(settings.n_sd)
     breakup = Collision(
-        settings.kernel,
-        settings.coal_eff,
-        settings.break_eff,
-        settings.fragmentation,
+        collision_kernel=settings.kernel,
+        coalescence_efficiency=settings.coal_eff,
+        breakup_efficiency=settings.break_eff,
+        fragmentation_function=settings.fragmentation,
         adaptive=settings.adaptive,
     )
     builder.add_dynamic(breakup)
@@ -62,7 +62,11 @@ def run_box_NObreakup(settings, step):
     attributes["volume"], attributes["n"] = ConstantMultiplicity(
         settings.spectrum
     ).sample(settings.n_sd)
-    coal = Coalescence(settings.kernel, settings.coal_eff, adaptive=settings.adaptive)
+    coal = Coalescence(
+        collision_kernel=settings.kernel,
+        coalescence_efficiency=settings.coal_eff,
+        adaptive=settings.adaptive,
+    )
     builder.add_dynamic(coal)
     products = (
         ParticleVolumeVersusRadiusLogarithmSpectrum(
@@ -94,10 +98,10 @@ def make_core(settings):
         settings.spectrum
     ).sample(settings.n_sd)
     collision = Collision(
-        settings.kernel,
-        settings.coal_eff,
-        settings.break_eff,
-        settings.fragmentation,
+        collision_kernel=settings.kernel,
+        coalescence_efficiency=settings.coal_eff,
+        breakup_efficiency=settings.break_eff,
+        fragmentation_function=settings.fragmentation,
         adaptive=settings.adaptive,
     )
     builder.add_dynamic(collision)

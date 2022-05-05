@@ -44,8 +44,8 @@ class Simulation:
         attributes["n"] = np.array([settings.n_in_dv], dtype=np.int64)
         environment = builder.particulator.environment
         r_wet = equilibrate_wet_radii(
-            r_dry,
-            environment,
+            r_dry=r_dry,
+            environment=environment,
             kappa_times_dry_volume=attributes["kappa times dry volume"],
         )
         attributes["volume"] = settings.formulae.trivia.volume(radius=r_wet)

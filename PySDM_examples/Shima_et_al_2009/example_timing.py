@@ -17,7 +17,7 @@ def run(settings, backend):
     attributes = {}
     sampling = ConstantMultiplicity(settings.spectrum)
     attributes["volume"], attributes["n"] = sampling.sample(settings.n_sd)
-    builder.add_dynamic(Coalescence(settings.kernel))
+    builder.add_dynamic(Coalescence(collision_kernel=settings.kernel))
     particles = builder.build(attributes, products=(WallTime(),))
 
     states = {}

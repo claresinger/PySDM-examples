@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 import numpy as np
 from PySDM.backends import CPU
@@ -18,7 +19,9 @@ def run(settings, backend=CPU, observers=()):
     attributes = {}
     sampling = ConstantMultiplicity(settings.spectrum)
     attributes["volume"], attributes["n"] = sampling.sample(settings.n_sd)
-    coalescence = Coalescence(settings.kernel, adaptive=settings.adaptive)
+    coalescence = Coalescence(
+        collision_kernel=settings.kernel, adaptive=settings.adaptive
+    )
     builder.add_dynamic(coalescence)
     products = (
         ParticleVolumeVersusRadiusLogarithmSpectrum(
@@ -46,7 +49,7 @@ def run(settings, backend=CPU, observers=()):
     return vals, exec_time
 
 
-def main(plot: bool, save: str):
+def main(plot: bool, save: Optional[str]):
     with np.errstate(all="raise"):
         settings = Settings()
 

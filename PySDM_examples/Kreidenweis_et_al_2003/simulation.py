@@ -37,7 +37,7 @@ class Simulation(BasicSimulation):
         builder.add_dynamic(Condensation())
         builder.add_dynamic(
             AqueousChemistry(
-                settings.ENVIRONMENT_MOLE_FRACTIONS,
+                environment_mole_fractions=settings.ENVIRONMENT_MOLE_FRACTIONS,
                 system_type=settings.system_type,
                 n_substep=settings.n_substep,
                 dry_rho=settings.DRY_RHO,
@@ -100,8 +100,8 @@ class Simulation(BasicSimulation):
                 radius_range=settings.cloud_radius_range, name="n_c_mg", unit="mg^-1"
             ),
             PySDM_products.AqueousMassSpectrum(
-                "S_VI",
-                settings.dry_radius_bins_edges,
+                key="S_VI",
+                dry_radius_bins_edges=settings.dry_radius_bins_edges,
                 name="dm_S_VI/dlog_10(dry diameter)",
                 unit='ug / m^3"',
             ),

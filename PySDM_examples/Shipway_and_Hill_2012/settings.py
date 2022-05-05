@@ -14,10 +14,10 @@ class Settings:
         self,
         *,
         n_sd_per_gridbox: int,
-        p0: float = 1002 * si.hPa,
+        p0: float = 1007 * si.hPa,  # as used in Olesik et al. 2022 (GMD)
         particle_reservoir_depth: float = 0 * si.m,
         kappa: float = 1,
-        rho_times_w_1: float = 2 * si.m / si.s,
+        rho_times_w_1: float = 2 * si.m / si.s * si.kg / si.m**3,
         dt: float = 1 * si.s,
         dz: float = 25 * si.m,
         precip: bool = True
@@ -55,33 +55,43 @@ class Settings:
             fill_value="extrapolate",
         )
 
-        self.thd = lambda z: self.formulae.state_variable_triplet.th_dry(
-            self._th(z), self.qv(z)
+        self.thd = (
+            lambda z_above_reservoir: self.formulae.state_variable_triplet.th_dry(
+                self._th(z_above_reservoir), self.qv(z_above_reservoir)
+            )
         )
 
         g = self.formulae.constants.g_std
         self.rhod0 = self.formulae.state_variable_triplet.rho_d(
-            p0,
-            self.qv(-self.particle_reservoir_depth),
-            self._th(-self.particle_reservoir_depth),
+            p=p0,
+            qv=self.qv(0 * si.m),
+            theta_std=self._th(0 * si.m),
         )
 
-        def drhod_dz(z, rhod):
-            T = self.formulae.state_variable_triplet.T(rhod[0], self.thd(z))
-            p = self.formulae.state_variable_triplet.p(rhod[0], T, self.qv(z))
+        def drhod_dz(z_above_reservoir, rhod):
+            if z_above_reservoir < 0:
+                return 0
+            qv = self.qv(z_above_reservoir)
+            T = self.formulae.state_variable_triplet.T(
+                rhod[0], self.thd(z_above_reservoir)
+            )
+            p = self.formulae.state_variable_triplet.p(rhod[0], T, qv)
             lv = self.formulae.latent_heat.lv(T)
-            return self.formulae.hydrostatics.drho_dz(g, p, T, self.qv(z), lv)
+            return self.formulae.hydrostatics.drho_dz(
+                g, p, T, qv, lv
+            )  # note: drho \approx drhod
 
-        t_span = (-self.particle_reservoir_depth, self.z_max)
-        z_points = np.linspace(*t_span, 2 * self.nz + 1)
+        z_span = (-self.particle_reservoir_depth, self.z_max)
+        z_points = np.linspace(*z_span, 2 * self.nz + 1)
         rhod_solution = solve_ivp(
             fun=drhod_dz,
-            t_span=t_span,
+            t_span=z_span,
             y0=np.asarray((self.rhod0,)),
             t_eval=z_points,
+            max_step=dz / 2,
         )
         assert rhod_solution.success
-        self.rhod = interp1d(z_points, rhod_solution.y[0], assume_sorted=True)
+        self.rhod = interp1d(z_points, rhod_solution.y[0])
 
         self.mpdata_settings = {"n_iters": 3, "iga": True, "fct": True, "tot": True}
         self.condensation_rtol_x = condensation.DEFAULTS.rtol_x
