@@ -48,7 +48,8 @@ class Settings:
         rho_times_w_1: float = 2 * si.m / si.s * si.kg / si.m**3,
         dt: float = 1 * si.s,
         dz: float = 25 * si.m,
-        precip: bool = True
+        precip: bool = True,
+        breakup: bool = False
     ):
         self.formulae = Formulae()
         self.n_sd_per_gridbox = n_sd_per_gridbox
@@ -62,6 +63,7 @@ class Settings:
         self.dt = dt
         self.dz = dz
         self.precip = precip
+        self.breakup = breakup
 
         self.z_max = 3000 * si.metres
         self.t_max = 60 * si.minutes
@@ -165,7 +167,7 @@ class Settings:
 <dl>
 <dt id="PySDM_examples.Shipway_and_Hill_2012.settings.Settings"><code class="flex name class">
 <span>class <span class="ident">Settings</span></span>
-<span>(</span><span>*, n_sd_per_gridbox: int, p0: float = 100700.0, particle_reservoir_depth: float = 0.0, kappa: float = 1, rho_times_w_1: float = 2.0, dt: float = 1.0, dz: float = 25.0, precip: bool = True)</span>
+<span>(</span><span>*, n_sd_per_gridbox: int, p0: float = 100700.0, particle_reservoir_depth: float = 0.0, kappa: float = 1, rho_times_w_1: float = 2.0, dt: float = 1.0, dz: float = 25.0, precip: bool = True, breakup: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -185,7 +187,8 @@ class Settings:
         rho_times_w_1: float = 2 * si.m / si.s * si.kg / si.m**3,
         dt: float = 1 * si.s,
         dz: float = 25 * si.m,
-        precip: bool = True
+        precip: bool = True,
+        breakup: bool = False
     ):
         self.formulae = Formulae()
         self.n_sd_per_gridbox = n_sd_per_gridbox
@@ -199,6 +202,7 @@ class Settings:
         self.dt = dt
         self.dz = dz
         self.precip = precip
+        self.breakup = breakup
 
         self.z_max = 3000 * si.metres
         self.t_max = 60 * si.minutes
