@@ -44,7 +44,7 @@ class AerosolMarine(DryAerosolMixture):
                 "NaCl": Substance.from_formula("NaCl").mass * si.gram / si.mole,
             },
         )
-        self.aerosol_modes = (
+        self.modes = (
             {
                 "f_org": 1 - self.f_soluble_volume(Aitken),
                 "kappa": self.kappa(Aitken),
@@ -112,7 +112,7 @@ class AerosolBoreal(DryAerosolMixture):
                 "NH4NO3": True,
             },
         )
-        self.aerosol_modes = (
+        self.modes = (
             {
                 "f_org": 1 - self.f_soluble_volume(Aitken),
                 "kappa": self.kappa(Aitken),
@@ -174,7 +174,7 @@ class AerosolNascent(DryAerosolMixture):
                 "(NH4)2SO4": True,
             },
         )
-        self.aerosol_modes = (
+        self.modes = (
             {
                 "f_org": 1 - self.f_soluble_volume(Ultrafine),
                 "kappa": self.kappa(Ultrafine),

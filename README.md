@@ -12,7 +12,7 @@ s repository stores example files for `PySDM` depicting usage of `PySDM` from Py
 For information on the `PySDM` package itself and examples of usage from Julia and Matlab, 
 see [PySDM README.md](https://github.com/atmos-cloud-sim-uj/PySDM/blob/master/README.md) file.
 
-Please use the [PySDM issue-tracking](https://github.com/atmos-cloud-sim-uj/PySDM/issues) and [dicsussion](https://github.com/atmos-cloud-sim-uj/PySDM/discussions) infrastructure for `PySDM-examples` as well.
+Please use the [PySDM issue-tracking](https://github.com/atmos-cloud-sim-uj/PySDM/issues) and [discussion](https://github.com/atmos-cloud-sim-uj/PySDM/discussions) infrastructure for `PySDM-examples` as well.
 
 ### 0D box-model coalescence-only examples:
 - [Shima et al. 2009](http://doi.org/10.1002/qj.441) (Box model, coalescence only, test case employing Golovin analytical solution):
@@ -76,12 +76,12 @@ Please use the [PySDM issue-tracking](https://github.com/atmos-cloud-sim-uj/PySD
     [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/atmos-cloud-sim-uj/PySDM-examples/blob/main/PySDM_examples/Yang_et_al_2018/fig_2.ipynb)
 
 - [Abdul-Razzak & Ghan 2000](http://doi.wiley.com/10.1029/1999JD901161) (aerosol activation parameterization for GCMs):
-  - Figs. 1 -- 5:
+  - Figs. 1 - 5:
     [![nbviewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](https://nbviewer.jupyter.org/github/atmos-cloud-sim-uj/PySDM-examples/blob/main/PySDM_examples/Abdul_Razzak_Ghan_2000/figs1-5.ipynb)
     [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/atmos-cloud-sim-uj/PySDM-examples.git/main?urlpath=PySDM_examples/Abdul_Razzak_Ghan_2000/figs1-5.ipynb)
     [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/atmos-cloud-sim-uj/PySDM-examples/blob/main/PySDM_examples/Abdul_Razzak_Ghan_2000/figs1-5.ipynb)
 
-- [Pyrcel documentation example](https://pyrcel.readthedocs.io/en/latest/examples/basic_run.html) (externally mixed polydisperse size spectrum activation test case)
+- [Pyrcel documentation example](https://pyrcel.readthedocs.io/en/latest/examples/basic_run.html) (externally mixed polydisperse size spectrum activation test case):
   - supersaturation, temperature, wet radii evolution and dry spectra plots:
     [![nbviewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](https://nbviewer.jupyter.org/github/atmos-cloud-sim-uj/PySDM-examples/blob/main/PySDM_examples/Pyrcel/example_basic_run.ipynb)
     [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/atmos-cloud-sim-uj/PySDM-examples.git/main?urlpath=PySDM_examples/Pyrcel/example_basic_run.ipynb)

@@ -20,7 +20,8 @@ class Settings:
         rho_times_w_1: float = 2 * si.m / si.s * si.kg / si.m**3,
         dt: float = 1 * si.s,
         dz: float = 25 * si.m,
-        precip: bool = True
+        precip: bool = True,
+        breakup: bool = False
     ):
         self.formulae = Formulae()
         self.n_sd_per_gridbox = n_sd_per_gridbox
@@ -34,6 +35,7 @@ class Settings:
         self.dt = dt
         self.dz = dz
         self.precip = precip
+        self.breakup = breakup
 
         self.z_max = 3000 * si.metres
         self.t_max = 60 * si.minutes

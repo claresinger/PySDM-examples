@@ -5,14 +5,19 @@ from PySDM.backends import CPU
 from PySDM.dynamics import (
     AmbientThermodynamics,
     Coalescence,
+    Collision,
     Condensation,
     Displacement,
     EulerianAdvection,
 )
+from PySDM.dynamics.collisions.breakup_efficiencies import ConstEb
+from PySDM.dynamics.collisions.breakup_fragmentations import ExponFrag
+from PySDM.dynamics.collisions.coalescence_efficiencies import ConstEc
 from PySDM.dynamics.collisions.collision_kernels import Geometric
 from PySDM.environments.kinematic_1d import Kinematic1D
 from PySDM.impl.mesh import Mesh
 from PySDM.initialisation.sampling import spatial_sampling, spectral_sampling
+from PySDM.physics import si
 
 from PySDM_examples.Shipway_and_Hill_2012.mpdata_1d import MPDATA_1D
 
@@ -67,12 +72,23 @@ class Simulation:
         )
         builder.add_dynamic(EulerianAdvection(self.mpdata))
         if settings.precip:
-            builder.add_dynamic(
-                Coalescence(
-                    collision_kernel=Geometric(collection_efficiency=1),
-                    adaptive=settings.coalescence_adaptive,
+            if settings.breakup:
+                builder.add_dynamic(
+                    Collision(
+                        collision_kernel=Geometric(collection_efficiency=1),
+                        coalescence_efficiency=ConstEc(Ec=0.95),
+                        breakup_efficiency=ConstEb(Eb=1.0),
+                        fragmentation_function=ExponFrag(scale=100 * si.um),
+                        adaptive=settings.coalescence_adaptive,
+                    )
                 )
-            )
+            else:
+                builder.add_dynamic(
+                    Coalescence(
+                        collision_kernel=Geometric(collection_efficiency=1),
+                        adaptive=settings.coalescence_adaptive,
+                    )
+                )
         displacement = Displacement(
             enable_sedimentation=settings.precip,
             precipitation_counting_level_index=int(

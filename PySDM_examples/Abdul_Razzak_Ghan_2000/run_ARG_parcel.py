@@ -50,7 +50,7 @@ def run_parcel(
     env = Parcel(dt=dt, mass_of_dry_air=mass_of_dry_air, p0=p0, q0=q0, w=w, T0=T0)
 
     aerosol = AerosolARG(M2_sol=sol2, M2_N=N2, M2_rad=rad2)
-    n_sd = n_sd_per_mode * len(aerosol.aerosol_modes)
+    n_sd = n_sd_per_mode * len(aerosol.modes)
 
     builder = Builder(backend=CPU(), n_sd=n_sd)
     builder.set_environment(env)
@@ -59,7 +59,7 @@ def run_parcel(
     builder.add_dynamic(Magick())
 
     attributes = {k: np.empty(0) for k in ("dry volume", "kappa times dry volume", "n")}
-    for i, mode in enumerate(aerosol.aerosol_modes):
+    for i, mode in enumerate(aerosol.modes):
         kappa, spectrum = mode["kappa"]["CompressedFilmOvadnevaite"], mode["spectrum"]
         r_dry, concentration = ConstantMultiplicity(spectrum).sample(n_sd_per_mode)
         v_dry = builder.formulae.trivia.volume(radius=r_dry)
@@ -100,10 +100,10 @@ def run_parcel(
             for drop_id in range(particulator.n_sd):
                 attr[drop_id].append(attr_data[drop_id])
 
-    error = np.zeros(len(aerosol.aerosol_modes))
-    activated_fraction_S = np.zeros(len(aerosol.aerosol_modes))
-    activated_fraction_V = np.zeros(len(aerosol.aerosol_modes))
-    for j, mode in enumerate(aerosol.aerosol_modes):
+    error = np.zeros(len(aerosol.modes))
+    activated_fraction_S = np.zeros(len(aerosol.modes))
+    activated_fraction_V = np.zeros(len(aerosol.modes))
+    for j, mode in enumerate(aerosol.modes):
         activated_drops_j_S = 0
         activated_drops_j_V = 0
         RHmax = np.nanmax(np.asarray(output["RH"]))
