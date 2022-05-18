@@ -15,7 +15,9 @@ def run(settings, observers=()):
     attributes = {}
     sampling = ConstantMultiplicity(settings.spectrum)
     attributes["volume"], attributes["n"] = sampling.sample(settings.n_sd)
-    coalescence = Coalescence(settings.kernel, adaptive=settings.adaptive)
+    coalescence = Coalescence(
+        collision_kernel=settings.kernel, adaptive=settings.adaptive
+    )
     builder.add_dynamic(coalescence)
     products = (
         ParticleVolumeVersusRadiusLogarithmSpectrum(
