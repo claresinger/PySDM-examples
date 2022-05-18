@@ -15,9 +15,9 @@ class Settings:
         *,
         n_sd_per_gridbox: int,
         p0: float = 1007 * si.hPa,  # as used in Olesik et al. 2022 (GMD)
-        particle_reservoir_depth: float = 0 * si.m,
         kappa: float = 1,
         rho_times_w_1: float = 2 * si.m / si.s * si.kg / si.m**3,
+        particles_per_volume_STP: int = 50 / si.cm**3,
         dt: float = 1 * si.s,
         dz: float = 25 * si.m,
         precip: bool = True,
@@ -27,11 +27,10 @@ class Settings:
         self.n_sd_per_gridbox = n_sd_per_gridbox
         self.kappa = kappa
         self.wet_radius_spectrum_per_mass_of_dry_air = spectra.Lognormal(
-            norm_factor=50 / si.cm**3 / self.formulae.constants.rho_STP,
+            norm_factor=particles_per_volume_STP / self.formulae.constants.rho_STP,
             m_mode=0.08 / 2 * si.um,
             s_geom=1.4,
         )
-        self.particle_reservoir_depth = particle_reservoir_depth
         self.dt = dt
         self.dz = dz
         self.precip = precip
@@ -44,6 +43,10 @@ class Settings:
         self.rho_times_w = (
             lambda t: rho_times_w_1 * np.sin(np.pi * t / t_1) if t < t_1 else 0
         )
+        apprx_w1 = rho_times_w_1 / self.formulae.constants.rho_STP
+        self.particle_reservoir_depth = (
+            (2 * apprx_w1 * t_1 / np.pi) // self.dz + 1
+        ) * self.dz
 
         self._th = interp1d(
             (0.0 * si.m, 740.0 * si.m, 3260.00 * si.m),
@@ -52,7 +55,7 @@ class Settings:
         )
 
         self.qv = interp1d(
-            (-max(particle_reservoir_depth, 1), 0, 740, 3260),
+            (-max(self.particle_reservoir_depth, 1), 0, 740, 3260),
             (0.015, 0.015, 0.0138, 0.0024),
             fill_value="extrapolate",
         )
@@ -101,11 +104,22 @@ class Settings:
         self.condensation_adaptive = True
         self.coalescence_adaptive = True
 
+        self.number_of_bins = 100
+        self.r_bins_edges_dry = np.logspace(
+            np.log10(0.001 * si.um),
+            np.log10(1 * si.um),
+            self.number_of_bins + 1,
+            endpoint=True,
+        )
         self.r_bins_edges = np.logspace(
-            np.log10(0.001 * si.um), np.log10(100 * si.um), 101, endpoint=True
+            np.log10(0.001 * si.um),
+            np.log10(100 * si.um),
+            self.number_of_bins + 1,
+            endpoint=True,
         )
         self.cloud_water_radius_range = [1 * si.um, 50 * si.um]
         self.rain_water_radius_range = [50 * si.um, np.inf * si.um]
+        self.save_spec_and_attr_times = []
 
     @property
     def n_sd(self):
