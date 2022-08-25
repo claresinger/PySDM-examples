@@ -36,6 +36,7 @@ from PySDM.physics import si
 from pystrict import strict
 from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d
+from scipy.misc import derivative
 
 
 @strict
@@ -130,14 +131,15 @@ class Settings:
             if z_above_reservoir &lt; 0:
                 return 0
             qv = self.qv(z_above_reservoir)
+            dqv_dz = derivative(self.qv, z_above_reservoir)
             T = self.formulae.state_variable_triplet.T(
                 rhod[0], self.thd(z_above_reservoir)
             )
             p = self.formulae.state_variable_triplet.p(rhod[0], T, qv)
             lv = self.formulae.latent_heat.lv(T)
-            return self.formulae.hydrostatics.drho_dz(
-                g, p, T, qv, lv
-            )  # note: drho \approx drhod
+            return self.formulae.hydrostatics.drho_dz(g, p, T, qv, lv) / (
+                1 + qv
+            ) - rhod * dqv_dz / (1 + qv)
 
         z_span = (-self.particle_reservoir_depth, self.z_max)
         z_points = np.linspace(*z_span, 2 * self.nz + 1)
@@ -307,14 +309,15 @@ class Settings:
             if z_above_reservoir &lt; 0:
                 return 0
             qv = self.qv(z_above_reservoir)
+            dqv_dz = derivative(self.qv, z_above_reservoir)
             T = self.formulae.state_variable_triplet.T(
                 rhod[0], self.thd(z_above_reservoir)
             )
             p = self.formulae.state_variable_triplet.p(rhod[0], T, qv)
             lv = self.formulae.latent_heat.lv(T)
-            return self.formulae.hydrostatics.drho_dz(
-                g, p, T, qv, lv
-            )  # note: drho \approx drhod
+            return self.formulae.hydrostatics.drho_dz(g, p, T, qv, lv) / (
+                1 + qv
+            ) - rhod * dqv_dz / (1 + qv)
 
         z_span = (-self.particle_reservoir_depth, self.z_max)
         z_points = np.linspace(*z_span, 2 * self.nz + 1)
