@@ -221,6 +221,9 @@ class GUISettings:
         self.coalescence_optimized_random = settings.coalescence_optimized_random
         self.coalescence_substeps = settings.coalescence_substeps
         self.freezing_inp_frac = settings.freezing_inp_frac
+        self.coalescence_efficiency = settings.coalescence_efficiency
+        self.breakup_efficiency = settings.breakup_efficiency
+        self.breakup_fragmentation = settings.breakup_fragmentation
 
         for attr in (&#34;rhod_of_zZ&#34;, &#34;versions&#34;, &#34;n_spin_up&#34;):
             setattr(self, attr, getattr(settings, attr))
@@ -646,6 +649,9 @@ def set_visibility(widget, visible):
         self.coalescence_optimized_random = settings.coalescence_optimized_random
         self.coalescence_substeps = settings.coalescence_substeps
         self.freezing_inp_frac = settings.freezing_inp_frac
+        self.coalescence_efficiency = settings.coalescence_efficiency
+        self.breakup_efficiency = settings.breakup_efficiency
+        self.breakup_fragmentation = settings.breakup_fragmentation
 
         for attr in (&#34;rhod_of_zZ&#34;, &#34;versions&#34;, &#34;n_spin_up&#34;):
             setattr(self, attr, getattr(settings, attr))
