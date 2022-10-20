@@ -2,7 +2,7 @@
 [![Copyright](https://img.shields.io/static/v1?label=Copyright&color=249fe2&message=Jagiellonian%20University&)](https://en.uj.edu.pl/)
 [![DOI](https://zenodo.org/badge/351755603.svg)](https://zenodo.org/badge/latestdoi/351755603)   
 
-[![Github Actions Build Status](https://github.com/atmos-cloud-sim-uj/PySDM-examples/workflows/PySDM-examples/badge.svg?branch=main)](https://github.com/atmos-cloud-sim-uj/PySDM-examples/actions)    
+[![Github Actions Build Status](https://github.com/atmos-cloud-sim-uj/PySDM-examples/workflows/main/badge.svg?branch=main)](https://github.com/atmos-cloud-sim-uj/PySDM-examples/actions)    
 [![GitHub issues](https://img.shields.io/github/issues-pr/atmos-cloud-sim-uj/PySDM-examples.svg?logo=github&logoColor=white)](https://github.com/atmos-cloud-sim-uj/PySDM-examples/pulls?q=)
 [![GitHub issues](https://img.shields.io/github/issues-pr-closed/atmos-cloud-sim-uj/PySDM-examples.svg?logo=github&logoColor=white)](https://github.com/atmos-cloud-sim-uj/PySDM-examples/pulls?q=is:closed)    
 [![PyPI version](https://badge.fury.io/py/PySDM-examples.svg)](https://pypi.org/project/PySDM-examples)
