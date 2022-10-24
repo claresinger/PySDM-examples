@@ -134,3 +134,10 @@ dmypy.json
 *.xlsx
 *.csv
 *.txt
+*.zip
+*.nc
+*.vtu
+*.vts
+*.pvd
+*.ogv
+*.pkl

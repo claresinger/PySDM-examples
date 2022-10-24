@@ -5,13 +5,11 @@ from PySDM import Formulae
 from PySDM.dynamics import condensation
 from PySDM.initialisation import spectra
 from PySDM.physics import si
-from pystrict import strict
 from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d
 from scipy.misc import derivative
 
 
-@strict
 class Settings:
     def __dir__(self) -> Iterable[str]:
         return (
@@ -23,7 +21,6 @@ class Settings:
             "dt",
             "dz",
             "precip",
-            "breakup",
             "z_max",
             "t_max",
             "cloud_water_radius_range",
@@ -43,7 +40,6 @@ class Settings:
         dt: float = 1 * si.s,
         dz: float = 25 * si.m,
         precip: bool = True,
-        breakup: bool = False
     ):
         self.formulae = Formulae()
         self.n_sd_per_gridbox = n_sd_per_gridbox
@@ -54,7 +50,6 @@ class Settings:
         self.dt = dt
         self.dz = dz
         self.precip = precip
-        self.breakup = breakup
 
         self.z_max = 3000 * si.metres
         self.t_max = 60 * si.minutes
@@ -146,7 +141,9 @@ class Settings:
             endpoint=True,
         )
         self.cloud_water_radius_range = [1 * si.um, 50 * si.um]
+        self.cloud_water_radius_range_igel = [1 * si.um, 25 * si.um]
         self.rain_water_radius_range = [50 * si.um, np.inf * si.um]
+        self.rain_water_radius_range_igel = [25 * si.um, np.inf * si.um]
         self.save_spec_and_attr_times = []
 
     @property

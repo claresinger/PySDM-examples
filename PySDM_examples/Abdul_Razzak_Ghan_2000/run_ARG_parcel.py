@@ -14,14 +14,6 @@ from PySDM.physics import si
 from PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol import AerosolARG
 
 
-class Magick:
-    def register(self, builder):
-        builder.request_attribute("critical supersaturation")
-
-    def __call__(self):
-        pass
-
-
 def run_parcel(
     w,
     sol2,
@@ -56,7 +48,7 @@ def run_parcel(
     builder.set_environment(env)
     builder.add_dynamic(AmbientThermodynamics())
     builder.add_dynamic(Condensation())
-    builder.add_dynamic(Magick())
+    builder.request_attribute("critical supersaturation")
 
     attributes = {k: np.empty(0) for k in ("dry volume", "kappa times dry volume", "n")}
     for i, mode in enumerate(aerosol.modes):

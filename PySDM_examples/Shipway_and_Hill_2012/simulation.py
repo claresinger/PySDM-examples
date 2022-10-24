@@ -7,19 +7,14 @@ from PySDM.backends import CPU
 from PySDM.dynamics import (
     AmbientThermodynamics,
     Coalescence,
-    Collision,
     Condensation,
     Displacement,
     EulerianAdvection,
 )
-from PySDM.dynamics.collisions.breakup_efficiencies import ConstEb
-from PySDM.dynamics.collisions.breakup_fragmentations import ExponFrag
-from PySDM.dynamics.collisions.coalescence_efficiencies import ConstEc
 from PySDM.dynamics.collisions.collision_kernels import Geometric
 from PySDM.environments.kinematic_1d import Kinematic1D
 from PySDM.impl.mesh import Mesh
 from PySDM.initialisation.sampling import spatial_sampling, spectral_sampling
-from PySDM.physics import si
 
 from PySDM_examples.Shipway_and_Hill_2012.mpdata_1d import MPDATA_1D
 
@@ -29,17 +24,22 @@ class Simulation:
         self.nt = settings.nt
         self.z0 = -settings.particle_reservoir_depth
         self.save_spec_and_attr_times = settings.save_spec_and_attr_times
+        self.number_of_bins = settings.number_of_bins
 
-        builder = Builder(
+        self.particulator = None
+        self.output_attributes = None
+        self.output_products = None
+
+        self.builder = Builder(
             n_sd=settings.n_sd, backend=backend(formulae=settings.formulae)
         )
-        mesh = Mesh(
+        self.mesh = Mesh(
             grid=(settings.nz,),
             size=(settings.z_max + settings.particle_reservoir_depth,),
         )
-        env = Kinematic1D(
+        self.env = Kinematic1D(
             dt=settings.dt,
-            mesh=mesh,
+            mesh=self.mesh,
             thd_of_z=settings.thd,
             rhod_of_z=settings.rhod,
             z0=-settings.particle_reservoir_depth,
@@ -64,9 +64,9 @@ class Simulation:
         )
         self.g_factor_vec = settings.rhod(_z_vec)
 
-        builder.set_environment(env)
-        builder.add_dynamic(AmbientThermodynamics())
-        builder.add_dynamic(
+        self.builder.set_environment(self.env)
+        self.builder.add_dynamic(AmbientThermodynamics())
+        self.builder.add_dynamic(
             Condensation(
                 adaptive=settings.condensation_adaptive,
                 rtol_thd=settings.condensation_rtol_thd,
@@ -74,46 +74,33 @@ class Simulation:
                 update_thd=settings.condensation_update_thd,
             )
         )
-        builder.add_dynamic(EulerianAdvection(self.mpdata))
+        self.builder.add_dynamic(EulerianAdvection(self.mpdata))
+
+        self.products = []
         if settings.precip:
-            if settings.breakup:
-                builder.add_dynamic(
-                    Collision(
-                        collision_kernel=Geometric(collection_efficiency=1),
-                        coalescence_efficiency=ConstEc(Ec=0.95),
-                        breakup_efficiency=ConstEb(Eb=1.0),
-                        fragmentation_function=ExponFrag(scale=100 * si.um),
-                        adaptive=settings.coalescence_adaptive,
-                    )
-                )
-            else:
-                builder.add_dynamic(
-                    Coalescence(
-                        collision_kernel=Geometric(collection_efficiency=1),
-                        adaptive=settings.coalescence_adaptive,
-                    )
-                )
+            self.add_collision_dynamic(self.builder, settings, self.products)
+
         displacement = Displacement(
             enable_sedimentation=settings.precip,
             precipitation_counting_level_index=int(
                 settings.particle_reservoir_depth / settings.dz
             ),
         )
-        builder.add_dynamic(displacement)
-        attributes = env.init_attributes(
+        self.builder.add_dynamic(displacement)
+        self.attributes = self.env.init_attributes(
             spatial_discretisation=spatial_sampling.Pseudorandom(),
             spectral_discretisation=spectral_sampling.ConstantMultiplicity(
                 spectrum=settings.wet_radius_spectrum_per_mass_of_dry_air
             ),
             kappa=settings.kappa,
         )
-        products = [
+        self.products += [
             PySDM_products.AmbientRelativeHumidity(name="RH", unit="%"),
             PySDM_products.AmbientPressure(name="p"),
             PySDM_products.AmbientTemperature(name="T"),
             PySDM_products.AmbientWaterVapourMixingRatio(name="qv"),
             PySDM_products.WaterMixingRatio(
-                name="ql", unit="g/kg", radius_range=settings.cloud_water_radius_range
+                name="qc", unit="g/kg", radius_range=settings.cloud_water_radius_range
             ),
             PySDM_products.WaterMixingRatio(
                 name="qr", unit="g/kg", radius_range=settings.rain_water_radius_range
@@ -135,9 +122,9 @@ class Simulation:
                 name="na", radius_range=(0, settings.cloud_water_radius_range[0])
             ),
             PySDM_products.MeanRadius(),
-            PySDM_products.RipeningRate(),
-            PySDM_products.ActivatingRate(),
-            PySDM_products.DeactivatingRate(),
+            PySDM_products.RipeningRate(name="ripening"),
+            PySDM_products.ActivatingRate(name="activating"),
+            PySDM_products.DeactivatingRate(name="deactivating"),
             PySDM_products.EffectiveRadius(
                 radius_range=settings.cloud_water_radius_range
             ),
@@ -148,7 +135,26 @@ class Simulation:
                 radius_range=settings.rain_water_radius_range,
             ),
         ]
-        self.particulator = builder.build(attributes=attributes, products=products)
+        if settings.precip:
+            self.products.append(
+                PySDM_products.CollisionRatePerGridbox(
+                    name="collision_rate",
+                ),
+            )
+            self.products.append(
+                PySDM_products.CollisionRateDeficitPerGridbox(
+                    name="collision_deficit",
+                ),
+            )
+            self.products.append(
+                PySDM_products.CoalescenceRatePerGridbox(
+                    name="coalescence_rate",
+                ),
+            )
+
+        self.particulator = self.builder.build(
+            attributes=self.attributes, products=self.products
+        )
 
         self.output_attributes = {
             "cell origin": [],
@@ -159,12 +165,21 @@ class Simulation:
         self.output_products = {}
         for k, v in self.particulator.products.items():
             if len(v.shape) == 1:
-                self.output_products[k] = np.zeros((mesh.grid[-1], self.nt + 1))
+                self.output_products[k] = np.zeros((self.mesh.grid[-1], self.nt + 1))
             elif len(v.shape) == 2:
                 number_of_time_sections = len(self.save_spec_and_attr_times)
                 self.output_products[k] = np.zeros(
-                    (mesh.grid[-1], settings.number_of_bins, number_of_time_sections)
+                    (self.mesh.grid[-1], self.number_of_bins, number_of_time_sections)
                 )
+
+    @staticmethod
+    def add_collision_dynamic(builder, settings, _):
+        builder.add_dynamic(
+            Coalescence(
+                collision_kernel=Geometric(collection_efficiency=1),
+                adaptive=settings.coalescence_adaptive,
+            )
+        )
 
     def save_scalar(self, step):
         for k, v in self.particulator.products.items():
