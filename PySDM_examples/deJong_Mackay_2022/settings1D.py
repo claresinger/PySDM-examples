@@ -43,7 +43,8 @@ class Settings1D(SettingsSH):
         precip: bool = True,
         breakup: bool = False,
         stochastic_breakup: bool = False,
-        warn_breakup_overflow: bool = False
+        warn_breakup_overflow: bool = False,
+        output_every_n_steps: int = 1
     ):
         super().__init__(
             n_sd_per_gridbox=n_sd_per_gridbox,
@@ -71,3 +72,4 @@ class Settings1D(SettingsSH):
                 mu=frag_scale_v, sigma=frag_scale_v / 2, vmin=(1 * si.um) ** 3, nfmax=20
             )
         self.warn_breakup_overflow = warn_breakup_overflow
+        self.output_steps = range(0, self.nt, output_every_n_steps)

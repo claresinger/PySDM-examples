@@ -14,7 +14,7 @@ from PySDM.products.collision.collision_rates import (
 from PySDM.products.size_spectral import ParticleVolumeVersusRadiusLogarithmSpectrum
 
 
-def run_box_breakup(settings, steps):
+def run_box_breakup(settings, steps=None):
     backend = CPU
 
     builder = Builder(n_sd=settings.n_sd, backend=backend(settings.formulae))
@@ -45,6 +45,8 @@ def run_box_breakup(settings, steps):
     )
     core = builder.build(attributes, products)
 
+    if steps is None:
+        steps = settings.output_steps
     y = np.ndarray((len(steps), len(settings.radius_bins_edges) - 1))
     rates = np.zeros((len(steps), 4))
     # run
@@ -61,7 +63,7 @@ def run_box_breakup(settings, steps):
     return (x, y, rates)
 
 
-def run_box_NObreakup(settings, steps):
+def run_box_NObreakup(settings, steps=None):
     backend = CPU
 
     builder = Builder(n_sd=settings.n_sd, backend=backend(settings.formulae))
@@ -88,6 +90,8 @@ def run_box_NObreakup(settings, steps):
     )
     core = builder.build(attributes, products)
 
+    if steps is None:
+        steps = settings.output_steps
     y = np.ndarray((len(steps), len(settings.radius_bins_edges) - 1))
     rates = np.zeros((len(steps), 4))
     # run

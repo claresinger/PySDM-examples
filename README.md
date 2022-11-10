@@ -28,10 +28,10 @@ Please use the [PySDM issue-tracking](https://github.com/atmos-cloud-sim-uj/PySD
      [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/atmos-cloud-sim-uj/PySDM-examples/blob/main/PySDM_examples/Berry_1967/figs_5_8_10.ipynb)
 
 - [Bieli et al. 2022](https://www.essoar.org/doi/abs/10.1002/essoar.10510248.1) (Box model, coalescence and breakup with fixed coalescence efficiency):
-    - Fig. 2:
-      [![nbviewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](https://nbviewer.jupyter.org/github/atmos-cloud-sim-uj/PySDM-examples/blob/main/PySDM_examples/Bieli_et_al_2022/make_fig_2.ipynb)
-      [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/atmos-cloud-sim-uj/PySDM-examples.git/main?urlpath=lab/tree/PySDM_examples/Bieli_et_al_2022/make_fig_2.ipynb)
-      [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/atmos-cloud-sim-uj/PySDM-examples/blob/main/PySDM_examples/Bieli_et_al_2022/make_fig_2.ipynb)
+    - Fig. 3:
+      [![nbviewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](https://nbviewer.jupyter.org/github/atmos-cloud-sim-uj/PySDM-examples/blob/main/PySDM_examples/Bieli_et_al_2022/make_fig_3.ipynb)
+      [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/atmos-cloud-sim-uj/PySDM-examples.git/main?urlpath=lab/tree/PySDM_examples/Bieli_et_al_2022/make_fig_3.ipynb)
+      [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/atmos-cloud-sim-uj/PySDM-examples/blob/main/PySDM_examples/Bieli_et_al_2022/make_fig_3.ipynb)
 
 - [deJong Mackay 2022](under preparation) (Box model, coalescence and breakup with Berry 1967 coalescence efficiency):
     - Fig. 1:

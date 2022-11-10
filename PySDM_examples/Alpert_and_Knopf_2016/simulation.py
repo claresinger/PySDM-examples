@@ -237,6 +237,7 @@ def simulation(
 
     temperature = initial_temperature
     env["a_w_ice"] = np.nan
+    env["RH"] = 1 + np.finfo(float).eps
     svp = particulator.formulae.saturation_vapour_pressure
 
     cell_id = 0
