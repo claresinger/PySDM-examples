@@ -32,6 +32,7 @@ from PySDM.builder import Builder
 from PySDM.dynamics import (
     AmbientThermodynamics,
     Coalescence,
+    Collision,
     Condensation,
     Displacement,
     EulerianAdvection,
@@ -124,7 +125,27 @@ class Simulation:
             builder.add_dynamic(EulerianAdvection(solver))
         if self.settings.processes[&#34;particle advection&#34;]:
             builder.add_dynamic(displacement)
-        if self.settings.processes[&#34;coalescence&#34;]:
+        if (
+            self.settings.processes[&#34;coalescence&#34;]
+            and self.settings.processes[&#34;breakup&#34;]
+        ):
+            builder.add_dynamic(
+                Collision(
+                    collision_kernel=self.settings.kernel,
+                    enable_breakup=self.settings.processes[&#34;breakup&#34;],
+                    coalescence_efficiency=self.settings.coalescence_efficiency,
+                    breakup_efficiency=self.settings.breakup_efficiency,
+                    fragmentation_function=self.settings.breakup_fragmentation,
+                    adaptive=self.settings.coalescence_adaptive,
+                    dt_coal_range=self.settings.coalescence_dt_coal_range,
+                    substeps=self.settings.coalescence_substeps,
+                    optimized_random=self.settings.coalescence_optimized_random,
+                )
+            )
+        elif (
+            self.settings.processes[&#34;coalescence&#34;]
+            and not self.settings.processes[&#34;breakup&#34;]
+        ):
             builder.add_dynamic(
                 Coalescence(
                     collision_kernel=self.settings.kernel,
@@ -134,6 +155,10 @@ class Simulation:
                     optimized_random=self.settings.coalescence_optimized_random,
                 )
             )
+        assert not (
+            self.settings.processes[&#34;breakup&#34;]
+            and not self.settings.processes[&#34;coalescence&#34;]
+        )
         if self.settings.processes[&#34;freezing&#34;]:
             builder.add_dynamic(Freezing(singular=self.settings.freezing_singular))
 
@@ -325,7 +350,27 @@ class Simulation:
             builder.add_dynamic(EulerianAdvection(solver))
         if self.settings.processes[&#34;particle advection&#34;]:
             builder.add_dynamic(displacement)
-        if self.settings.processes[&#34;coalescence&#34;]:
+        if (
+            self.settings.processes[&#34;coalescence&#34;]
+            and self.settings.processes[&#34;breakup&#34;]
+        ):
+            builder.add_dynamic(
+                Collision(
+                    collision_kernel=self.settings.kernel,
+                    enable_breakup=self.settings.processes[&#34;breakup&#34;],
+                    coalescence_efficiency=self.settings.coalescence_efficiency,
+                    breakup_efficiency=self.settings.breakup_efficiency,
+                    fragmentation_function=self.settings.breakup_fragmentation,
+                    adaptive=self.settings.coalescence_adaptive,
+                    dt_coal_range=self.settings.coalescence_dt_coal_range,
+                    substeps=self.settings.coalescence_substeps,
+                    optimized_random=self.settings.coalescence_optimized_random,
+                )
+            )
+        elif (
+            self.settings.processes[&#34;coalescence&#34;]
+            and not self.settings.processes[&#34;breakup&#34;]
+        ):
             builder.add_dynamic(
                 Coalescence(
                     collision_kernel=self.settings.kernel,
@@ -335,6 +380,10 @@ class Simulation:
                     optimized_random=self.settings.coalescence_optimized_random,
                 )
             )
+        assert not (
+            self.settings.processes[&#34;breakup&#34;]
+            and not self.settings.processes[&#34;coalescence&#34;]
+        )
         if self.settings.processes[&#34;freezing&#34;]:
             builder.add_dynamic(Freezing(singular=self.settings.freezing_singular))
 
@@ -520,7 +569,27 @@ def products(self):
         builder.add_dynamic(EulerianAdvection(solver))
     if self.settings.processes[&#34;particle advection&#34;]:
         builder.add_dynamic(displacement)
-    if self.settings.processes[&#34;coalescence&#34;]:
+    if (
+        self.settings.processes[&#34;coalescence&#34;]
+        and self.settings.processes[&#34;breakup&#34;]
+    ):
+        builder.add_dynamic(
+            Collision(
+                collision_kernel=self.settings.kernel,
+                enable_breakup=self.settings.processes[&#34;breakup&#34;],
+                coalescence_efficiency=self.settings.coalescence_efficiency,
+                breakup_efficiency=self.settings.breakup_efficiency,
+                fragmentation_function=self.settings.breakup_fragmentation,
+                adaptive=self.settings.coalescence_adaptive,
+                dt_coal_range=self.settings.coalescence_dt_coal_range,
+                substeps=self.settings.coalescence_substeps,
+                optimized_random=self.settings.coalescence_optimized_random,
+            )
+        )
+    elif (
+        self.settings.processes[&#34;coalescence&#34;]
+        and not self.settings.processes[&#34;breakup&#34;]
+    ):
         builder.add_dynamic(
             Coalescence(
                 collision_kernel=self.settings.kernel,
@@ -530,6 +599,10 @@ def products(self):
                 optimized_random=self.settings.coalescence_optimized_random,
             )
         )
+    assert not (
+        self.settings.processes[&#34;breakup&#34;]
+        and not self.settings.processes[&#34;coalescence&#34;]
+    )
     if self.settings.processes[&#34;freezing&#34;]:
         builder.add_dynamic(Freezing(singular=self.settings.freezing_singular))
 
