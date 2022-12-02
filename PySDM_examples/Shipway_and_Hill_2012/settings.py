@@ -40,8 +40,9 @@ class Settings:
         dt: float = 1 * si.s,
         dz: float = 25 * si.m,
         precip: bool = True,
+        formulae: Formulae = None,
     ):
-        self.formulae = Formulae()
+        self.formulae = formulae or Formulae()
         self.n_sd_per_gridbox = n_sd_per_gridbox
         self.p0 = p0
         self.kappa = kappa

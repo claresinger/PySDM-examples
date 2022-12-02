@@ -1,6 +1,7 @@
 from typing import Iterable
 
 import numpy as np
+from PySDM import Formulae
 from PySDM.dynamics.collisions.breakup_efficiencies import ConstEb
 from PySDM.dynamics.collisions.breakup_fragmentations import Gaussian, Straub2010Nf
 from PySDM.dynamics.collisions.coalescence_efficiencies import ConstEc, Straub2010Ec
@@ -46,21 +47,6 @@ class Settings1D(SettingsSH):
         warn_breakup_overflow: bool = False,
         output_every_n_steps: int = 1
     ):
-        super().__init__(
-            n_sd_per_gridbox=n_sd_per_gridbox,
-            p0=p0,
-            kappa=kappa,
-            rho_times_w_1=rho_times_w_1,
-            particles_per_volume_STP=particles_per_volume_STP,
-            dt=dt,
-            dz=dz,
-            precip=precip,
-        )
-        self.breakup = breakup
-        self.stochastic_breakup = stochastic_breakup
-
-        self.breakup_efficiency = ConstEb(Eb=1.0)
-
         if stochastic_breakup:
             self.coalescence_efficiency = Straub2010Ec()
             self.fragmentation_function = Straub2010Nf(vmin=1 * si.um**3)
@@ -71,5 +57,24 @@ class Settings1D(SettingsSH):
             self.fragmentation_function = Gaussian(
                 mu=frag_scale_v, sigma=frag_scale_v / 2, vmin=(1 * si.um) ** 3, nfmax=20
             )
+
+        super().__init__(
+            n_sd_per_gridbox=n_sd_per_gridbox,
+            p0=p0,
+            kappa=kappa,
+            rho_times_w_1=rho_times_w_1,
+            particles_per_volume_STP=particles_per_volume_STP,
+            dt=dt,
+            dz=dz,
+            precip=precip,
+            formulae=Formulae(
+                fragmentation_function=self.fragmentation_function.__class__.__name__
+            ),
+        )
+        self.breakup = breakup
+        self.stochastic_breakup = stochastic_breakup
+
+        self.breakup_efficiency = ConstEb(Eb=1.0)
+
         self.warn_breakup_overflow = warn_breakup_overflow
         self.output_steps = range(0, self.nt, output_every_n_steps)

@@ -143,7 +143,7 @@ class GUISettings:
                 value=defaults[k],
             )
             for k, v in formulae_init_params
-            if k not in ("self", "fastmath", "seed", "constants")
+            if k not in ("self", "fastmath", "seed", "constants", "handle_all_breakups")
         ]
 
         self.ui_formulae_options.append(

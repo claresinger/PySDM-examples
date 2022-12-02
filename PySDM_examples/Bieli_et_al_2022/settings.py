@@ -11,8 +11,7 @@ from pystrict import strict
 
 @strict
 class Settings:
-    def __init__(self):
-        self.formulae = Formulae()
+    def __init__(self, formulae: Formulae = None):
         self.n_sd = 2**12
         self.n_part = 1e4 / si.cm**3
         self.theta = 0.33e-9 * si.g / rho_w
@@ -37,6 +36,9 @@ class Settings:
         self.break_eff = ConstEb(1.0)
         self.spectrum = Gamma(norm_factor=self.norm_factor, k=self.k, theta=self.theta)
         self.rho = rho_w
+        self.formulae = formulae or Formulae(
+            fragmentation_function=self.fragmentation.__class__.__name__
+        )
 
     @property
     def output_steps(self):
