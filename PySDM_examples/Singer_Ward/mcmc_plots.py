@@ -5,25 +5,44 @@ from matplotlib import pylab
 from PySDM_examples.Singer_Ward.kappa_mcmc import get_model, param_transform
 
 
+def model_options(model):
+    if model == "CompressedFilmOvadnevaite":
+        labels = ["$\sigma_{org}$", "$\delta_{min}$"]
+        scaling = [1, 1]
+    elif model == "SzyszkowskiLangmuir":
+        labels = ["$A_0 \\times 10^{20}$", "$C_0 \\times 10^{6}$", "$\sigma_{min}$"]
+        scaling = [1e20, 1e6, 1]
+    elif model == "CompressedFilmRuehl":
+        labels = [
+            "$A_0 \\times 10^{20}$",
+            "$C_0 \\times 10^{6}$",
+            "$\sigma_{min}$",
+            "$m_{\sigma} \\times 10^{-16}$",
+        ]
+        scaling = [1e20, 1e6, 1, 1e-16]
+    else:
+        raise AssertionError()
+    return labels, scaling
+
+
 def plot_param_chain(param_chain, args):
     _, _, _, c, model = args
     p = param_transform(param_chain, model)
 
     if model == "CompressedFilmOvadnevaite":
-        labels = ["sgm_org", "delta_min"]
         _, axes = pylab.subplots(2, 1, figsize=(6, 8))
     elif model == "CompressedFilmRuehl":
-        labels = ["A0", "C0", "sgm_min", "m_sigma"]
         _, axes = pylab.subplots(2, 2, figsize=(12, 8))
     elif model == "SzyszkowskiLangmuir":
-        labels = ["A0", "C0", "sgm_min"]
         _, axes = pylab.subplots(3, 1, figsize=(6, 12))
     else:
         raise AssertionError()
 
+    labels, scaling = model_options(model)
+
     for i, ax in enumerate(axes.flatten()):
         p[i, 0:100] = np.nan
-        ax.plot(p[i, :])
+        ax.plot(p[i, :] * scaling[i])
         ax.set_ylabel(labels[i])
         ax.grid()
     pylab.tight_layout()
@@ -55,23 +74,16 @@ def plot_corner(param_chain, args):
     data = param_transform(param_chain, model).T
     data = data[100:, :]
 
-    if model == "CompressedFilmOvadnevaite":
-        labels = ["sgm_org", "delta_min"]
-    elif model == "CompressedFilmRuehl":
-        labels = ["A0", "C0", "sgm_min", "m_sigma"]
-    elif model == "SzyszkowskiLangmuir":
-        labels = ["A0", "C0", "sgm_min"]
-    else:
-        raise AssertionError()
+    labels, scaling = model_options(model)
 
     pylab.rcParams.update({"font.size": 12})
     _ = corner(
-        data,
+        data * scaling,
         labels=labels,
-        label_kwargs={"fontsize": 12},
+        label_kwargs={"fontsize": 15},
         quantiles=[0.16, 0.5, 0.84],
         show_titles=True,
-        title_fmt=".1e",
+        title_fmt=".1f",
         title_kwargs={"fontsize": 12},
     )
 

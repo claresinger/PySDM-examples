@@ -1,4 +1,3 @@
-# from joblib import Parallel, delayed
 import time
 
 import numba
@@ -8,8 +7,6 @@ from PySDM.backends.impl_numba.conf import JIT_FLAGS as jit_flags
 from PySDM.backends.impl_numba.toms748 import toms748_solve
 from PySDM.physics import constants_defaults as const
 from PySDM.physics import si
-from PySDM.physics.trivia import Trivia
-from scipy.optimize import minimize_scalar
 
 
 # parameter transformation so the MCMC parameters range from [-inf, inf]
@@ -43,27 +40,48 @@ def param_transform(mcmc_params, model):
     return film_params
 
 
-def negSS(r_wet, SS_args):
-    formulae, T, r_dry, kappa, f_org = SS_args
-    v_dry = formulae.trivia.volume(r_dry)
-    v_wet = formulae.trivia.volume(r_wet)
-    sigma = formulae.surface_tension.sigma(T, v_wet, v_dry, f_org)
-    RH_eq = formulae.hygroscopicity.RH_eq(r_wet, T, kappa, r_dry**3, sigma)
-    SS = (RH_eq - 1) * 100
-    return -1 * SS
+@numba.njit(**{**jit_flags, "parallel": False})
+def minfun(rcrit, T, r_dry, kappa, f_org, fun_volume, fun_sigma, fun_r_cr):
+    v_dry = fun_volume(r_dry)
+    vcrit = fun_volume(rcrit)
+    sigma = fun_sigma(T, vcrit, v_dry, f_org)
+    rc = fun_r_cr(kappa, r_dry**3, T, sigma)
+    return rcrit - rc
 
 
-# @numba.njit(**{**jit_flags, "parallel": False})
-# def minfun(rcrit, formulae, T, r_dry, kappa, f_org):
-#     v_dry = formulae.trivia.volume(r_dry)
-#     vcrit = formulae.trivia.volume(rcrit)
-#     sigma = formulae.surface_tension.sigma(T, vcrit, v_dry, f_org)
-#     rc = formulae.hygroscopicity.r_cr(kappa, r_dry**3, T, sigma)
-#     return rcrit - rc
+@numba.njit(**{**jit_flags, "parallel": True})
+def parallel_block(
+    T,
+    r_dry,
+    N_meas,
+    kappas,
+    f_orgs,
+    rtol,
+    max_iters,
+    fun_volume,
+    fun_sigma,
+    fun_r_cr,
+    fun_within_tolerance,
+):
+    rcrit = np.zeros(N_meas)
+    for i in numba.prange(len(r_dry)):
+        rd = r_dry[i]
+        bracket = (rd / 2, 10e-6)
+        rc_args = (T, rd, kappas[i], f_orgs[i], fun_volume, fun_sigma, fun_r_cr)
+        rcrit_i, iters = toms748_solve(
+            minfun,
+            rc_args,
+            *bracket,
+            minfun(bracket[0], *rc_args),
+            minfun(bracket[1], *rc_args),
+            rtol,
+            max_iters,
+            fun_within_tolerance
+        )
+        assert iters != max_iters
+        rcrit[i] = rcrit_i
+    return rcrit
 
-# within_tolerance = numba.njit(
-#     Trivia.within_tolerance, **{**jit_flags, "parallel": False}
-# )
 
 # evaluate the y-values of the model, given the current guess of parameter values
 def get_model(params, args):
@@ -101,38 +119,33 @@ def get_model(params, args):
     else:
         raise AssertionError()
 
-    N_meas = len(r_dry)
-    Scrit, rcrit = np.zeros(N_meas), np.zeros(N_meas)
-    for i, rd in enumerate(r_dry):
-        SS_args = [
-            formulae,
-            T,
-            rd,
-            aerosol_list[i].modes[0]["kappa"][model],
-            aerosol_list[i].modes[0]["f_org"],
-        ]
-        res = minimize_scalar(negSS, args=SS_args, bracket=[rd / 2, 100e-6])
-        Scrit[i], rcrit[i] = -1 * res.fun, res.x
+    fun_within_tolerance = formulae.trivia.within_tolerance
+    fun_volume = formulae.trivia.volume
+    fun_sigma = formulae.surface_tension.sigma
+    fun_r_cr = formulae.hygroscopicity.r_cr
 
-    # N_meas = len(r_dry)
-    # Scrit, rcrit = np.zeros(N_meas), np.zeros(N_meas)
-    # max_iters = 1e2
-    # rtol = 1e-6
-    # for i, rd in enumerate(r_dry):
-    #     bracket = [rd/2, 10e-6]
-    #     rc_args = (formulae, T, rd, aerosol_list[i].modes[0]["kappa"][model], aerosol_list[i].modes[0]["f_org"])
-    #     rcrit_i, iters = toms748_solve(
-    #         minfun,
-    #         rc_args,
-    #         *bracket,
-    #         minfun(bracket[0], *rc_args),
-    #         minfun(bracket[1], *rc_args),
-    #         rtol,
-    #         max_iters,
-    #         within_tolerance
-    #     )
-    #     assert iters != max_iters
-    #     rcrit[i] = rcrit_i
+    N_meas = len(r_dry)
+    max_iters = 1e2
+    rtol = 1e-2
+
+    kappas = np.asarray(
+        [aerosol_list[i].modes[0]["kappa"][model] for i in range(len(r_dry))]
+    )
+    f_orgs = np.asarray([aerosol_list[i].modes[0]["f_org"] for i in range(len(r_dry))])
+
+    rcrit = parallel_block(
+        T,
+        r_dry,
+        N_meas,
+        kappas,
+        f_orgs,
+        rtol,
+        max_iters,
+        fun_volume,
+        fun_sigma,
+        fun_r_cr,
+        fun_within_tolerance,
+    )
 
     kap_eff = (
         (2 * rcrit**2) / (3 * r_dry**3 * const.Rv * T * const.rho_w) * const.sgm_w
