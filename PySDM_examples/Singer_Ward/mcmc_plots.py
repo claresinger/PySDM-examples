@@ -29,11 +29,12 @@ def plot_param_chain(param_chain, args):
     pylab.tight_layout()
 
     modelname = model.split("CompressedFilm")[-1]
-    aerosolname = c.__class__.__name__.split("Aerosol")[-1]
+    aerosolname = c[0].__class__.__name__.split("Aerosol")[-1]
     pylab.savefig(
         "mcmc_output/" + aerosolname + "_" + modelname + "_chain.png",
         dpi=200,
         bbox_inches="tight",
+        facecolor="w",
     )
     pylab.show()
 
@@ -75,11 +76,12 @@ def plot_corner(param_chain, args):
     )
 
     modelname = model.split("CompressedFilm")[-1]
-    aerosolname = c.__class__.__name__.split("Aerosol")[-1]
+    aerosolname = c[0].__class__.__name__.split("Aerosol")[-1]
     pylab.savefig(
         "mcmc_output/" + aerosolname + "_" + modelname + "_corner.png",
         dpi=200,
         bbox_inches="tight",
+        facecolor="w",
     )
     pylab.show()
 
@@ -117,11 +119,12 @@ def plot_ovf_kappa_fit(param_chain, args, errorx, datay, errory):
     pylab.tight_layout()
 
     modelname = model.split("CompressedFilm")[-1]
-    aerosolname = c.__class__.__name__.split("Aerosol")[-1]
+    aerosolname = c[0].__class__.__name__.split("Aerosol")[-1]
     pylab.savefig(
         "mcmc_output/" + aerosolname + "_" + modelname + "_fit.png",
         dpi=200,
         bbox_inches="tight",
+        facecolor="w",
     )
     pylab.show()
 
@@ -146,4 +149,14 @@ def plot_keff(param_chain, args, datay, errory):
     pylab.ylim([-0.05, 0.55])
     pylab.rcParams.update({"font.size": 15})
     pylab.grid()
+
+    _, _, _, c, model = args
+    modelname = model.split("CompressedFilm")[-1]
+    aerosolname = c[0].__class__.__name__.split("Aerosol")[-1]
+    pylab.savefig(
+        "mcmc_output/" + aerosolname + "_" + modelname + "_keff.png",
+        dpi=200,
+        bbox_inches="tight",
+        facecolor="w",
+    )
     pylab.show()

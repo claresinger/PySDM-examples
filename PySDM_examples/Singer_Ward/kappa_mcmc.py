@@ -1,9 +1,15 @@
+import numba
 import numpy as np
 from PySDM import Formulae
+from PySDM.backends.impl_numba.conf import JIT_FLAGS as jit_flags
+from PySDM.backends.impl_numba.toms748 import toms748_solve
 from PySDM.physics import constants_defaults as const
 from PySDM.physics import si
+from PySDM.physics.trivia import Trivia
 from scipy.optimize import minimize_scalar
 
+# from joblib import Parallel, delayed
+# import time
 
 # parameter transformation so the MCMC parameters range from [-inf, inf]
 # but the compressed film parameters are bounded appropriately
@@ -36,8 +42,8 @@ def param_transform(mcmc_params, model):
     return film_params
 
 
-def negSS(r_wet, args):
-    formulae, T, r_dry, kappa, f_org = args
+def negSS(r_wet, SS_args):
+    formulae, T, r_dry, kappa, f_org = SS_args
     v_dry = formulae.trivia.volume(r_dry)
     v_wet = formulae.trivia.volume(r_wet)
     sigma = formulae.surface_tension.sigma(T, v_wet, v_dry, f_org)
@@ -46,11 +52,21 @@ def negSS(r_wet, args):
     return -1 * SS
 
 
+# @numba.njit(**{**jit_flags, "parallel": False})
+# def minfun(rcrit, formulae, T, r_dry, kappa, f_org):
+#     v_dry = formulae.trivia.volume(r_dry)
+#     vcrit = formulae.trivia.volume(rcrit)
+#     sigma = formulae.surface_tension.sigma(T, vcrit, v_dry, f_org)
+#     rc = formulae.hygroscopicity.r_cr(kappa, r_dry**3, T, sigma)
+#     return rcrit - rc
+
+# within_tolerance = numba.njit(
+#     Trivia.within_tolerance, **{**jit_flags, "parallel": False}
+# )
+
 # evaluate the y-values of the model, given the current guess of parameter values
 def get_model(params, args):
-    T, r_dry, _, c, model = args
-    f_org = c.modes[0]["f_org"]
-    kappa = c.modes[0]["kappa"][model]
+    T, r_dry, _, aerosol_list, model = args
 
     if model == "CompressedFilmOvadnevaite":
         formulae = Formulae(
@@ -64,7 +80,7 @@ def get_model(params, args):
         formulae = Formulae(
             surface_tension=model,
             constants={
-                "RUEHL_nu_org": c.modes[0]["nu_org"][0],
+                "RUEHL_nu_org": aerosol_list[0].modes[0]["nu_org"],
                 "RUEHL_A0": param_transform(params, model)[0] * si.m**2,
                 "RUEHL_C0": param_transform(params, model)[1],
                 "RUEHL_sgm_min": param_transform(params, model)[2] * si.mN / si.m,
@@ -75,7 +91,7 @@ def get_model(params, args):
         formulae = Formulae(
             surface_tension=model,
             constants={
-                "RUEHL_nu_org": c.modes[0]["nu_org"][0],
+                "RUEHL_nu_org": aerosol_list[0].modes[0]["nu_org"],
                 "RUEHL_A0": param_transform(params, model)[0] * si.m**2,
                 "RUEHL_C0": param_transform(params, model)[1],
                 "RUEHL_sgm_min": param_transform(params, model)[2] * si.mN / si.m,
@@ -84,11 +100,38 @@ def get_model(params, args):
     else:
         raise AssertionError()
 
-    Scrit, rcrit = np.zeros(len(r_dry)), np.zeros(len(r_dry))
+    N_meas = len(r_dry)
+    Scrit, rcrit = np.zeros(N_meas), np.zeros(N_meas)
     for i, rd in enumerate(r_dry):
-        args = [formulae, T, rd, kappa[i], f_org[i]]
-        res = minimize_scalar(negSS, args=args)
+        SS_args = [
+            formulae,
+            T,
+            rd,
+            aerosol_list[i].modes[0]["kappa"][model],
+            aerosol_list[i].modes[0]["f_org"],
+        ]
+        res = minimize_scalar(negSS, args=SS_args, bracket=[rd / 2, 100e-6])
         Scrit[i], rcrit[i] = -1 * res.fun, res.x
+
+    # N_meas = len(r_dry)
+    # Scrit, rcrit = np.zeros(N_meas), np.zeros(N_meas)
+    # max_iters = 1e2
+    # rtol = 1e-6
+    # for i, rd in enumerate(r_dry):
+    #     bracket = [rd/2, 10e-6]
+    #     rc_args = (formulae, T, rd, aerosol_list[i].modes[0]["kappa"][model], aerosol_list[i].modes[0]["f_org"])
+    #     rcrit_i, iters = toms748_solve(
+    #         minfun,
+    #         rc_args,
+    #         *bracket,
+    #         minfun(bracket[0], *rc_args),
+    #         minfun(bracket[1], *rc_args),
+    #         rtol,
+    #         max_iters,
+    #         within_tolerance
+    #     )
+    #     assert iters != max_iters
+    #     rcrit[i] = rcrit_i
 
     kap_eff = (
         (2 * rcrit**2) / (3 * r_dry**3 * const.Rv * T * const.rho_w) * const.sgm_w
@@ -157,10 +200,12 @@ def MCMC(params, stepsize, args, y, error, n_steps):
     chi2_chain = np.zeros(n_steps)
 
     for i in np.arange(n_steps):
+        # t = time.time()
         param_chain[:, i], ind, accept_value, chi2_chain[i] = step_eval(
             params, stepsize, args, y, error
         )
         accept_chain[ind, i] = accept_value
         params = param_chain[:, i]
+        # print("step time: ", time.time() - t)
 
     return param_chain, accept_chain, chi2_chain
