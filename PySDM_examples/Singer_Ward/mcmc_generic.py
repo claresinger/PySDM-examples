@@ -1,4 +1,6 @@
 import os
+
+os.environ["NUMBA_DISABLE_JIT"] = "1"
 import warnings
 
 import numpy as np
@@ -47,11 +49,11 @@ def mcmc_generic(
         params = [0.5, 0.2]
         stepsize = [0.1, 0.1]
     elif model == "SzyszkowskiLangmuir":
-        params = [20, -12.0, 3.9]
+        params = [40, -12.0, 3.0]
         stepsize = [0.5, 0.1, 0.05]
     elif model == "CompressedFilmRuehl":
-        params = [15.1, -12.0, 3.3, 0.8]
-        stepsize = [0.1, 0.05, 0.01, 0.05]
+        params = [40, -12.0, 3.0, 1.0]
+        stepsize = [0.5, 0.1, 0.05, 0.05]
     else:
         print("error model name not recognized")
 

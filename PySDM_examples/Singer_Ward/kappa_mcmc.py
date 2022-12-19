@@ -1,14 +1,10 @@
-# from joblib import Parallel, delayed
 import time
 
-import numba
 import numpy as np
+from joblib import Parallel, delayed
 from PySDM import Formulae
-from PySDM.backends.impl_numba.conf import JIT_FLAGS as jit_flags
-from PySDM.backends.impl_numba.toms748 import toms748_solve
 from PySDM.physics import constants_defaults as const
 from PySDM.physics import si
-from PySDM.physics.trivia import Trivia
 from scipy.optimize import minimize_scalar
 
 
@@ -53,21 +49,16 @@ def negSS(r_wet, SS_args):
     return -1 * SS
 
 
-# @numba.njit(**{**jit_flags, "parallel": False})
-# def minfun(rcrit, formulae, T, r_dry, kappa, f_org):
-#     v_dry = formulae.trivia.volume(r_dry)
-#     vcrit = formulae.trivia.volume(rcrit)
-#     sigma = formulae.surface_tension.sigma(T, vcrit, v_dry, f_org)
-#     rc = formulae.hygroscopicity.r_cr(kappa, r_dry**3, T, sigma)
-#     return rcrit - rc
+def get_rcrit(SS_args, bracket):
+    return minimize_scalar(negSS, args=SS_args, bracket=bracket).x
 
-# within_tolerance = numba.njit(
-#     Trivia.within_tolerance, **{**jit_flags, "parallel": False}
-# )
 
 # evaluate the y-values of the model, given the current guess of parameter values
 def get_model(params, args):
     T, r_dry, _, aerosol_list, model = args
+    kappa = [ai.modes[0]["kappa"][model] for ai in aerosol_list]
+    forg = [ai.modes[0]["f_org"] for ai in aerosol_list]
+    nu_org = aerosol_list[0].modes[0]["nu_org"]
 
     if model == "CompressedFilmOvadnevaite":
         formulae = Formulae(
@@ -81,7 +72,7 @@ def get_model(params, args):
         formulae = Formulae(
             surface_tension=model,
             constants={
-                "RUEHL_nu_org": aerosol_list[0].modes[0]["nu_org"],
+                "RUEHL_nu_org": nu_org,
                 "RUEHL_A0": param_transform(params, model)[0] * si.m**2,
                 "RUEHL_C0": param_transform(params, model)[1],
                 "RUEHL_sgm_min": param_transform(params, model)[2] * si.mN / si.m,
@@ -92,7 +83,7 @@ def get_model(params, args):
         formulae = Formulae(
             surface_tension=model,
             constants={
-                "RUEHL_nu_org": aerosol_list[0].modes[0]["nu_org"],
+                "RUEHL_nu_org": nu_org,
                 "RUEHL_A0": param_transform(params, model)[0] * si.m**2,
                 "RUEHL_C0": param_transform(params, model)[1],
                 "RUEHL_sgm_min": param_transform(params, model)[2] * si.mN / si.m,
@@ -101,38 +92,19 @@ def get_model(params, args):
     else:
         raise AssertionError()
 
-    N_meas = len(r_dry)
-    Scrit, rcrit = np.zeros(N_meas), np.zeros(N_meas)
+    rcrit = np.zeros(len(r_dry))
     for i, rd in enumerate(r_dry):
-        SS_args = [
-            formulae,
-            T,
-            rd,
-            aerosol_list[i].modes[0]["kappa"][model],
-            aerosol_list[i].modes[0]["f_org"],
-        ]
+        SS_args = [formulae, T, rd, kappa[i], forg[i]]
         res = minimize_scalar(negSS, args=SS_args, bracket=[rd / 2, 100e-6])
-        Scrit[i], rcrit[i] = -1 * res.fun, res.x
+        rcrit[i] = res.x
 
-    # N_meas = len(r_dry)
-    # Scrit, rcrit = np.zeros(N_meas), np.zeros(N_meas)
-    # max_iters = 1e2
-    # rtol = 1e-6
-    # for i, rd in enumerate(r_dry):
-    #     bracket = [rd/2, 10e-6]
-    #     rc_args = (formulae, T, rd, aerosol_list[i].modes[0]["kappa"][model], aerosol_list[i].modes[0]["f_org"])
-    #     rcrit_i, iters = toms748_solve(
-    #         minfun,
-    #         rc_args,
-    #         *bracket,
-    #         minfun(bracket[0], *rc_args),
-    #         minfun(bracket[1], *rc_args),
-    #         rtol,
-    #         max_iters,
-    #         within_tolerance
+    # rcrit = np.array(Parallel(verbose=0, n_jobs=-1, backend="threading")(
+    #     delayed(get_rcrit)(
+    #         [formulae, T, rd, kappa[i], forg[i]],
+    #         [rd / 2, 100e-6]
     #     )
-    #     assert iters != max_iters
-    #     rcrit[i] = rcrit_i
+    #     for i,rd in enumerate(r_dry)
+    # ))
 
     kap_eff = (
         (2 * rcrit**2) / (3 * r_dry**3 * const.Rv * T * const.rho_w) * const.sgm_w

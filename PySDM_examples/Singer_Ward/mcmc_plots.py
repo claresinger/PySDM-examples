@@ -25,7 +25,7 @@ def model_options(model):
     return labels, scaling
 
 
-def plot_param_chain(param_chain, args):
+def plot_param_chain(param_chain, args, savetxt=True):
     _, _, _, c, model = args
     p = param_transform(param_chain, model)
 
@@ -57,16 +57,17 @@ def plot_param_chain(param_chain, args):
     )
     pylab.show()
 
-    filename = (
-        "mcmc_output/"
-        + aerosolname
-        + "_"
-        + modelname
-        + "_chain"
-        + str(np.max(np.shape(param_chain)))
-        + ".csv"
-    )
-    np.savetxt(filename, param_chain.T, fmt="%.6e", delimiter=",")
+    if savetxt:
+        filename = (
+            "mcmc_output/"
+            + aerosolname
+            + "_"
+            + modelname
+            + "_chain"
+            + str(np.max(np.shape(param_chain)))
+            + ".csv"
+        )
+        np.savetxt(filename, param_chain.T, fmt="%.6e", delimiter=",")
 
 
 def plot_corner(param_chain, args):
