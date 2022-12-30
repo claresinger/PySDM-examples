@@ -34,21 +34,8 @@ class Settings:
             form = Formulae(
                 surface_tension=model,
                 constants={
-                    "sgm_org": 40 * si.mN / si.m,
-                    "delta_min": 0.1 * si.nm,
-                    "MAC": MAC,
-                    "HAC": HAC,
-                },
-            )
-        elif model == "CompressedFilmRuehl":
-            form = Formulae(
-                surface_tension=model,
-                constants={
-                    "RUEHL_nu_org": aerosol.modes[0]["nu_org"],
-                    "RUEHL_A0": 2.5e-19 * si.m**2,
-                    "RUEHL_C0": 1e-5,
-                    "RUEHL_sgm_min": 40 * si.mN / si.m,
-                    "RUEHL_m_sigma": 1.3 * si.J / si.m**2,
+                    "sgm_org": 19 * si.mN / si.m,  # 40
+                    "delta_min": 0.4 * si.nm,  # 0.1
                     "MAC": MAC,
                     "HAC": HAC,
                 },
@@ -58,9 +45,22 @@ class Settings:
                 surface_tension=model,
                 constants={
                     "RUEHL_nu_org": aerosol.modes[0]["nu_org"],
-                    "RUEHL_A0": 2.5e-19 * si.m**2,
-                    "RUEHL_C0": 1e-5,
-                    "RUEHL_sgm_min": 40 * si.mN / si.m,
+                    "RUEHL_A0": 7.5e-19 * si.m**2,  # 2.5e-19
+                    "RUEHL_C0": 5e-7,  # 1e-5
+                    "RUEHL_sgm_min": 21 * si.mN / si.m,  # 40
+                    "MAC": MAC,
+                    "HAC": HAC,
+                },
+            )
+        elif model == "CompressedFilmRuehl":
+            form = Formulae(
+                surface_tension=model,
+                constants={
+                    "RUEHL_nu_org": aerosol.modes[0]["nu_org"],
+                    "RUEHL_A0": 9.4e-19 * si.m**2,  # 2.5e-19
+                    "RUEHL_C0": 10e-7,  # 1e-5
+                    "RUEHL_sgm_min": 24 * si.mN / si.m,  # 40
+                    "RUEHL_m_sigma": 1.8e17 * si.J / si.m**2,  # 1.3
                     "MAC": MAC,
                     "HAC": HAC,
                 },
