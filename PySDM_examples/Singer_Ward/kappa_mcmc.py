@@ -49,8 +49,8 @@ def negSS(r_wet, SS_args):
     return -1 * SS
 
 
-def get_rcrit(SS_args, bracket):
-    return minimize_scalar(negSS, args=SS_args, bracket=bracket).x
+# def get_rcrit(SS_args, bracket):
+#     return minimize_scalar(negSS, args=SS_args, bracket=bracket).x
 
 
 # evaluate the y-values of the model, given the current guess of parameter values
@@ -68,6 +68,16 @@ def get_model(params, args):
                 "delta_min": param_transform(params, model)[1] * si.nm,
             },
         )
+    elif model == "SzyszkowskiLangmuir":
+        formulae = Formulae(
+            surface_tension=model,
+            constants={
+                "RUEHL_nu_org": nu_org,
+                "RUEHL_A0": param_transform(params, model)[0] * si.m**2,
+                "RUEHL_C0": param_transform(params, model)[1],
+                "RUEHL_sgm_min": param_transform(params, model)[2] * si.mN / si.m,
+            },
+        )
     elif model == "CompressedFilmRuehl":
         formulae = Formulae(
             surface_tension=model,
@@ -77,16 +87,6 @@ def get_model(params, args):
                 "RUEHL_C0": param_transform(params, model)[1],
                 "RUEHL_sgm_min": param_transform(params, model)[2] * si.mN / si.m,
                 "RUEHL_m_sigma": param_transform(params, model)[3] * si.J / si.m**2,
-            },
-        )
-    elif model == "SzyszkowskiLangmuir":
-        formulae = Formulae(
-            surface_tension=model,
-            constants={
-                "RUEHL_nu_org": nu_org,
-                "RUEHL_A0": param_transform(params, model)[0] * si.m**2,
-                "RUEHL_C0": param_transform(params, model)[1],
-                "RUEHL_sgm_min": param_transform(params, model)[2] * si.mN / si.m,
             },
         )
     else:
@@ -179,6 +179,6 @@ def MCMC(params, stepsize, args, y, error, n_steps):
         )
         accept_chain[ind, i] = accept_value
         params = param_chain[:, i]
-        print("step time: ", time.time() - t)
+        # print("step time: ", time.time() - t)
 
     return param_chain, accept_chain, chi2_chain

@@ -46,13 +46,13 @@ def mcmc_generic(
     # set up MCMC
     ######
     if model == "CompressedFilmOvadnevaite":
-        params = [0.5, 0.2]
-        stepsize = [0.1, 0.1]
+        params = [-1.0, -0.5]  # [0.5, 0.2]
+        stepsize = [0.1, 0.05]
     elif model == "SzyszkowskiLangmuir":
-        params = [40, -12.0, 3.0]
+        params = [75, -14, 3.2]  # [25, -11.4, 3.7]
         stepsize = [0.5, 0.1, 0.05]
     elif model == "CompressedFilmRuehl":
-        params = [40, -12.0, 3.0, 1.0]
+        params = [75, -14, 3.2, 1.0]  # [15, -11.5, 3.5, 1.0]
         stepsize = [0.5, 0.1, 0.05, 0.05]
     else:
         print("error model name not recognized")
@@ -68,6 +68,9 @@ def mcmc_generic(
     else:
         print("error aerosol type doesn't exist")
     args = [T, r_dry, ovf, aerosol_list, model]
+
+    print(param_transform(params, model))
+    print(params)
 
     ######
     # run MCMC
