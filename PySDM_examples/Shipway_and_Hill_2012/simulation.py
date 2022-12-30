@@ -119,6 +119,9 @@ class Simulation:
                 name="nc", radius_range=settings.cloud_water_radius_range
             ),
             PySDM_products.ParticleConcentration(
+                name="nr", radius_range=settings.rain_water_radius_range
+            ),
+            PySDM_products.ParticleConcentration(
                 name="na", radius_range=(0, settings.cloud_water_radius_range[0])
             ),
             PySDM_products.MeanRadius(),
