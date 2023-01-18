@@ -42,10 +42,8 @@ from PySDM.products.collision.collision_rates import (
 from PySDM.products.size_spectral import ParticleVolumeVersusRadiusLogarithmSpectrum
 
 
-def run_box_breakup(settings, steps=None):
-    backend = CPU
-
-    builder = Builder(n_sd=settings.n_sd, backend=backend(settings.formulae))
+def run_box_breakup(settings, steps=None, backend_class=CPU):
+    builder = Builder(n_sd=settings.n_sd, backend=backend_class(settings.formulae))
     env = Box(dv=settings.dv, dt=settings.dt)
     builder.set_environment(env)
     env[&#34;rhod&#34;] = 1.0
@@ -91,10 +89,8 @@ def run_box_breakup(settings, steps=None):
     return (x, y, rates)
 
 
-def run_box_NObreakup(settings, steps=None):
-    backend = CPU
-
-    builder = Builder(n_sd=settings.n_sd, backend=backend(settings.formulae))
+def run_box_NObreakup(settings, steps=None, backend_class=CPU):
+    builder = Builder(n_sd=settings.n_sd, backend=backend_class(settings.formulae))
     env = Box(dv=settings.dv, dt=settings.dt)
     builder.set_environment(env)
     env[&#34;rhod&#34;] = 1.0
@@ -143,7 +139,7 @@ def run_box_NObreakup(settings, steps=None):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="PySDM_examples.deJong_Mackay_2022.simulation_0D.run_box_NObreakup"><code class="name flex">
-<span>def <span class="ident">run_box_NObreakup</span></span>(<span>settings, steps=None)</span>
+<span>def <span class="ident">run_box_NObreakup</span></span>(<span>settings, steps=None, backend_class=PySDM.backends.numba.Numba)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -151,10 +147,8 @@ def run_box_NObreakup(settings, steps=None):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_box_NObreakup(settings, steps=None):
-    backend = CPU
-
-    builder = Builder(n_sd=settings.n_sd, backend=backend(settings.formulae))
+<pre><code class="python">def run_box_NObreakup(settings, steps=None, backend_class=CPU):
+    builder = Builder(n_sd=settings.n_sd, backend=backend_class(settings.formulae))
     env = Box(dv=settings.dv, dt=settings.dt)
     builder.set_environment(env)
     env[&#34;rhod&#34;] = 1.0
@@ -196,7 +190,7 @@ def run_box_NObreakup(settings, steps=None):
 </details>
 </dd>
 <dt id="PySDM_examples.deJong_Mackay_2022.simulation_0D.run_box_breakup"><code class="name flex">
-<span>def <span class="ident">run_box_breakup</span></span>(<span>settings, steps=None)</span>
+<span>def <span class="ident">run_box_breakup</span></span>(<span>settings, steps=None, backend_class=PySDM.backends.numba.Numba)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -204,10 +198,8 @@ def run_box_NObreakup(settings, steps=None):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_box_breakup(settings, steps=None):
-    backend = CPU
-
-    builder = Builder(n_sd=settings.n_sd, backend=backend(settings.formulae))
+<pre><code class="python">def run_box_breakup(settings, steps=None, backend_class=CPU):
+    builder = Builder(n_sd=settings.n_sd, backend=backend_class(settings.formulae))
     env = Box(dv=settings.dv, dt=settings.dt)
     builder.set_environment(env)
     env[&#34;rhod&#34;] = 1.0

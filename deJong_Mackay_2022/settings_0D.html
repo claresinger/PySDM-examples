@@ -45,7 +45,12 @@ TRIVIA = Formulae().trivia
 class Settings0D:
     X0 = TRIVIA.volume(radius=30.531 * si.micrometres)
 
-    def __init__(self, fragmentation: object = None, seed: Optional[int] = None):
+    def __init__(
+        self,
+        fragmentation: object = None,
+        seed: Optional[int] = None,
+        warn_overflows: bool = True,
+    ):
         self.n_sd = 2**10
         self.n_part = 100 / si.cm**3
         self.frag_scale = TRIVIA.volume(radius=100 * si.micrometres)
@@ -54,7 +59,7 @@ class Settings0D:
         self.rho = 1000 * si.kilogram / si.metre**3
         self.dt = 1 * si.seconds
         self.adaptive = True
-        self.warn_overflows = True
+        self.warn_overflows = warn_overflows
         self.seed = 44
         self._steps = [0]
         self.kernel = Geometric()
@@ -87,7 +92,7 @@ class Settings0D:
 <dl>
 <dt id="PySDM_examples.deJong_Mackay_2022.settings_0D.Settings0D"><code class="flex name class">
 <span>class <span class="ident">Settings0D</span></span>
-<span>(</span><span>fragmentation: object = None, seed: Optional[int] = None)</span>
+<span>(</span><span>fragmentation: object = None, seed: Optional[int] = None, warn_overflows: bool = True)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -99,7 +104,12 @@ class Settings0D:
 class Settings0D:
     X0 = TRIVIA.volume(radius=30.531 * si.micrometres)
 
-    def __init__(self, fragmentation: object = None, seed: Optional[int] = None):
+    def __init__(
+        self,
+        fragmentation: object = None,
+        seed: Optional[int] = None,
+        warn_overflows: bool = True,
+    ):
         self.n_sd = 2**10
         self.n_part = 100 / si.cm**3
         self.frag_scale = TRIVIA.volume(radius=100 * si.micrometres)
@@ -108,7 +118,7 @@ class Settings0D:
         self.rho = 1000 * si.kilogram / si.metre**3
         self.dt = 1 * si.seconds
         self.adaptive = True
-        self.warn_overflows = True
+        self.warn_overflows = warn_overflows
         self.seed = 44
         self._steps = [0]
         self.kernel = Geometric()
