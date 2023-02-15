@@ -48,7 +48,7 @@ def run_box_breakup(settings, steps=None, backend_class=CPU):
     y = np.ndarray((len(steps), len(settings.radius_bins_edges) - 1))
     rates = np.zeros((len(steps), 4))
     # run
-    for (i, step) in enumerate(steps):
+    for i, step in enumerate(steps):
         core.run(step - core.n_steps)
         y[i] = core.products["dv/dlnr"].get()[0]
         rates[i, 0] = core.products["cr"].get()
@@ -91,7 +91,7 @@ def run_box_NObreakup(settings, steps=None, backend_class=CPU):
     y = np.ndarray((len(steps), len(settings.radius_bins_edges) - 1))
     rates = np.zeros((len(steps), 4))
     # run
-    for (i, step) in enumerate(steps):
+    for i, step in enumerate(steps):
         core.run(step - core.n_steps)
         y[i] = core.products["dv/dlnr"].get()[0]
         rates[i, 0] = core.products["cr"].get()

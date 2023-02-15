@@ -235,7 +235,7 @@ def simulation(
     )
     particulator = builder.build(attributes=attributes, products=products)
 
-    temperature = initial_temperature
+    env["T"] = initial_temperature
     env["a_w_ice"] = np.nan
     env["RH"] = 1 + np.finfo(float).eps
     svp = particulator.formulae.saturation_vapour_pressure
@@ -245,13 +245,13 @@ def simulation(
     a_tot = []
     for i in range(int(total_time / time_step) + 1):
         if cooling_rate != 0:
-            temperature -= cooling_rate * time_step / 2
-            env["a_w_ice"] = svp.ice_Celsius(temperature - const.T0) / svp.pvs_Celsius(
-                temperature - const.T0
+            env["T"] -= np.full((1,), cooling_rate * time_step / 2)
+            env["a_w_ice"] = svp.ice_Celsius(env["T"][0] - const.T0) / svp.pvs_Celsius(
+                env["T"][0] - const.T0
             )
         particulator.run(0 if i == 0 else 1)
         if cooling_rate != 0:
-            temperature -= cooling_rate * time_step / 2
+            env["T"] -= np.full((1,), cooling_rate * time_step / 2)
 
         ice_mass_per_volume = particulator.products["qi"].get()[cell_id]
         ice_mass = ice_mass_per_volume * volume
