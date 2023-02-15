@@ -18,7 +18,7 @@ setup(
     install_requires=[
         "PySDM",
         "PyMPDATA",
-        "atmos-cloud-sim-uj-utils",
+        "open-atmos-jupyter-utils",
         "pystrict",
         "matplotlib",
         "joblib",
@@ -27,16 +27,16 @@ setup(
         "ghapi",
     ]
     + (["pyvinecopulib", "vtk"] if platform.architecture()[0] != "32bit" else []),
-    author="https://github.com/orgs/atmos-cloud-sim-uj/people",
-    author_email="sylwester.arabas@uj.edu.pl",
+    author="https://github.com/open-atmos/PySDM/graphs/contributors",
+    author_email="slayoo@staszic.waw.pl",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
-    url="https://github.com/atmos-cloud-sim-uj/PySDM-examples",
+    url="https://github.com/open-atmos/PySDM-examples",
     license="GPL-3.0",
     packages=find_packages(include=["PySDM_examples", "PySDM_examples.*"]),
     project_urls={
-        "Tracker": "https://github.com/atmos-cloud-sim-uj/PySDM/issues",
-        "Documentation": "https://atmos-cloud-sim-uj.github.io/PySDM-examples",
-        "Source": "https://github.com/atmos-cloud-sim-uj/PySDM-examples",
+        "Tracker": "https://github.com/open-atmos/PySDM/issues",
+        "Documentation": "https://open-atmos.github.io/PySDM-examples",
+        "Source": "https://github.com/open-atmos/PySDM-examples",
     },
 )

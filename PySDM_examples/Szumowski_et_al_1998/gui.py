@@ -1,7 +1,7 @@
 import os
 import sys
 
-from atmos_cloud_sim_uj_utils import TemporaryFile
+from open_atmos_jupyter_utils import TemporaryFile
 from PySDM.exporters import NetCDFExporter
 
 from PySDM_examples.Szumowski_et_al_1998.gui_controller import GUIController

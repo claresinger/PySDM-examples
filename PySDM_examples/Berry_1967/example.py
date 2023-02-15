@@ -15,7 +15,6 @@ from PySDM_examples.Shima_et_al_2009.example import run
 
 def main(plot: bool, save):
     with np.errstate(all="ignore"):
-
         u_term_approxs = (gunn_and_kinzer.Interpolation,)
         dts = (1, 10, "adaptive")
         setup_prop = {

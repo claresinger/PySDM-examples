@@ -79,7 +79,6 @@ class AerosolMarine(DryAerosolMixture):
 
 @strict
 class AerosolBoreal(DryAerosolMixture):
-
     #     cd HYY
     #     MODAL_PARS.CONC         = [1110   540];
     #     MODAL_PARS.GSD          = [1.75   1.62];
@@ -172,7 +171,6 @@ class AerosolBoreal(DryAerosolMixture):
 
 @strict
 class AerosolNascent(DryAerosolMixture):
-
     # cd NUM
     # MODAL_PARS.CONC         = [2000  30];
     # MODAL_PARS.GSD          = [1.71  1.703];
