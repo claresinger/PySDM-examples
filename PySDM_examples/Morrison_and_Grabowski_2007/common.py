@@ -36,6 +36,7 @@ class Common:
         self.breakup_fragmentation = AlwaysN(n=2)
 
         self.freezing_singular = True
+        self.freezing_thaw = False
         self.freezing_inp_spec = None
 
         self.displacement_adaptive = displacement.DEFAULTS.adaptive

@@ -13,7 +13,7 @@ if platform.architecture()[0] != "32bit":
 
 def readVTK_1d(file):
     if platform.architecture()[0] == "32bit":
-        NotImplementedError("Not implemented for system arcitucture 32bit!")
+        raise NotImplementedError("Not implemented for system arcitucture 32bit!")
 
     reader = vtk.vtkXMLUnstructuredGridReader()  # pylint: disable = no-member
     reader.SetFileName(file)
