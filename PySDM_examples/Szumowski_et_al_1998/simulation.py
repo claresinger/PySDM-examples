@@ -4,6 +4,7 @@ from PySDM.builder import Builder
 from PySDM.dynamics import (
     AmbientThermodynamics,
     Coalescence,
+    Collision,
     Condensation,
     Displacement,
     EulerianAdvection,
@@ -96,7 +97,27 @@ class Simulation:
             builder.add_dynamic(EulerianAdvection(solver))
         if self.settings.processes["particle advection"]:
             builder.add_dynamic(displacement)
-        if self.settings.processes["coalescence"]:
+        if (
+            self.settings.processes["coalescence"]
+            and self.settings.processes["breakup"]
+        ):
+            builder.add_dynamic(
+                Collision(
+                    collision_kernel=self.settings.kernel,
+                    enable_breakup=self.settings.processes["breakup"],
+                    coalescence_efficiency=self.settings.coalescence_efficiency,
+                    breakup_efficiency=self.settings.breakup_efficiency,
+                    fragmentation_function=self.settings.breakup_fragmentation,
+                    adaptive=self.settings.coalescence_adaptive,
+                    dt_coal_range=self.settings.coalescence_dt_coal_range,
+                    substeps=self.settings.coalescence_substeps,
+                    optimized_random=self.settings.coalescence_optimized_random,
+                )
+            )
+        elif (
+            self.settings.processes["coalescence"]
+            and not self.settings.processes["breakup"]
+        ):
             builder.add_dynamic(
                 Coalescence(
                     collision_kernel=self.settings.kernel,
@@ -106,13 +127,24 @@ class Simulation:
                     optimized_random=self.settings.coalescence_optimized_random,
                 )
             )
+        assert not (
+            self.settings.processes["breakup"]
+            and not self.settings.processes["coalescence"]
+        )
         if self.settings.processes["freezing"]:
-            builder.add_dynamic(Freezing(singular=self.settings.freezing_singular))
+            builder.add_dynamic(
+                Freezing(
+                    singular=self.settings.freezing_singular,
+                    thaw=self.settings.freezing_thaw,
+                )
+            )
 
         attributes = environment.init_attributes(
             spatial_discretisation=spatial_sampling.Pseudorandom(),
             dry_radius_spectrum=self.settings.spectrum_per_mass_of_dry_air,
             kappa=self.settings.kappa,
+            n_sd=self.settings.n_sd
+            // (2 if self.settings.freezing_inp_frac != 1 else 1),
         )
 
         if self.settings.processes["freezing"]:
@@ -122,18 +154,54 @@ class Simulation:
                 )
             else:
                 immersed_surface_area = self.settings.freezing_inp_spec.percentiles(
-                    np.random.random(self.settings.n_sd),  # TODO #599: seed
+                    np.random.random(attributes["dry volume"].size),  # TODO #599: seed
                 )
 
             if self.settings.freezing_singular:
                 attributes[
                     "freezing temperature"
                 ] = formulae.freezing_temperature_spectrum.invcdf(
-                    np.random.random(self.settings.n_sd),  # TODO #599: seed
+                    np.random.random(immersed_surface_area.size),  # TODO #599: seed
                     immersed_surface_area,
                 )
             else:
                 attributes["immersed surface area"] = immersed_surface_area
+
+            if self.settings.freezing_inp_frac != 1:
+                assert self.settings.n_sd % 2 == 0
+                assert 0 < self.settings.freezing_inp_frac < 1
+                freezing_attribute = {
+                    True: "freezing temperature",
+                    False: "immersed surface area",
+                }[self.settings.freezing_singular]
+                for name, array in attributes.items():
+                    if array.shape[-1] != self.settings.n_sd // 2:
+                        raise AssertionError(f"attribute >>{name}<< has wrong size")
+                    array = array.copy()
+                    full_shape = list(array.shape)
+                    orig = slice(None, full_shape[-1])
+                    copy = slice(orig.stop, None)
+                    full_shape[-1] *= 2
+                    attributes[name] = np.empty(full_shape, dtype=array.dtype)
+                    if name == freezing_attribute:
+                        attributes[name][orig] = array
+                        attributes[name][copy] = 0
+                    elif name == "n":
+                        attributes[name][orig] = array * self.settings.freezing_inp_frac
+                        attributes[name][copy] = array * (
+                            1 - self.settings.freezing_inp_frac
+                        )
+                    elif len(array.shape) > 1:
+                        attributes[name][:, orig] = array
+                        attributes[name][:, copy] = array
+                    else:
+                        attributes[name][orig] = array
+                        attributes[name][copy] = array
+
+                non_zero_per_gridbox = np.count_nonzero(
+                    attributes[freezing_attribute]
+                ) / np.prod(self.settings.grid)
+                assert non_zero_per_gridbox == self.settings.n_sd_per_gridbox / 2
 
         self.particulator = builder.build(attributes, tuple(products))
 

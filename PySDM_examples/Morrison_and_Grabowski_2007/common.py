@@ -6,6 +6,9 @@ import PySDM
 import scipy
 from PySDM import Formulae
 from PySDM.dynamics import collisions, condensation, displacement
+from PySDM.dynamics.collisions.breakup_efficiencies import ConstEb
+from PySDM.dynamics.collisions.breakup_fragmentations import AlwaysN
+from PySDM.dynamics.collisions.coalescence_efficiencies import ConstEc
 from PySDM.dynamics.collisions.collision_kernels import Geometric
 from PySDM.initialisation import spectra
 from PySDM.physics import si
@@ -28,12 +31,17 @@ class Common:
         self.coalescence_optimized_random = True
         self.coalescence_substeps = 1
         self.kernel = Geometric(collection_efficiency=1)
+        self.coalescence_efficiency = ConstEc(Ec=1.0)
+        self.breakup_efficiency = ConstEb(Eb=1.0)
+        self.breakup_fragmentation = AlwaysN(n=2)
 
         self.freezing_singular = True
+        self.freezing_thaw = False
         self.freezing_inp_spec = None
 
         self.displacement_adaptive = displacement.DEFAULTS.adaptive
         self.displacement_rtol = displacement.DEFAULTS.rtol
+        self.freezing_inp_frac = 1
 
         self.n_sd_per_gridbox = 20
 
@@ -82,6 +90,7 @@ class Common:
             "coalescence": True,
             "condensation": True,
             "sedimentation": True,
+            "breakup": False,
             "freezing": False,
         }
 

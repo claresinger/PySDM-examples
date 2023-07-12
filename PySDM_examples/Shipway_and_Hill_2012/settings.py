@@ -1,15 +1,34 @@
+from typing import Iterable
+
 import numpy as np
 from PySDM import Formulae
 from PySDM.dynamics import condensation
 from PySDM.initialisation import spectra
 from PySDM.physics import si
-from pystrict import strict
 from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d
+from scipy.misc import derivative
 
 
-@strict
 class Settings:
+    def __dir__(self) -> Iterable[str]:
+        return (
+            "n_sd_per_gridbox",
+            "p0",
+            "kappa",
+            "rho_times_w_1",
+            "particles_per_volume_STP",
+            "dt",
+            "dz",
+            "precip",
+            "z_max",
+            "t_max",
+            "cloud_water_radius_range",
+            "rain_water_radius_range",
+            "r_bins_edges_dry",
+            "r_bins_edges",
+        )
+
     def __init__(
         self,
         *,
@@ -20,24 +39,24 @@ class Settings:
         particles_per_volume_STP: int = 50 / si.cm**3,
         dt: float = 1 * si.s,
         dz: float = 25 * si.m,
+        z_max: float = 3000 * si.m,
+        t_max: float = 60 * si.minutes,
         precip: bool = True,
-        breakup: bool = False
+        formulae: Formulae = None,
+        save_spec_and_attr_times=()
     ):
-        self.formulae = Formulae()
+        self.formulae = formulae or Formulae()
         self.n_sd_per_gridbox = n_sd_per_gridbox
+        self.p0 = p0
         self.kappa = kappa
-        self.wet_radius_spectrum_per_mass_of_dry_air = spectra.Lognormal(
-            norm_factor=particles_per_volume_STP / self.formulae.constants.rho_STP,
-            m_mode=0.08 / 2 * si.um,
-            s_geom=1.4,
-        )
+        self.rho_times_w_1 = rho_times_w_1
+        self.particles_per_volume_STP = particles_per_volume_STP
         self.dt = dt
         self.dz = dz
         self.precip = precip
-        self.breakup = breakup
 
-        self.z_max = 3000 * si.metres
-        self.t_max = 60 * si.minutes
+        self.z_max = z_max
+        self.t_max = t_max
 
         t_1 = 600 * si.s
         self.rho_times_w = (
@@ -47,6 +66,12 @@ class Settings:
         self.particle_reservoir_depth = (
             (2 * apprx_w1 * t_1 / np.pi) // self.dz + 1
         ) * self.dz
+
+        self.wet_radius_spectrum_per_mass_of_dry_air = spectra.Lognormal(
+            norm_factor=particles_per_volume_STP / self.formulae.constants.rho_STP,
+            m_mode=0.08 / 2 * si.um,
+            s_geom=1.4,
+        )
 
         self._th = interp1d(
             (0.0 * si.m, 740.0 * si.m, 3260.00 * si.m),
@@ -77,14 +102,15 @@ class Settings:
             if z_above_reservoir < 0:
                 return 0
             qv = self.qv(z_above_reservoir)
+            dqv_dz = derivative(self.qv, z_above_reservoir)
             T = self.formulae.state_variable_triplet.T(
                 rhod[0], self.thd(z_above_reservoir)
             )
             p = self.formulae.state_variable_triplet.p(rhod[0], T, qv)
             lv = self.formulae.latent_heat.lv(T)
-            return self.formulae.hydrostatics.drho_dz(
-                g, p, T, qv, lv
-            )  # note: drho \approx drhod
+            return self.formulae.hydrostatics.drho_dz(g, p, T, qv, lv) / (
+                1 + qv
+            ) - rhod * dqv_dz / (1 + qv)
 
         z_span = (-self.particle_reservoir_depth, self.z_max)
         z_points = np.linspace(*z_span, 2 * self.nz + 1)
@@ -102,6 +128,7 @@ class Settings:
         self.condensation_rtol_x = condensation.DEFAULTS.rtol_x
         self.condensation_rtol_thd = condensation.DEFAULTS.rtol_thd
         self.condensation_adaptive = True
+        self.condensation_update_thd = False
         self.coalescence_adaptive = True
 
         self.number_of_bins = 100
@@ -113,13 +140,15 @@ class Settings:
         )
         self.r_bins_edges = np.logspace(
             np.log10(0.001 * si.um),
-            np.log10(100 * si.um),
+            np.log10(10 * si.mm),
             self.number_of_bins + 1,
             endpoint=True,
         )
         self.cloud_water_radius_range = [1 * si.um, 50 * si.um]
+        self.cloud_water_radius_range_igel = [1 * si.um, 25 * si.um]
         self.rain_water_radius_range = [50 * si.um, np.inf * si.um]
-        self.save_spec_and_attr_times = []
+        self.rain_water_radius_range_igel = [25 * si.um, np.inf * si.um]
+        self.save_spec_and_attr_times = save_spec_and_attr_times
 
     @property
     def n_sd(self):

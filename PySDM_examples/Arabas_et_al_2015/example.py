@@ -1,4 +1,4 @@
-from atmos_cloud_sim_uj_utils import TemporaryFile
+from open_atmos_jupyter_utils import TemporaryFile
 from PySDM import Formulae
 from PySDM.exporters import NetCDFExporter
 from PySDM.physics import si

@@ -1,9 +1,12 @@
 pytest
 nbconvert
+jupyter-core<5.0.0
 jsonschema==3.2.0  # https://github.com/jupyter/nbformat/issues/232
 Jinja2<3.0.0  # https://github.com/jupyter/nbconvert/issues/1568
 MarkupSafe<2.1.0  # https://github.com/aws/aws-sam-cli/issues/3661
 Pillow<9.1.0  # https://github.com/python-pillow/Pillow/blob/0606f02860d0c4449bc047a6187043b6188a7404/docs/releasenotes/9.1.0.rst#deprecations
+ipywidgets<8.0.3
+ipykernel<6.22.0 # https://github.com/dask/distributed/issues/7688
 
-PySDM @ git+https://github.com/atmos-cloud-sim-uj/PySDM@c68fc44#egg=PySDM
-PyMPDATA @ git+https://github.com/atmos-cloud-sim-uj/PyMPDATA@bb963c2#egg=PyMPDATA
+PySDM @ git+https://github.com/open-atmos/PySDM@506f185#egg=PySDM
+PyMPDATA @ git+https://github.com/open-atmos/PyMPDATA@d3179a5#egg=PyMPDATA

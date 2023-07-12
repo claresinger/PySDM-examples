@@ -4,7 +4,7 @@ import numpy as np
 from PySDM import Builder, Formulae
 from PySDM import products as PySDM_products
 from PySDM.backends import CPU
-from PySDM.backends.impl_numba.test_helpers import bdf
+from PySDM.backends.impl_numba.test_helpers import scipy_ode_condensation_solver
 from PySDM.dynamics import AmbientThermodynamics, Condensation
 from PySDM.environments import Parcel
 from PySDM.initialisation import equilibrate_wet_radii
@@ -12,14 +12,6 @@ from PySDM.initialisation.sampling.spectral_sampling import ConstantMultiplicity
 from PySDM.physics import si
 
 from PySDM_examples.Abdul_Razzak_Ghan_2000.aerosol import AerosolARG
-
-
-class Magick:
-    def register(self, builder):  # pylint: disable=no-self-use
-        builder.request_attribute("critical supersaturation")
-
-    def __call__(self):
-        pass
 
 
 def run_parcel(
@@ -56,7 +48,7 @@ def run_parcel(
     builder.set_environment(env)
     builder.add_dynamic(AmbientThermodynamics())
     builder.add_dynamic(Condensation())
-    builder.add_dynamic(Magick())
+    builder.request_attribute("critical supersaturation")
 
     attributes = {k: np.empty(0) for k in ("dry volume", "kappa times dry volume", "n")}
     for i, mode in enumerate(aerosol.modes):
@@ -80,7 +72,7 @@ def run_parcel(
     attributes["volume"] = builder.formulae.trivia.volume(radius=r_wet)
 
     particulator = builder.build(attributes, products=products)
-    bdf.patch_particulator(particulator)
+    scipy_ode_condensation_solver.patch_particulator(particulator)
 
     output = {product.name: [] for product in particulator.products.values()}
     output_attributes = {

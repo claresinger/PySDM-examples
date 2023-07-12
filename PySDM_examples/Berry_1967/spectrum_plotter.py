@@ -1,5 +1,5 @@
-from atmos_cloud_sim_uj_utils import show_plot
 from matplotlib import pyplot
+from open_atmos_jupyter_utils import show_plot
 
 from PySDM_examples.Shima_et_al_2009.spectrum_plotter import (
     SpectrumPlotter as SuperSpectrumPlotter,

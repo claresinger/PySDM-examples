@@ -63,15 +63,15 @@ N_STPs = (50 / si.centimetre**3, 500 / si.centimetre**3)
 r_drys = (0.1 * si.micrometre, 0.05 * si.micrometre)
 
 setups = []
-for w_i, _ in enumerate(w_avgs):
-    for N_i, __ in enumerate(N_STPs):
-        for rd_i, ___ in enumerate(r_drys):
+for w_i, _w_avg in enumerate(w_avgs):
+    for N_i, _N_STP in enumerate(N_STPs):
+        for rd_i, _r_dry in enumerate(r_drys):
             if not rd_i == N_i == 1:
                 setups.append(
                     Settings(
-                        w_avg=w_avgs[w_i],
-                        N_STP=N_STPs[N_i],
-                        r_dry=r_drys[rd_i],
+                        w_avg=_w_avg,
+                        N_STP=_N_STP,
+                        r_dry=_r_dry,
                         mass_of_dry_air=1000 * si.kilogram,
                     )
                 )

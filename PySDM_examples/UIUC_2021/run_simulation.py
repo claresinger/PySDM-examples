@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def update_thermo(particulator, T):
     env = particulator.environment
     svp = particulator.formulae.saturation_vapour_pressure
@@ -19,8 +22,10 @@ def run_simulation(particulator, temperature_profile, n_steps):
             )
             particulator.run(step - particulator.n_steps)
             update_thermo(particulator, T=temperature_profile(step * particulator.dt))
+            output["frozen"].append(particulator.attributes["volume"].to_ndarray() < 0)
         else:
             output["spectrum"] = {}
+            output["frozen"] = [np.full(particulator.n_sd, False)]
             for k in ("n", "freezing temperature", "immersed surface area"):
                 if k in particulator.attributes:
                     output["spectrum"][k] = particulator.attributes[k].to_ndarray()

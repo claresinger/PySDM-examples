@@ -69,8 +69,8 @@ class _ImagePlot(_Plot):
             )
 
     def update_lines(self, focus_x, focus_z):
-        self.lines["X"][0].set_xdata(x=(focus_x[0] + 0.25) * self.dx)
-        self.lines["Z"][0].set_ydata(y=(focus_z[0] + 0.25) * self.dz)
+        self.lines["X"][0].set_xdata(x=(focus_x[0] + 0.15) * self.dx)
+        self.lines["Z"][0].set_ydata(y=(focus_z[0] + 0.15) * self.dz)
         self.lines["X"][1].set_xdata(x=(focus_x[1] - 0.25) * self.dx)
         self.lines["Z"][1].set_ydata(y=(focus_z[1] - 0.25) * self.dz)
 
@@ -143,12 +143,8 @@ class _TemperaturePlot(_Plot):
         self.ax.set_ylabel("freezable fraction / cdf [1]")
         self.ax.set_ylim(-0.05, 1.05)
         self.ax.grid(True)
-        self.ax.plot(
-            T_bins,
-            self.formulae.freezing_temperature_spectrum.cdf(T_bins),
-            label=str(self.formulae.freezing_temperature_spectrum)
-            + " (sampled at t=0)",
-        )
+        # self.ax.plot(T_bins, self.formulae.freezing_temperature_spectrum.cdf(T_bins),
+        #              label=str(self.formulae.freezing_temperature_spectrum) + " (sampled at t=0)")
         self.spec = self.ax.step(
             T_bins,
             np.full_like(T_bins, np.nan),

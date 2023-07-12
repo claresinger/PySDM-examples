@@ -1,7 +1,7 @@
 import os
 from tempfile import TemporaryDirectory
 
-from atmos_cloud_sim_uj_utils import TemporaryFile
+from open_atmos_jupyter_utils import TemporaryFile
 from PySDM import Formulae
 from PySDM.backends import CPU
 from PySDM.exporters import NetCDFExporter, VTKExporter

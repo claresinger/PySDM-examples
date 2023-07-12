@@ -7,16 +7,16 @@ from pystrict import strict
 
 @strict
 class AerosolMarine(DryAerosolMixture):
-    def __init__(self, Acc_Forg: float = 0.2, Acc_N2: float = 134):
+    def __init__(self, Forg: float = 0.2, Acc_N2: float = 134):
         Aitken = {
-            "palmitic": 0.2,
-            "(NH4)2SO4": 0.8,
+            "palmitic": Forg,
+            "(NH4)2SO4": (1 - Forg),
             "NaCl": 0,
         }
         Accumulation = {
-            "palmitic": Acc_Forg,
+            "palmitic": Forg,
             "(NH4)2SO4": 0,
-            "NaCl": (1 - Acc_Forg),
+            "NaCl": (1 - Forg),
         }
 
         super().__init__(
@@ -68,19 +68,19 @@ class AerosolMarine(DryAerosolMixture):
 
 @strict
 class AerosolBoreal(DryAerosolMixture):
-    def __init__(self, Acc_Forg: float = 0.668, Acc_N2: float = 540):
+    def __init__(self, Forg: float = 0.668, Acc_N2: float = 540):
         # note: SOA1 or SOA2 unclear from the paper
         Aitken = {
-            "SOA1": 0.668,
+            "SOA1": Forg,
             "SOA2": 0,
-            "(NH4)2SO4": 0.166,
-            "NH4NO3": 0.166,
+            "(NH4)2SO4": (1 - Forg) / 2,
+            "NH4NO3": (1 - Forg) / 2,
         }
         Accumulation = {
             "SOA1": 0,
-            "SOA2": Acc_Forg,
-            "(NH4)2SO4": (1 - Acc_Forg) / 2,
-            "NH4NO3": (1 - Acc_Forg) / 2,
+            "SOA2": Forg,
+            "(NH4)2SO4": (1 - Forg) / 2,
+            "NH4NO3": (1 - Forg) / 2,
         }
 
         super().__init__(
@@ -118,7 +118,7 @@ class AerosolBoreal(DryAerosolMixture):
                 "kappa": self.kappa(Aitken),
                 "nu_org": self.nu_org(Aitken),
                 "spectrum": spectra.Lognormal(
-                    norm_factor=1100 / si.cm**3, m_mode=22.7 * si.nm, s_geom=1.75
+                    norm_factor=1110 / si.cm**3, m_mode=22.7 * si.nm, s_geom=1.75
                 ),
             },
             {

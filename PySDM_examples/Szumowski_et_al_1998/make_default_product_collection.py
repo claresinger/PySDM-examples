@@ -57,7 +57,7 @@ def make_default_product_collection(settings):
 
     if settings.processes["fluid advection"]:
         products.append(PySDM_products.MaxCourantNumber())
-        products.append(PySDM_products.CoolingRate())
+        products.append(PySDM_products.CoolingRate(unit="K/min"))
     if settings.processes["condensation"]:
         products.append(PySDM_products.CondensationTimestepMin(name="dt_cond_min"))
         products.append(PySDM_products.CondensationTimestepMax(name="dt_cond_max"))
@@ -72,8 +72,12 @@ def make_default_product_collection(settings):
     if settings.processes["coalescence"]:
         products.append(PySDM_products.CollisionTimestepMean(name="dt_coal_avg"))
         products.append(PySDM_products.CollisionTimestepMin(name="dt_coal_min"))
-        products.append(PySDM_products.CollisionRatePerGridbox())
-        products.append(PySDM_products.CollisionRateDeficitPerGridbox())
+        products.append(PySDM_products.CollisionRatePerGridbox(name="cr"))
+        products.append(PySDM_products.CollisionRateDeficitPerGridbox(name="crd"))
+        products.append(PySDM_products.CoalescenceRatePerGridbox(name="cor"))
+    if settings.processes["breakup"]:
+        products.append(PySDM_products.BreakupRatePerGridbox(name="br"))
+        products.append(PySDM_products.BreakupRateDeficitPerGridbox(name="brd"))
     if settings.processes["freezing"]:
         products.append(PySDM_products.IceWaterContent())
         if settings.freezing_singular:

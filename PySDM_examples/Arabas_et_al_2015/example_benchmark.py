@@ -36,6 +36,7 @@ def main():
         "condensation": False,
         "sedimentation": True,
         "freezing": False,
+        "breakup": False,
     }
 
     n_sd = range(14, 16, 1)
