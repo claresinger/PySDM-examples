@@ -50,12 +50,12 @@ class Settings:
         HAC: float = 1,
         c_pd: float = 1005 * si.joule / si.kilogram / si.kelvin,
         g_std: float = sci.g * si.metre / si.second**2,
-        BDF: bool = False,
+        scipy_ode_solver: bool = False,
     ):
         assert model in (&#34;Constant&#34;, &#34;CompressedFilmOvadnevaite&#34;)
         self.model = model
         self.n_sd_per_mode = n_sd_per_mode
-        self.BDF = BDF
+        self.scipy_ode_solver = scipy_ode_solver
         self.formulae = Formulae(
             surface_tension=model,
             constants={
@@ -131,7 +131,7 @@ class Settings:
 <dl>
 <dt id="PySDM_examples.Lowe_et_al_2019.settings.Settings"><code class="flex name class">
 <span>class <span class="ident">Settings</span></span>
-<span>(</span><span>dz: float, n_sd_per_mode: int, aerosol: PySDM.initialisation.aerosol_composition.dry_aerosol.DryAerosolMixture, model: str, spectral_sampling: type, w: float = 0.32, delta_min: float = 0.1, MAC: float = 1, HAC: float = 1, c_pd: float = 1005.0, g_std: float = 9.80665, BDF: bool = False)</span>
+<span>(</span><span>dz: float, n_sd_per_mode: int, aerosol: PySDM.initialisation.aerosol_composition.dry_aerosol.DryAerosolMixture, model: str, spectral_sampling: type, w: float = 0.32, delta_min: float = 0.1, MAC: float = 1, HAC: float = 1, c_pd: float = 1005.0, g_std: float = 9.80665, scipy_ode_solver: bool = False)</span>
 </code></dt>
 <dd>
 <div class="desc"></div>
@@ -154,12 +154,12 @@ class Settings:
         HAC: float = 1,
         c_pd: float = 1005 * si.joule / si.kilogram / si.kelvin,
         g_std: float = sci.g * si.metre / si.second**2,
-        BDF: bool = False,
+        scipy_ode_solver: bool = False,
     ):
         assert model in (&#34;Constant&#34;, &#34;CompressedFilmOvadnevaite&#34;)
         self.model = model
         self.n_sd_per_mode = n_sd_per_mode
-        self.BDF = BDF
+        self.scipy_ode_solver = scipy_ode_solver
         self.formulae = Formulae(
             surface_tension=model,
             constants={
