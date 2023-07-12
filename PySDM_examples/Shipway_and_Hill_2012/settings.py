@@ -39,8 +39,11 @@ class Settings:
         particles_per_volume_STP: int = 50 / si.cm**3,
         dt: float = 1 * si.s,
         dz: float = 25 * si.m,
+        z_max: float = 3000 * si.m,
+        t_max: float = 60 * si.minutes,
         precip: bool = True,
         formulae: Formulae = None,
+        save_spec_and_attr_times=()
     ):
         self.formulae = formulae or Formulae()
         self.n_sd_per_gridbox = n_sd_per_gridbox
@@ -52,8 +55,8 @@ class Settings:
         self.dz = dz
         self.precip = precip
 
-        self.z_max = 3000 * si.metres
-        self.t_max = 60 * si.minutes
+        self.z_max = z_max
+        self.t_max = t_max
 
         t_1 = 600 * si.s
         self.rho_times_w = (
@@ -137,7 +140,7 @@ class Settings:
         )
         self.r_bins_edges = np.logspace(
             np.log10(0.001 * si.um),
-            np.log10(100 * si.um),
+            np.log10(10 * si.mm),
             self.number_of_bins + 1,
             endpoint=True,
         )
@@ -145,7 +148,7 @@ class Settings:
         self.cloud_water_radius_range_igel = [1 * si.um, 25 * si.um]
         self.rain_water_radius_range = [50 * si.um, np.inf * si.um]
         self.rain_water_radius_range_igel = [25 * si.um, np.inf * si.um]
-        self.save_spec_and_attr_times = []
+        self.save_spec_and_attr_times = save_spec_and_attr_times
 
     @property
     def n_sd(self):

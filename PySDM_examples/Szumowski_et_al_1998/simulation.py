@@ -132,7 +132,12 @@ class Simulation:
             and not self.settings.processes["coalescence"]
         )
         if self.settings.processes["freezing"]:
-            builder.add_dynamic(Freezing(singular=self.settings.freezing_singular))
+            builder.add_dynamic(
+                Freezing(
+                    singular=self.settings.freezing_singular,
+                    thaw=self.settings.freezing_thaw,
+                )
+            )
 
         attributes = environment.init_attributes(
             spatial_discretisation=spatial_sampling.Pseudorandom(),

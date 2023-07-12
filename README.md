@@ -11,7 +11,7 @@ see [PySDM README.md](https://github.com/open-atmos/PySDM/blob/master/README.md)
 
 Please use the [PySDM issue-tracking](https://github.com/open-atmos/PySDM/issues) and [discussion](https://github.com/open-atmos/PySDM/discussions) infrastructure for `PySDM-examples` as well.
 
-### 0D box-model coalescence-only examples:
+### 0D box-model coalescence and breakup examples:
 - [Shima et al. 2009](http://doi.org/10.1002/qj.441) (Box model, coalescence only, test case employing Golovin analytical solution):
     - Fig. 2:
       [![nbviewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](https://nbviewer.jupyter.org/github/open-atmos/PySDM-examples/blob/main/PySDM_examples/Shima_et_al_2009/fig_2.ipynb)
@@ -30,11 +30,15 @@ Please use the [PySDM issue-tracking](https://github.com/open-atmos/PySDM/issues
       [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/open-atmos/PySDM-examples.git/main?urlpath=lab/tree/PySDM_examples/Bieli_et_al_2022/make_fig_3.ipynb)
       [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/open-atmos/PySDM-examples/blob/main/PySDM_examples/Bieli_et_al_2022/make_fig_3.ipynb)
 
-- [deJong et al. 2023](https://doi.org/10.5194/egusphere-2022-1243) (Box model, coalescence and breakup with Berry 1967 coalescence efficiency):
-    - Figs. 3-5:
+- [deJong et al. 2023](https://doi.org/10.5194/egusphere-2022-1243) (Box model, coalescence and breakup):
+    - Figs. 3-5 (Berry 1967 coalescence efficiency):
       [![nbviewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](https://nbviewer.jupyter.org/github/open-atmos/PySDM-examples/blob/main/PySDM_examples/deJong_Mackay_2022/box_sensitivities.ipynb)
       [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/open-atmos/PySDM-examples.git/main?urlpath=lab/tree/PySDM_examples/deJong_Mackay_2022/box_sensitivities.ipynb)
       [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/open-atmos/PySDM-examples/blob/main/PySDM_examples/deJong_Mackay_2022/box_sensitivities.ipynb)
+    - Appendix figures (validation against Srivastava 1982 analytic solution):
+      [![nbviewer](https://raw.githubusercontent.com/jupyter/design/master/logos/Badges/nbviewer_badge.svg)](https://nbviewer.jupyter.org/github/open-atmos/PySDM-examples/blob/main/PySDM_examples/deJong_Mackay_2022/appendix.ipynb)
+      [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/open-atmos/PySDM-examples.git/main?urlpath=lab/tree/PySDM_examples/deJong_Mackay_2022/appendix.ipynb)
+      [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/open-atmos/PySDM-examples/blob/main/PySDM_examples/deJong_Mackay_2022/appendix.ipynb)
   
 ### 0D box-model immersion freezing-only example:
 - [Alpert & Knopf 2016](https://doi.org/10.5194/acp-16-2083-2016) (stochastic immersion freezing with monodisperse vs. lognormal immersed surface areas):

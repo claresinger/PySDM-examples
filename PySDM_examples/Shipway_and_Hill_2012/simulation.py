@@ -202,8 +202,21 @@ class Simulation:
     def save(self, step):
         self.save_scalar(step)
         time = step * self.particulator.dt
-        if time in self.save_spec_and_attr_times:
-            save_index = self.save_spec_and_attr_times.index(time)
+        if len(self.save_spec_and_attr_times) > 0 and (
+            np.min(
+                np.abs(
+                    np.ones_like(self.save_spec_and_attr_times) * time
+                    - np.array(self.save_spec_and_attr_times)
+                )
+            )
+            < 0.1
+        ):
+            save_index = np.argmin(
+                np.abs(
+                    np.ones_like(self.save_spec_and_attr_times) * time
+                    - np.array(self.save_spec_and_attr_times)
+                )
+            )
             self.save_spectrum(save_index)
             self.save_attributes()
 

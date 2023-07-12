@@ -29,6 +29,7 @@ class Settings1D(SettingsSH):
             "rain_water_radius_range",
             "r_bins_edges_dry",
             "r_bins_edges",
+            "save_spec_at",
         )
 
     def __init__(
@@ -41,11 +42,14 @@ class Settings1D(SettingsSH):
         particles_per_volume_STP: int = 50 / si.cm**3,
         dt: float = 1 * si.s,
         dz: float = 25 * si.m,
+        z_max: float = 3000 * si.m,
+        t_max: float = 3600 * si.s,
         precip: bool = True,
         breakup: bool = False,
         stochastic_breakup: bool = False,
         warn_breakup_overflow: bool = False,
-        output_every_n_steps: int = 1
+        output_every_n_steps: int = 1,
+        save_spec_at=()
     ):
         if stochastic_breakup:
             self.coalescence_efficiency = Straub2010Ec()
@@ -66,10 +70,13 @@ class Settings1D(SettingsSH):
             particles_per_volume_STP=particles_per_volume_STP,
             dt=dt,
             dz=dz,
+            z_max=z_max,
+            t_max=t_max,
             precip=precip,
             formulae=Formulae(
                 fragmentation_function=self.fragmentation_function.__class__.__name__
             ),
+            save_spec_and_attr_times=save_spec_at,
         )
         self.breakup = breakup
         self.stochastic_breakup = stochastic_breakup
